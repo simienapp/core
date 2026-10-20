@@ -9,9 +9,13 @@ Crates are checked with `cargo package --workspace` before this runs, so
 publishing uses --no-verify. The `simien` placeholder in placeholders/simien
 goes first.
 
-  CARGO_REGISTRY_TOKEN=... tools/publish.py [--dry-run]
+  CARGO_REGISTRY_TOKEN=... [NEW_CRATE_TOKEN=...] tools/publish.py [--dry-run]
 
-In CI the token comes from crates.io trusted publishing (publish.yml).
+In CI CARGO_REGISTRY_TOKEN comes from crates.io trusted publishing
+(publish.yml). Trusted publishing can't create a crate, so a crate crates.io
+doesn't have yet is published with NEW_CRATE_TOKEN, the release
+environment's CARGO_REGISTRY_TOKEN secret, which is only needed while a new
+crate is waiting.
 """
 
 import email.utils
@@ -29,8 +33,9 @@ DRY = "--dry-run" in sys.argv
 AGENT = "simienapp-core-publish (https://github.com/simienapp/core)"
 
 
-def on_crates_io(name, version):
-    req = urllib.request.Request(f"https://crates.io/api/v1/crates/{name}/{version}", headers={"User-Agent": AGENT})
+def on_crates_io(name, version=None):
+    path = f"{name}/{version}" if version else name
+    req = urllib.request.Request(f"https://crates.io/api/v1/crates/{path}", headers={"User-Agent": AGENT})
     try:
         with urllib.request.urlopen(req) as r:
             return r.status == 200
@@ -69,11 +74,20 @@ def main():
         if on_crates_io(name, version):
             print(f"skip    {name} {version} (already on crates.io)", flush=True)
             continue
+        # Trusted publishing only covers crates that exist. A brand-new crate's
+        # first version goes up with NEW_CRATE_TOKEN; after that the crate
+        # trusts publish.yml like the rest.
+        env = dict(os.environ)
+        new = not on_crates_io(name)
+        if new:
+            if not os.environ.get("NEW_CRATE_TOKEN"):
+                sys.exit(f"publish {name} {version}: a new crate, and NEW_CRATE_TOKEN is not set")
+            env["CARGO_REGISTRY_TOKEN"] = os.environ["NEW_CRATE_TOKEN"]
         if DRY:
-            print(f"publish {name} {version}", flush=True)
+            print(f"publish {name} {version}" + (" (new crate)" if new else ""), flush=True)
             continue
         while True:
-            r = subprocess.run(["cargo", "publish", "--no-verify", *args], cwd=ROOT, capture_output=True, text=True)
+            r = subprocess.run(["cargo", "publish", "--no-verify", *args], cwd=ROOT, capture_output=True, text=True, env=env)
             out = r.stdout + r.stderr
             if r.returncode == 0:
                 print(f"publish {name} {version}: done", flush=True)
