@@ -3,13 +3,9 @@
 //! Parts of this module should be able to be replaced with other crates
 //! eventually, once generic versions appear in hyper-util, et al.
 
-#[cfg(not(windows))]
-use std::borrow::Cow;
 use std::env;
 use std::future::Future;
 use std::net::IpAddr;
-#[cfg(not(windows))]
-use std::path::Path;
 #[cfg(not(windows))]
 use std::path::PathBuf;
 use std::pin::Pin;
@@ -19,8 +15,7 @@ use std::task::Poll;
 
 use deno_core::futures::TryFutureExt;
 #[cfg(not(windows))]
-use deno_permissions::OpenAccessKind;
-use deno_permissions::PermissionsContainer;
+use crate::permissions::PermissionsContainer;
 use deno_tls::rustls::ClientConfig as TlsConfig;
 use http::Uri;
 use http::header::HeaderValue;
@@ -709,16 +704,8 @@ where
           let mut permissions = self.permissions.clone();
           Box::pin(async move {
             if let Some(permissions) = permissions.as_mut() {
-              let resolved_path = permissions
-                .check_open(
-                  Cow::Borrowed(Path::new(&path)),
-                  OpenAccessKind::ReadWriteNoFollow,
-                  Some("fetch() proxy"),
-                )?
-                .into_path();
-              permissions
-                .check_net_unix_socket(&resolved_path, Some("fetch() proxy"))?;
-              path = resolved_path.into_owned();
+              path =
+                permissions.check_net_unix_socket(&path, "fetch() proxy")?;
             }
             let io = UnixStream::connect(&path).await?;
             Ok(Proxied::Unix(TokioIo::new(io)))

@@ -9,10 +9,10 @@ use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering::SeqCst;
 
 use bytes::Bytes;
-use deno_permissions::Permissions;
-use deno_permissions::PermissionsContainer;
-use deno_permissions::PermissionsOptions;
-use deno_permissions::RuntimePermissionDescriptorParser;
+use crate::permissions::FetchPermissions;
+use deno_core::url::Url;
+use crate::permissions::PermissionCheckError;
+use crate::permissions::PermissionsContainer;
 use deno_tls::rustls::pki_types::PrivateKeyDer;
 use fast_socks5::server::Config as Socks5Config;
 use fast_socks5::server::Socks5Socket;
@@ -220,34 +220,88 @@ impl dns::Resolve for FixedResolver {
   }
 }
 
+/// Denies resolved addresses on a list, for net or for imports, and allows
+/// everything else: what the deny tests below need from a policy.
+struct DenyResolved {
+  kind: &'static str,
+  ips: Vec<std::net::IpAddr>,
+}
+
+impl DenyResolved {
+  fn check(
+    &self,
+    kind: &str,
+    ip: &std::net::IpAddr,
+  ) -> Result<(), PermissionCheckError> {
+    if kind == self.kind && self.ips.contains(ip) {
+      return Err(PermissionCheckError(format!(
+        "Requires {kind} access to \"{ip}\""
+      )));
+    }
+    Ok(())
+  }
+}
+
+impl FetchPermissions for DenyResolved {
+  fn check_net_url(
+    &self,
+    _: &Url,
+    _: &str,
+  ) -> Result<(), PermissionCheckError> {
+    Ok(())
+  }
+  fn check_net(
+    &self,
+    _: &str,
+    _: Option<u16>,
+    _: &str,
+  ) -> Result<(), PermissionCheckError> {
+    Ok(())
+  }
+  fn check_net_resolved(
+    &self,
+    ip: &std::net::IpAddr,
+    _: u16,
+  ) -> Result<(), PermissionCheckError> {
+    self.check("net", ip)
+  }
+  fn check_import_resolved(
+    &self,
+    ip: &std::net::IpAddr,
+    _: u16,
+  ) -> Result<(), PermissionCheckError> {
+    self.check("import", ip)
+  }
+  fn check_net_unix_socket(
+    &self,
+    path: &std::path::Path,
+    _: &str,
+  ) -> Result<std::path::PathBuf, PermissionCheckError> {
+    Ok(path.to_path_buf())
+  }
+  fn check_net_vsock(
+    &self,
+    _: u32,
+    _: u32,
+    _: &str,
+  ) -> Result<(), PermissionCheckError> {
+    Ok(())
+  }
+}
+
+fn deny_resolved(kind: &'static str, deny: &[&str]) -> PermissionsContainer {
+  PermissionsContainer::new(Arc::new(DenyResolved {
+    kind,
+    ips: deny.iter().map(|ip| ip.parse().unwrap()).collect(),
+  }))
+}
+
 fn deny_net_permissions(deny: &[&str]) -> PermissionsContainer {
-  let parser =
-    RuntimePermissionDescriptorParser::new(sys_traits::impls::RealSys);
-  let perms = Permissions::from_options(
-    &parser,
-    &PermissionsOptions {
-      allow_net: Some(vec![]),
-      deny_net: Some(deny.iter().map(|s| s.to_string()).collect()),
-      ..Default::default()
-    },
-  )
-  .unwrap();
-  PermissionsContainer::new(Arc::new(parser), perms)
+  deny_resolved("net", deny)
 }
 
 fn deny_import_permissions(deny: &[&str]) -> PermissionsContainer {
-  let parser =
-    RuntimePermissionDescriptorParser::new(sys_traits::impls::RealSys);
-  let perms = Permissions::from_options(
-    &parser,
-    &PermissionsOptions {
-      allow_import: Some(vec![]),
-      deny_import: Some(deny.iter().map(|s| s.to_string()).collect()),
-      ..Default::default()
-    },
-  )
-  .unwrap();
-  PermissionsContainer::new(Arc::new(parser), perms)
+  deny_resolved("import", deny)
 }
 
 // A client that loads modules checks resolved addresses against the import
