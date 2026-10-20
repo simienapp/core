@@ -2,14 +2,13 @@
 
 [package]
 name = "simien_bench_util"
-version = "0.253.0"
+version = "0.1.0"
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
-publish = true
 readme = "README.md"
 repository.workspace = true
-description = "Bench and profiling utilities for deno crates"
+description = "Benchmark and profiling helpers for the simien_* crates. Forked from Deno's deno_bench_util 0.253.0."
 
 [lib]
 path = "lib.rs"

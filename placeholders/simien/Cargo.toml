@@ -1,0 +1,15 @@
+# Reserves the crate name for the Simien runtime executable, which will be
+# published from simienapp/runtime. Not a workspace member.
+[package]
+name = "simien"
+version = "0.0.0"
+edition = "2024"
+description = "The Simien runtime executable. Not released yet: this version reserves the name."
+license = "Apache-2.0"
+repository = "https://github.com/simienapp/runtime"
+homepage = "https://simien.dev"
+readme = "README.md"
+keywords = ["javascript", "runtime", "v8", "wintertc"]
+categories = ["command-line-utilities"]
+
+[workspace]

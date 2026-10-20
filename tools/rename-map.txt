@@ -4,6 +4,7 @@
 deno_core simien_core
 deno_ops simien_ops
 serde_v8 simien_serde_v8
+serde_v8_utilities simien_serde_v8_utilities
 deno_v8 simien_v8
 deno_crypto_provider simien_crypto_provider
 deno_webidl simien_webidl

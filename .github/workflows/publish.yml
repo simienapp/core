@@ -1,0 +1,30 @@
+name: Publish crates
+
+# Manual for now: publishes every crate crates.io doesn't have yet
+# (tools/publish.py), with the release environment's CARGO_REGISTRY_TOKEN.
+# Rerunning is safe. Once each crate exists, this moves to crates.io trusted
+# publishing and the token goes.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    environment: release
+    # crates.io allows about one new crate every ten minutes after a burst.
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: rustup show active-toolchain || rustup toolchain install
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: python3 tools/publish.py

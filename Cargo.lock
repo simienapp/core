@@ -3284,13 +3284,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_v8_utilities"
-version = "0.28.0"
-dependencies = [
- "simien_v8",
-]
-
-[[package]]
 name = "serdect"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3398,7 +3391,7 @@ dependencies = [
 
 [[package]]
 name = "simien_bench_util"
-version = "0.253.0"
+version = "0.1.0"
 dependencies = [
  "bencher",
  "simien_core",
@@ -3407,7 +3400,7 @@ dependencies = [
 
 [[package]]
 name = "simien_boxed_error"
-version = "0.2.3"
+version = "0.1.0"
 dependencies = [
  "quote",
  "syn",
@@ -3416,7 +3409,7 @@ dependencies = [
 
 [[package]]
 name = "simien_core"
-version = "0.412.0"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64",
@@ -3463,7 +3456,7 @@ dependencies = [
 
 [[package]]
 name = "simien_crypto"
-version = "0.273.0"
+version = "0.1.0"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -3508,7 +3501,7 @@ dependencies = [
 
 [[package]]
 name = "simien_crypto_provider"
-version = "0.53.0"
+version = "0.1.0"
 dependencies = [
  "aws-lc-sys",
  "ed448-goldilocks",
@@ -3516,7 +3509,7 @@ dependencies = [
 
 [[package]]
 name = "simien_error"
-version = "0.7.1"
+version = "0.1.0"
 dependencies = [
  "libc",
  "serde",
@@ -3529,7 +3522,7 @@ dependencies = [
 
 [[package]]
 name = "simien_error_macro"
-version = "0.7.1"
+version = "0.1.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3538,7 +3531,7 @@ dependencies = [
 
 [[package]]
 name = "simien_fetch"
-version = "0.283.0"
+version = "0.1.0"
 dependencies = [
  "async-compression",
  "base64",
@@ -3577,7 +3570,7 @@ dependencies = [
 
 [[package]]
 name = "simien_native_certs"
-version = "0.3.1"
+version = "0.1.0"
 dependencies = [
  "dlopen2",
  "dlopen2_derive",
@@ -3588,7 +3581,7 @@ dependencies = [
 
 [[package]]
 name = "simien_ops"
-version = "0.288.0"
+version = "0.1.0"
 dependencies = [
  "indexmap",
  "pretty_assertions",
@@ -3606,7 +3599,7 @@ dependencies = [
 
 [[package]]
 name = "simien_path_util"
-version = "0.6.4"
+version = "0.1.0"
 dependencies = [
  "divan",
  "percent-encoding",
@@ -3620,22 +3613,29 @@ dependencies = [
 
 [[package]]
 name = "simien_serde_v8"
-version = "0.321.0"
+version = "0.1.0"
 dependencies = [
  "num-bigint",
  "serde",
  "serde_bytes",
  "serde_json",
- "serde_v8_utilities",
  "simien_error",
+ "simien_serde_v8_utilities",
  "simien_v8",
  "smallvec",
  "thiserror 2.0.12",
 ]
 
 [[package]]
+name = "simien_serde_v8_utilities"
+version = "0.28.0"
+dependencies = [
+ "simien_v8",
+]
+
+[[package]]
 name = "simien_tls"
-version = "0.246.0"
+version = "0.1.0"
 dependencies = [
  "log",
  "rustls",
@@ -3653,7 +3653,7 @@ dependencies = [
 
 [[package]]
 name = "simien_unsync"
-version = "0.4.4"
+version = "0.1.0"
 dependencies = [
  "futures-util",
  "parking_lot",
@@ -3662,7 +3662,7 @@ dependencies = [
 
 [[package]]
 name = "simien_v8"
-version = "0.4.0"
+version = "0.1.0"
 dependencies = [
  "v8",
  "v8x",
@@ -3670,7 +3670,7 @@ dependencies = [
 
 [[package]]
 name = "simien_wasm_dep_analyzer"
-version = "0.4.0"
+version = "0.1.0"
 dependencies = [
  "pretty_assertions",
  "simien_error",
@@ -3679,7 +3679,7 @@ dependencies = [
 
 [[package]]
 name = "simien_web"
-version = "0.290.0"
+version = "0.1.0"
 dependencies = [
  "approx",
  "async-trait",
@@ -3702,7 +3702,7 @@ dependencies = [
 
 [[package]]
 name = "simien_webidl"
-version = "0.259.0"
+version = "0.1.0"
 dependencies = [
  "simien_bench_util",
  "simien_core",

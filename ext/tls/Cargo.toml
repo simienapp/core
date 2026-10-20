@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_tls"
-version = "0.246.0"
-authors.workspace = true
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "TLS for Deno"
+repository = "https://github.com/simienapp/core"
+description = "TLS for the Simien runtime. Forked from Deno's deno_tls 0.246.0."
 
 [lib]
 path = "lib.rs"

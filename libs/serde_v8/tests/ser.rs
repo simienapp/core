@@ -3,8 +3,8 @@
 use serde::Serialize;
 use serde_json::json;
 use simien_serde_v8::BigInt;
-use serde_v8_utilities::js_exec;
-use serde_v8_utilities::v8_do;
+use simien_serde_v8_utilities::js_exec;
+use simien_serde_v8_utilities::v8_do;
 
 #[derive(Debug, Serialize, PartialEq)]
 struct MathOp {

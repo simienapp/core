@@ -1,11 +1,11 @@
 [package]
 name = "simien_unsync"
-version = "0.4.4"
+version = "0.1.0"
 edition = "2021"
-authors = ["the Deno authors"]
+authors = ["the Deno authors", "the Simien authors"]
 license = "MIT"
-repository = "https://github.com/denoland/deno_unsync"
-description = "A collection of adapters to make working with Tokio single-threaded runtimes easier"
+repository = "https://github.com/simienapp/core"
+description = "Adapters for working with Tokio on a single thread. Forked from Deno's deno_unsync 0.4.4."
 readme = "README.md"
 
 [features]
