@@ -1,0 +1,19 @@
+# Where this repo stands against denoland/deno, for the paths in
+# tools/upstream-paths.txt. The upstream watch reads `checked`: anything after
+# it on denoland/deno main that touches those paths is new.
+#
+# checked <deno main commit> <date>
+# ported  <deno commit> <title>
+# skipped <deno commit> <reason>
+
+checked a18ce33715 2026-10-06
+
+# Since the v2.9.7 fork. 82 commits on main touched the kept paths after the
+# release branch split (merge-base 356c132ed6); 75 were already in v2.9.7.
+skipped 34f9f47f42 version bump: forward v2.9.3 release commit to main
+ported  9dcb61d52b fix(ext/web): validate AbortSignal.any() input like Node (#36293)
+skipped fa9ba06e33 already in v2.9.7, in a later form: feat: add experimental QuickJS backend (#36194)
+skipped abd22074e4 version bump: forward v2.9.7 release commit to main
+ported  1b48a20f85 fix(core): errno_location for android bionic (#36890)
+ported  117c76f209 chore(core): add SharedArrayBuffer to primordials (#36627)
+ported  2f885193c6 perf: avoid allocating null-prototype objects for default parameters (#36940)
