@@ -33,19 +33,19 @@ repository = "https://github.com/simienapp/core"
 
 [workspace.dependencies]
 deno_core_icudata = "0.77.0"
-deno_doc = "=0.207.0"
-simien_error = { version = "0.1.0", path = "./libs/deno_error" }
-deno_graph = { version = "=0.111.0", default-features = false }
-deno_lint = "=0.84.1"
-deno_media_type = { version = "=0.4.0", features = ["module_specifier"] }
-simien_native_certs = { version = "0.1.0", path = "./libs/deno_native_certs" }
-simien_path_util = { version = "0.1.0", path = "./libs/deno_path_util" }
-deno_semver = "=0.10.1"
-deno_task_shell = "=0.33.3"
-deno_terminal = "=0.2.3"
-simien_unsync = { version = "0.1.0", path = "./libs/deno_unsync", default-features = false }
+deno_doc = "0.207.0"
+simien_error = { version = "0.1.1", path = "./libs/deno_error" }
+deno_graph = { version = "0.111.0", default-features = false }
+deno_lint = "0.84.1"
+deno_media_type = { version = "0.4.0", features = ["module_specifier"] }
+simien_native_certs = { version = "0.1.1", path = "./libs/deno_native_certs" }
+simien_path_util = { version = "0.1.1", path = "./libs/deno_path_util" }
+deno_semver = "0.10.1"
+deno_task_shell = "0.33.3"
+deno_terminal = "0.2.3"
+simien_unsync = { version = "0.1.1", path = "./libs/deno_unsync", default-features = false }
 deno_whoami = "0.1.0"
-v8 = { package = "simien_v8", version = "0.1.0", path = "./libs/deno_v8", default-features = false, features = ["v8", "simdutf"] }
+v8 = { package = "simien_v8", version = "0.1.1", path = "./libs/deno_v8", default-features = false, features = ["v8", "simdutf"] }
 
 denokv_proto = "0.14.0"
 denokv_remote = "0.14.0"
@@ -57,8 +57,8 @@ deno_bundle_runtime = { version = "0.46.0" }
 deno_cache = { version = "0.192.0" }
 deno_canvas = { version = "0.121.0" }
 deno_cron = { version = "0.139.0" }
-simien_crypto = { version = "0.1.0", path = "./ext/crypto" }
-simien_fetch = { version = "0.1.0", path = "./ext/fetch" }
+simien_crypto = { version = "0.1.1", path = "./ext/crypto" }
+simien_fetch = { version = "0.1.1", path = "./ext/fetch" }
 deno_ffi = { version = "0.246.0" }
 deno_fs = { version = "0.169.0" }
 deno_http = { version = "0.257.0" }
@@ -74,25 +74,25 @@ deno_os = { version = "0.76.0" }
 deno_process = { version = "0.74.0" }
 deno_signals = { version = "0.50.0" }
 deno_telemetry = { version = "0.81.0" }
-simien_tls = { version = "0.1.0", path = "./ext/tls" }
-simien_web = { version = "0.1.0", path = "./ext/web" }
+simien_tls = { version = "0.1.1", path = "./ext/tls" }
+simien_web = { version = "0.1.1", path = "./ext/web" }
 deno_webgpu = { version = "0.226.0" }
-simien_webidl = { version = "0.1.0", path = "./ext/webidl" }
+simien_webidl = { version = "0.1.1", path = "./ext/webidl" }
 deno_websocket = { version = "0.264.0" }
 deno_webstorage = { version = "0.254.0" }
 denort_helper = { version = "0.57.0" }
 
 # workspace libraries
-simien_bench_util = { version = "0.1.0", path = "./tests/bench_util" }
+simien_bench_util = { version = "0.1.1", path = "./tests/bench_util" }
 deno_cache_dir = { version = "0.51.0" }
 deno_cli_parser = { version = "0.9.0" }
 deno_config = { version = "0.109.0", features = ["workspace"] }
 # Workspace binaries select the JavaScript engine at their top level. Keep the
 # backend-independent runtime defaults enabled here without pulling simien_core's
 # public V8 default into a QuickJS feature graph.
-simien_core = { version = "0.1.0", path = "./libs/core", default-features = false, features = ["reactor-tokio", "v8_use_custom_libcxx"] }
+simien_core = { version = "0.1.1", path = "./libs/core", default-features = false, features = ["reactor-tokio", "v8_use_custom_libcxx"] }
 deno_core_testing = { }
-simien_crypto_provider = { version = "0.1.0", path = "./libs/crypto" }
+simien_crypto_provider = { version = "0.1.1", path = "./libs/crypto" }
 deno_dotenv = { version = "0.28.0" }
 deno_features = { version = "0.56.0" }
 deno_http_h1 = { version = "0.10.0" }
@@ -104,7 +104,7 @@ deno_npm = { version = "0.71.0" }
 deno_npm_cache = { version = "0.78.0" }
 deno_npm_installer = { version = "0.54.0" }
 deno_npmrc = { version = "0.20.0" }
-simien_ops = { version = "0.1.0", path = "./libs/ops" }
+simien_ops = { version = "0.1.1", path = "./libs/ops" }
 deno_package_json = { version = "0.61.0", default-features = false }
 deno_permissions = { version = "0.118.0" }
 deno_print = { version = "0.7.0" }
@@ -116,7 +116,7 @@ eszip = { version = "0.137.0" }
 napi_sym = { version = "0.189.0" }
 node_resolver = { version = "0.97.0" }
 node_shim = { version = "0.34.0" }
-simien_serde_v8 = { version = "0.1.0", path = "./libs/serde_v8", default-features = false }
+simien_serde_v8 = { version = "0.1.1", path = "./libs/serde_v8", default-features = false }
 test_macro = { }
 test_util = { }
 
@@ -133,21 +133,21 @@ async-trait = "0.1.73"
 aws-lc-rs = { version = "1.16.3" }
 aws-lc-sys = { version = "0.40.0", features = ["prebuilt-nasm"] }
 backhand = { version = "0.25.1", default-features = false, features = ["zstd"] }
-base32 = "=0.5.1"
+base32 = "0.5.1"
 base64 = "0.22.1"
 bencher = "0.1"
 bincode = "1"
 bit-set = "0.8.0"
 bit-vec = "0.8.0"
-simien_boxed_error = { version = "0.1.0", path = "./libs/boxed_error" }
-simien_wasm_dep_analyzer = { version = "0.1.0", path = "./libs/wasm_dep_analyzer" }
+simien_boxed_error = { version = "0.1.1", path = "./libs/boxed_error" }
+simien_wasm_dep_analyzer = { version = "0.1.1", path = "./libs/wasm_dep_analyzer" }
 brotli = { version = "6.0.0", features = ["ffi-api"] }
 bsdiff = "0.2.1"
 bytemuck = "1.17.1"
 bytes = "1.11.1"
 cab = "0.6.0"
 capacity_builder = "0.5.0"
-cbc = { version = "=0.1.2", features = ["alloc"] }
+cbc = { version = "0.1.2", features = ["alloc"] }
 cfb = "0.14.0"
 # Note: Do not use the "clock" feature of chrono, as it links us to CoreFoundation on macOS.
 #       Instead use util::time::utc_now()
@@ -157,8 +157,8 @@ cooked-waker = "5"
 criterion = "0.5"
 dashmap = "5.5.3"
 data-encoding = "2.3.3"
-data-url = "=0.3.1"
-encoding_rs = "=0.8.35"
+data-url = "0.3.1"
+encoding_rs = "0.8.35"
 error_reporter = "1"
 fast-socks5 = "0.9.6"
 faster-hex = "0.10.0"
@@ -198,10 +198,10 @@ libdeflater = "1.25.2"
 liblzma = { version = "0.4.6", features = ["static"] }
 libz-sys = { version = "1.1.20", default-features = false }
 log = { version = "0.4.28", features = ["kv"] }
-lsp-types = { package = "ls-types", version = "=0.0.3" }
+lsp-types = { package = "ls-types", version = "0.0.3" }
 memchr = "2.7.4"
 mime = "0.3.16"
-monch = "=0.6.0"
+monch = "0.6.0"
 msi = "0.10.0"
 netif = "0.1.6"
 notify = "8.2.0"
@@ -210,14 +210,14 @@ num-bigint-dig = "0.8.2"
 num-integer = "0.1.45"
 num-traits = "0.2.19"
 once_cell = "1.17.1"
-os_pipe = { version = "=1.2.1", features = ["io_safety"] }
+os_pipe = { version = "1.2.1", features = ["io_safety"] }
 parking_lot = "0.12.0"
 paste = "1.0"
-path-clean = "=0.1.0"
+path-clean = "0.1.0"
 percent-encoding = "2.3.0"
 phf = { version = "0.11", features = ["macros"] }
 pin-project = "1.0.11" # don't pin because they yank crates from cargo
-pretty_assertions = "=1.4.1"
+pretty_assertions = "1.4.1"
 prettyplease = "0.2.31"
 proc-macro2 = "1.0"
 proptest = "1"
@@ -226,7 +226,7 @@ prost-build = "0.14"
 qbsdiff = "1.4"
 quick-junit = "0.3.5"
 quinn = { version = "0.11.8", default-features = false }
-rand = "=0.8.5"
+rand = "0.8.5"
 rayon = "1.11.0"
 regex = "^1.7.0"
 reqwest = { version = "=0.12.5", default-features = false, features = ["rustls-tls", "stream", "gzip", "brotli", "socks", "json", "http2"] } # pinned because of https://github.com/seanmonstar/reqwest/pull/1955
@@ -236,19 +236,19 @@ reqwest = { version = "=0.12.5", default-features = false, features = ["rustls-t
 rpm = { version = "0.25.1", default-features = false, features = ["payload", "zstd-compression"] }
 rstest = "0"
 rusqlite = { version = "0.40.0", features = ["unlock_notify", "bundled", "session", "modern_sqlite", "limits", "backup", "fallible_uint"] } # "modern_sqlite": need sqlite >= 3.49.0 for some db configs; "fallible_uint": ToSql for u64/usize (needed when crates like deno_cache are published/built standalone, not just feature-unified via denokv_sqlite)
-rustls = { version = "=0.23.40", default-features = false, features = ["logging", "std", "tls12", "aws_lc_rs"] }
+rustls = { version = "0.23.40", default-features = false, features = ["logging", "std", "tls12", "aws_lc_rs"] }
 rustls-pemfile = "2"
-rustls-tokio-stream = "=0.8.0"
+rustls-tokio-stream = "0.8.0"
 rustls-webpki = "0.103"
-rustyline = { version = "=17.0.0", features = ["custom-bindings"] }
-rustyline-derive = "=0.11.1"
+rustyline = { version = "17.0.0", features = ["custom-bindings"] }
+rustyline-derive = "0.11.1"
 same-file = "1.0.6"
 scopeguard = "1.2.0"
-semver = "=1.0.25"
+semver = "1.0.25"
 serde = { version = "1.0.149", features = ["derive"] }
 serde_bytes = "0.11"
 serde_json = { version = "1.0.85", features = ["raw_value"] }
-serde_repr = "=0.1.19"
+serde_repr = "0.1.19"
 shlex = "1.3.0"
 signal-hook = "0.3"
 slab = "0.4"
@@ -259,7 +259,7 @@ static_assertions = "1"
 strum = { version = "0.27.1", features = ["derive"] }
 strum_macros = "0.27.1"
 sys_traits = "0.1.28"
-tar = "=0.4.46"
+tar = "0.4.46"
 tempfile = "3.4.0"
 termcolor = "1.1.3"
 testing_macros = "1.0.0"
@@ -271,17 +271,17 @@ tokio-rustls = { version = "0.26.0", default-features = false, features = ["aws_
 tokio-socks = "0.5.3"
 tokio-util = "0.7.16"
 tower = { version = "0.5.2", default-features = false, features = ["retry", "util"] }
-tower-lsp = { package = "deno_tower_lsp", version = "=0.5.0", features = ["proposed"] }
+tower-lsp = { package = "deno_tower_lsp", version = "0.5.0", features = ["proposed"] }
 tower-service = "0.3.2"
 tracing = "0.1"
 tracing-opentelemetry = "0.33.0"
 tracing-subscriber = "0.3.20"
 twox-hash = { version = "2.1.0", features = ["std", "xxhash64"], default-features = false }
-typed-arena = "=2.0.2"
+typed-arena = "2.0.2"
 url = { version = "2.5", features = ["serde", "expose_internals"] }
-urlpattern = "=0.4.2"
+urlpattern = "0.4.2"
 uuid = { version = "1.3.0", features = ["v4"] }
-walkdir = "=2.5.0"
+walkdir = "2.5.0"
 web-transport-proto = "0.2.7"
 webpki-root-certs = "0.26.5"
 webpki-roots = "0.26"
@@ -303,38 +303,38 @@ lcms2 = "6.1.0"
 
 # cli
 anstream = "0.6.14"
-console_static_text = "=0.8.3"
+console_static_text = "0.8.3"
 crossterm = "0.28.1"
 dhat = "0.3.3"
-dprint-core = "=0.67.4"
-dprint-plugin-json = "=0.21.3"
-dprint-plugin-jupyter = "=0.2.2"
-dprint-plugin-markdown = "=0.20.0"
-dprint-plugin-typescript = "=0.96.1"
+dprint-core = "0.67.4"
+dprint-plugin-json = "0.21.3"
+dprint-plugin-jupyter = "0.2.2"
+dprint-plugin-markdown = "0.20.0"
+dprint-plugin-typescript = "0.96.1"
 dunce = "1.0.5"
-env_logger = { version = "=0.11.6", default-features = false, features = ["regex"] }
-imara-diff = "=0.2.0"
-lax-css = "=0.3.0"
-lax-markup = "=0.3.2"
-lax-sql = "=0.3.0"
-libsui = "=0.16.4"
+env_logger = { version = "0.11.6", default-features = false, features = ["regex"] }
+imara-diff = "0.2.0"
+lax-css = "0.3.0"
+lax-markup = "0.3.2"
+lax-sql = "0.3.0"
+libsui = "0.16.4"
 object = { version = "0.36.3", default-features = false, features = ["read_core", "pe"] }
 open = "5.0.1"
 pathdiff = "0.2.1"
-pretty_yaml = "=0.5.0"
+pretty_yaml = "0.5.0"
 rustc-hash = "2.1.1"
 strsim = "0.11.1"
-text-size = "=1.1.1"
-text_lines = "=0.6.0"
+text-size = "1.1.1"
+text_lines = "0.6.0"
 unicode-general-category = "1.1.0"
 unicode-normalization = "0.1"
 unicode-width = "0.1.3"
-yaml_parser = "=0.2.1"
-zstd = "=0.13.2"
+yaml_parser = "0.2.1"
+zstd = "0.13.2"
 
 # crypto
 aead-gcm-stream = "0.4"
-aes = "=0.8.3"
+aes = "0.8.3"
 aes-gcm = "0.10"
 aes-kw = "0.2.1"
 blake2 = "0.10.6"
@@ -345,7 +345,7 @@ der = "0.7.9"
 des = "0.8.1"
 digest = "0.10.5"
 dsa = "0.6.3"
-ecb = "=0.1.2"
+ecb = "0.1.2"
 ecdsa = "0.16.9"
 ed25519-dalek = "2.1.1"
 ed448-goldilocks = "0.14.0-pre.10"
@@ -383,12 +383,12 @@ x509-parser = "0.15.0"
 cranelift = "0.117"
 cranelift-native = "0.117"
 dlopen2 = "0.6.1"
-libffi = "=5.1.0"
+libffi = "5.1.0"
 memmap2 = "0.9"
 
 # napi
 libloading = "0.7"
-libuv-sys-lite = { version = "=1.48.4", features = ["dyn-symbols"] }
+libuv-sys-lite = { version = "1.48.4", features = ["dyn-symbols"] }
 napi_sys = { version = "0.1.0" }
 
 # geometry
@@ -396,22 +396,22 @@ cssparser = "0.36.0"
 
 # webgpu
 raw-window-handle = "0.6.0"
-wgpu-core = "=29.0.1"
-wgpu-types = "=29.0.1"
+wgpu-core = "29.0.1"
+wgpu-types = "29.0.1"
 
 # macros
 quote = "1"
 syn = { version = "2", features = ["full", "extra-traits"] }
 
 # unix deps
-nix = "=0.30.1"
+nix = "0.30.1"
 tokio-vsock = "0.7"
 
 # windows deps
-junction = "=1.2.0"
-win32job = "=2.0.3"
+junction = "1.2.0"
+win32job = "2.0.3"
 windows-sys = { version = "0.59.0", features = ["Win32_Foundation", "Win32_Media", "Win32_Storage_FileSystem", "Win32_System_IO", "Win32_System_WindowsProgramming", "Wdk", "Wdk_System", "Wdk_System_SystemInformation", "Win32_Security", "Win32_System_Pipes", "Wdk_Storage_FileSystem", "Win32_System_Registry", "Win32_System_Kernel", "Win32_System_Threading", "Win32_UI", "Win32_UI_Shell"] }
-winres = "=0.1.12"
+winres = "0.1.12"
 
 # NB: the `bench` and `release` profiles must remain EXACTLY the same.
 [profile.release]
