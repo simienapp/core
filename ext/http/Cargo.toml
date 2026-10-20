@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_http"
-version = "0.257.0"
-authors.workspace = true
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "HTTP server implementation for Deno"
+repository = "https://github.com/simienapp/core"
+description = "HTTP server for the Simien runtime. Forked from Deno's deno_http 0.257.0."
 
 [features]
 default = ["default_property_extractor"]
@@ -33,7 +33,6 @@ simien_core.workspace = true
 simien_error.workspace = true
 simien_http_h1.workspace = true
 simien_net.workspace = true
-deno_telemetry.workspace = true
 simien_websocket.workspace = true
 flate2.workspace = true
 http.workspace = true
@@ -53,9 +52,6 @@ smallvec.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 tokio-util = { workspace = true, features = ["io"] }
-
-[target.'cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))'.dependencies]
-tokio-vsock.workspace = true
 
 [dev-dependencies]
 bencher.workspace = true

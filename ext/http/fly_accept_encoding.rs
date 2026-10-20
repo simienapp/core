@@ -77,6 +77,7 @@ pub fn preferred(
 /// Parse a set of HTTP headers into an iterator containing tuples of options containing encodings and their corresponding q-values.
 ///
 /// Compatible with the `http` crate header map.
+#[cfg(test)]
 pub fn encodings_iter_http(
   headers: &http::HeaderMap,
 ) -> impl Iterator<Item = Result<(Option<Encoding>, f32), EncodingError>> + '_ {

@@ -248,12 +248,6 @@ impl HttpRecordExternal {
     }
   }
 
-  fn copy_span_to_otel_info(&self, span: &deno_telemetry::OtelSpan) {
-    match self {
-      Self::Hyper(record) => record.copy_span_to_otel_info(span),
-      Self::Raw(record) => record.copy_span_to_otel_info(span),
-    }
-  }
 }
 
 // Register the [`HttpRecord`] as an external.
@@ -1198,7 +1192,7 @@ impl RawHttpRecord {
     } else {
       None
     };
-    let otel_info = deno_telemetry::OTEL_GLOBALS
+    let otel_info = crate::otel::OTEL_GLOBALS
       .get()
       .filter(|o| o.has_metrics())
       .map(|otel| {
@@ -1484,21 +1478,6 @@ impl RawHttpRecord {
     if let Some(info) = inner.otel_info.as_mut() {
       info.attributes.error_type = Some(error);
       info.handle_duration_and_request_size();
-    }
-  }
-
-  fn copy_span_to_otel_info(&self, span: &deno_telemetry::OtelSpan) {
-    let mut inner = self.0.borrow_mut();
-    let Some(info) = inner.otel_info.as_mut() else {
-      return;
-    };
-    let span_state = span.0.borrow();
-    if let deno_telemetry::OtelSpanState::Recording(data) = &**span_state {
-      for attr in &data.attributes {
-        if attr.key.as_str() == "http.route" {
-          info.attributes.http_route = Some(attr.value.to_string());
-        }
-      }
     }
   }
 
@@ -5656,24 +5635,6 @@ fn is_normal_close(err: &(dyn std::error::Error + 'static)) -> bool {
     return false;
   }
 
-  if let Some(err) = err.downcast_ref::<simien_net::tunnel::Error>() {
-    if let simien_net::tunnel::Error::QuinnConnection(err) = err {
-      return is_normal_close(err);
-    }
-
-    return false;
-  }
-
-  if let Some(err) =
-    err.downcast_ref::<simien_net::tunnel::quinn::ConnectionError>()
-  {
-    if matches!(err, simien_net::tunnel::quinn::ConnectionError::LocallyClosed) {
-      return true;
-    }
-
-    return false;
-  }
-
   false
 }
 
@@ -5786,20 +5747,4 @@ pub fn op_http_metric_handle_otel_error(external: *const c_void) {
   };
 
   http.otel_info_set_error("user");
-}
-
-#[op2(fast)]
-pub fn op_http_copy_span_to_otel_info(
-  external: *const c_void,
-  #[cppgc] span: &deno_telemetry::OtelSpan,
-) {
-  // SAFETY: The external may have already been consumed by a take_external!
-  // call (e.g. op_http_set_promise_complete). On some platforms (Windows),
-  // the freed memory may be reused, causing the marker check to fail.
-  // We gracefully skip the copy in that case rather than panicking.
-  let Some(http) = (unsafe { try_clone_external!(external) }) else {
-    return;
-  };
-
-  http.copy_span_to_otel_info(span);
 }

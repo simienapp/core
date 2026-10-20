@@ -2,12 +2,12 @@
 
 [package]
 name = "simien_http_h1"
-version = "0.10.0"
-authors.workspace = true
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
-description = "HTTP/1 protocol pieces for Deno"
+repository = "https://github.com/simienapp/core"
+description = "HTTP/1 protocol pieces for the Simien runtime. Forked from Deno's deno_http_h1 0.10.0."
 
 [lib]
 path = "lib.rs"

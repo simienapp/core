@@ -43,6 +43,10 @@ pub struct HttpRequestProperties<'a> {
 
 /// Pluggable trait to determine listen, connection and request properties
 /// for embedders that wish to provide alternative routes for incoming HTTP.
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait HttpPropertyExtractor {
   type Listener: 'static;
@@ -167,31 +171,11 @@ impl HttpPropertyExtractor for DefaultHttpPropertyExtractor {
       NetworkStreamAddress::Ip(ip) => Some(ip.port() as _),
       #[cfg(unix)]
       NetworkStreamAddress::Unix(_) => None,
-      #[cfg(any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "macos"
-      ))]
-      NetworkStreamAddress::Vsock(vsock) => Some(vsock.port()),
-      NetworkStreamAddress::Tunnel(ref addr) => Some(addr.port() as _),
-      #[cfg(windows)]
-      NetworkStreamAddress::WindowsPipe(_) => None,
     };
     let peer_address = match peer_address {
       NetworkStreamAddress::Ip(addr) => Rc::from(addr.ip().to_string()),
       #[cfg(unix)]
       NetworkStreamAddress::Unix(_) => Rc::from("unix"),
-      #[cfg(any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "macos"
-      ))]
-      NetworkStreamAddress::Vsock(addr) => {
-        Rc::from(format!("vsock:{}", addr.cid()))
-      }
-      NetworkStreamAddress::Tunnel(ref addr) => Rc::from(addr.hostname()),
-      #[cfg(windows)]
-      NetworkStreamAddress::WindowsPipe(_) => Rc::from("pipe"),
     };
     let local_port = listen_properties.local_port;
     let stream_type = listen_properties.stream_type;
@@ -234,15 +218,6 @@ fn listener_properties(
     NetworkStreamAddress::Ip(ip) => Some(ip.port() as _),
     #[cfg(unix)]
     NetworkStreamAddress::Unix(_) => None,
-    #[cfg(any(
-      target_os = "android",
-      target_os = "linux",
-      target_os = "macos"
-    ))]
-    NetworkStreamAddress::Vsock(vsock) => Some(vsock.port()),
-    NetworkStreamAddress::Tunnel(addr) => Some(addr.port() as _),
-    #[cfg(windows)]
-    NetworkStreamAddress::WindowsPipe(_) => None,
   };
   Ok(HttpListenProperties {
     scheme,
@@ -287,40 +262,15 @@ fn req_host_from_addr(
       percent_encoding::NON_ALPHANUMERIC,
     )
     .to_string(),
-    #[cfg(any(
-      target_os = "android",
-      target_os = "linux",
-      target_os = "macos"
-    ))]
-    NetworkStreamAddress::Vsock(vsock) => {
-      format!("{}:{}", vsock.cid(), vsock.port())
-    }
-    NetworkStreamAddress::Tunnel(addr) => {
-      if addr.port() == 443 {
-        addr.hostname()
-      } else {
-        format!("{}:{}", addr.hostname(), addr.port())
-      }
-    }
-    #[cfg(windows)]
-    NetworkStreamAddress::WindowsPipe(_) => "localhost".to_owned(),
   }
 }
 
 fn req_scheme_from_stream_type(stream_type: NetworkStreamType) -> &'static str {
   match stream_type {
     NetworkStreamType::Tcp => "http://",
-    NetworkStreamType::Tls | NetworkStreamType::Tunnel => "https://",
+    NetworkStreamType::Tls => "https://",
     #[cfg(unix)]
     NetworkStreamType::Unix => "http+unix://",
-    #[cfg(any(
-      target_os = "android",
-      target_os = "linux",
-      target_os = "macos"
-    ))]
-    NetworkStreamType::Vsock => "http+vsock://",
-    #[cfg(windows)]
-    NetworkStreamType::WindowsPipe => "http://",
   }
 }
 
@@ -338,21 +288,13 @@ fn req_host<'a>(
           return Some(Cow::Borrowed(auth.host()));
         }
       }
-      NetworkStreamType::Tls | NetworkStreamType::Tunnel => {
+      NetworkStreamType::Tls => {
         if port == 443 {
           return Some(Cow::Borrowed(auth.host()));
         }
       }
       #[cfg(unix)]
       NetworkStreamType::Unix => {}
-      #[cfg(any(
-        target_os = "android",
-        target_os = "linux",
-        target_os = "macos"
-      ))]
-      NetworkStreamType::Vsock => {}
-      #[cfg(windows)]
-      NetworkStreamType::WindowsPipe => {}
     }
     return Some(Cow::Borrowed(auth.as_str()));
   }
