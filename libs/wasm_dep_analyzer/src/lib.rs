@@ -295,7 +295,7 @@ fn build_func_export_idx_to_type_idx(
   Ok(space)
 }
 
-fn parse(input: &[u8], include_types: bool) -> Result<WasmDeps, ParseError> {
+fn parse(input: &[u8], include_types: bool) -> Result<WasmDeps<'_>, ParseError> {
   let mut state = ParserState {
     imports: None,
     exports: None,
@@ -343,7 +343,7 @@ fn parse(input: &[u8], include_types: bool) -> Result<WasmDeps, ParseError> {
   })
 }
 
-fn parse_magic_bytes(input: &[u8]) -> ParseResult<()> {
+fn parse_magic_bytes(input: &[u8]) -> ParseResult<'_, ()> {
   // \0asm
   if input.starts_with(&[0, 97, 115, 109]) {
     Ok((&input[4..], ()))
@@ -352,7 +352,7 @@ fn parse_magic_bytes(input: &[u8]) -> ParseResult<()> {
   }
 }
 
-fn ensure_known_version(input: &[u8]) -> ParseResult<()> {
+fn ensure_known_version(input: &[u8]) -> ParseResult<'_, ()> {
   if input.len() < 4 {
     return Err(ParseError::UnexpectedEof);
   }
@@ -365,7 +365,7 @@ fn ensure_known_version(input: &[u8]) -> ParseResult<()> {
   Ok((&input[4..], ()))
 }
 
-fn parse_import_section(input: &[u8]) -> Result<Vec<Import>, ParseError> {
+fn parse_import_section(input: &[u8]) -> Result<Vec<Import<'_>>, ParseError> {
   let (mut input, count) = parse_var_uint(input)?;
   let mut imports = Vec::with_capacity(count as usize);
 
@@ -380,7 +380,7 @@ fn parse_import_section(input: &[u8]) -> Result<Vec<Import>, ParseError> {
   Ok(imports)
 }
 
-fn parse_import(input: &[u8]) -> ParseResult<Import> {
+fn parse_import(input: &[u8]) -> ParseResult<'_, Import<'_>> {
   let (input, module) = parse_length_prefixed_string(input)?;
   let (input, name) = parse_length_prefixed_string(input)?;
   let (input, import_type) = parse_import_type(input)?;
@@ -395,7 +395,7 @@ fn parse_import(input: &[u8]) -> ParseResult<Import> {
   ))
 }
 
-fn parse_import_type(input: &[u8]) -> ParseResult<ImportType> {
+fn parse_import_type(input: &[u8]) -> ParseResult<'_, ImportType> {
   let (input, kind_byte) = read_byte(input)?;
   match kind_byte {
     0x00 => {
@@ -422,7 +422,7 @@ fn parse_import_type(input: &[u8]) -> ParseResult<ImportType> {
   }
 }
 
-fn parse_table_type(input: &[u8]) -> ParseResult<TableType> {
+fn parse_table_type(input: &[u8]) -> ParseResult<'_, TableType> {
   // element type
   let (input, element_type) = read_byte(input)?;
   if element_type != /* funref */ 0x70 {
@@ -441,12 +441,12 @@ fn parse_table_type(input: &[u8]) -> ParseResult<TableType> {
   ))
 }
 
-fn parse_memory_type(input: &[u8]) -> ParseResult<MemoryType> {
+fn parse_memory_type(input: &[u8]) -> ParseResult<'_, MemoryType> {
   let (input, limits) = parse_limits(input)?;
   Ok((input, MemoryType { limits }))
 }
 
-fn parse_global_type(input: &[u8]) -> ParseResult<GlobalType> {
+fn parse_global_type(input: &[u8]) -> ParseResult<'_, GlobalType> {
   let (input, value_type) = parse_value_type(input)?;
   let (input, mutability_byte) = read_byte(input)?;
   let mutability = match mutability_byte {
@@ -464,7 +464,7 @@ fn parse_global_type(input: &[u8]) -> ParseResult<GlobalType> {
   ))
 }
 
-fn skip_init_expr(input: &[u8]) -> ParseResult<()> {
+fn skip_init_expr(input: &[u8]) -> ParseResult<'_, ()> {
   let mut input = input;
 
   loop {
@@ -484,7 +484,7 @@ fn skip_init_expr(input: &[u8]) -> ParseResult<()> {
   Ok((input, ()))
 }
 
-fn parse_value_type(input: &[u8]) -> ParseResult<ValueType> {
+fn parse_value_type(input: &[u8]) -> ParseResult<'_, ValueType> {
   let (input, byte) = read_byte(input)?;
   Ok((
     input,
@@ -498,8 +498,8 @@ fn parse_value_type(input: &[u8]) -> ParseResult<ValueType> {
   ))
 }
 
-fn parse_limits(input: &[u8]) -> ParseResult<Limits> {
-  fn maybe_parse_maximum(input: &[u8], flags: u8) -> ParseResult<Option<u32>> {
+fn parse_limits(input: &[u8]) -> ParseResult<'_, Limits> {
+  fn maybe_parse_maximum(input: &[u8], flags: u8) -> ParseResult<'_, Option<u32>> {
     if flags == 0x01 {
       let (input, max) = parse_var_uint(input)?;
       Ok((input, Some(max)))
@@ -515,7 +515,7 @@ fn parse_limits(input: &[u8]) -> ParseResult<Limits> {
   Ok((input, Limits { initial, maximum }))
 }
 
-fn parse_tag_type(input: &[u8]) -> ParseResult<TagType> {
+fn parse_tag_type(input: &[u8]) -> ParseResult<'_, TagType> {
   let (input, kind) = read_byte(input)?;
   if kind != 0x00 {
     return Err(ParseError::UnknownTagKind(kind));
@@ -525,7 +525,7 @@ fn parse_tag_type(input: &[u8]) -> ParseResult<TagType> {
   Ok((input, TagType { kind, type_index }))
 }
 
-fn parse_export_section(input: &[u8]) -> Result<Vec<Export>, ParseError> {
+fn parse_export_section(input: &[u8]) -> Result<Vec<Export<'_>>, ParseError> {
   let (mut input, count) = parse_var_uint(input)?;
   let mut exports = Vec::with_capacity(count as usize);
 
@@ -540,7 +540,7 @@ fn parse_export_section(input: &[u8]) -> Result<Vec<Export>, ParseError> {
   Ok(exports)
 }
 
-fn parse_export_type(input: &[u8]) -> ParseResult<Export> {
+fn parse_export_type(input: &[u8]) -> ParseResult<'_, Export<'_>> {
   let (input, name) = parse_length_prefixed_string(input)?;
   let (input, kind_byte) = read_byte(input)?;
   let (input, index) = parse_var_uint(input)?;
@@ -585,7 +585,7 @@ fn parse_type_section(
   Ok(function_signatures)
 }
 
-fn parse_function_signature(input: &[u8]) -> ParseResult<FunctionSignature> {
+fn parse_function_signature(input: &[u8]) -> ParseResult<'_, FunctionSignature> {
   let (input, type_byte) = read_byte(input)?;
   if type_byte != 0x60 {
     return Err(ParseError::InvalidTypeIndicator(type_byte));
@@ -655,7 +655,7 @@ struct WasmSection<'a> {
   bytes: &'a [u8],
 }
 
-fn parse_section(input: &[u8]) -> ParseResult<WasmSection> {
+fn parse_section(input: &[u8]) -> ParseResult<'_, WasmSection<'_>> {
   let (input, kind) = read_byte(input)?;
   let (input, payload_len) = parse_var_uint(input)?;
   let payload_len = payload_len as usize;
@@ -687,7 +687,7 @@ fn parse_length_prefixed_string(
 }
 
 /// Parse a variable length ULEB128 unsigned integer.
-fn parse_var_uint(input: &[u8]) -> ParseResult<u32> {
+fn parse_var_uint(input: &[u8]) -> ParseResult<'_, u32> {
   let mut result = 0;
   let mut shift = 0;
   let mut input = input;
@@ -706,7 +706,7 @@ fn parse_var_uint(input: &[u8]) -> ParseResult<u32> {
   Ok((input, result))
 }
 
-fn read_byte(input: &[u8]) -> ParseResult<u8> {
+fn read_byte(input: &[u8]) -> ParseResult<'_, u8> {
   if input.is_empty() {
     return Err(ParseError::UnexpectedEof);
   }

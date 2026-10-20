@@ -37,7 +37,7 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
   }
 
   fn load_pem_certs(path: &Path) -> Result<Vec<Certificate>, Error> {
-    let f = File::open(&path)?;
+    let f = File::open(path)?;
     let mut f = BufReader::new(f);
 
     let certs: Result<Vec<_>, _> = rustls_pemfile::certs(&mut f).collect();
