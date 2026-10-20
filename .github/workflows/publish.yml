@@ -4,8 +4,10 @@ name: Publish crates
 # (tools/publish.py). Rerunning is safe. Authenticates with crates.io trusted
 # publishing: each crate trusts simienapp/core, this file and the release
 # environment, and the short-lived token is revoked when the job ends. A
-# brand-new crate can't be published this way; its first version needs a
-# token from crates.io before it can trust this workflow.
+# brand-new crate can't be published this way: its first version uses the
+# release environment's CARGO_REGISTRY_TOKEN secret (tools/publish.py), and
+# from then on the crate trusts this workflow. Without new crates the secret
+# is never read and can be deleted.
 
 on:
   workflow_dispatch:
@@ -31,4 +33,5 @@ jobs:
       - name: Publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+          NEW_CRATE_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: python3 tools/publish.py
