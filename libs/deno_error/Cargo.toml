@@ -1,6 +1,6 @@
 [package]
 name = "simien_error"
-version = "0.1.0"
+version = "0.1.1"
 description = "Error representation to JavaScript for simien_core. Forked from Deno's deno_error 0.7.1."
 repository = "https://github.com/simienapp/core"
 documentation = "https://docs.rs/deno_error"
@@ -9,7 +9,7 @@ edition = "2021"
 license = "MIT"
 
 [dependencies]
-simien_error_macro = { version = "=0.1.0", path = "macros" }
+simien_error_macro = { version = "=0.1.1", path = "macros" }
 libc = "0.2.126"
 
 tokio = { version = "1", features = ["full"], optional = true }

@@ -3391,7 +3391,7 @@ dependencies = [
 
 [[package]]
 name = "simien_bench_util"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bencher",
  "simien_core",
@@ -3400,7 +3400,7 @@ dependencies = [
 
 [[package]]
 name = "simien_boxed_error"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "quote",
  "syn",
@@ -3409,7 +3409,7 @@ dependencies = [
 
 [[package]]
 name = "simien_core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "base64",
@@ -3456,7 +3456,7 @@ dependencies = [
 
 [[package]]
 name = "simien_crypto"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -3501,7 +3501,7 @@ dependencies = [
 
 [[package]]
 name = "simien_crypto_provider"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aws-lc-sys",
  "ed448-goldilocks",
@@ -3509,7 +3509,7 @@ dependencies = [
 
 [[package]]
 name = "simien_error"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "libc",
  "serde",
@@ -3522,7 +3522,7 @@ dependencies = [
 
 [[package]]
 name = "simien_error_macro"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3531,7 +3531,7 @@ dependencies = [
 
 [[package]]
 name = "simien_fetch"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-compression",
  "base64",
@@ -3570,7 +3570,7 @@ dependencies = [
 
 [[package]]
 name = "simien_native_certs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "dlopen2",
  "dlopen2_derive",
@@ -3581,7 +3581,7 @@ dependencies = [
 
 [[package]]
 name = "simien_ops"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "indexmap",
  "pretty_assertions",
@@ -3599,7 +3599,7 @@ dependencies = [
 
 [[package]]
 name = "simien_path_util"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "divan",
  "percent-encoding",
@@ -3613,7 +3613,7 @@ dependencies = [
 
 [[package]]
 name = "simien_serde_v8"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "num-bigint",
  "serde",
@@ -3635,7 +3635,7 @@ dependencies = [
 
 [[package]]
 name = "simien_tls"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "log",
  "rustls",
@@ -3653,7 +3653,7 @@ dependencies = [
 
 [[package]]
 name = "simien_unsync"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "futures-util",
  "parking_lot",
@@ -3662,7 +3662,7 @@ dependencies = [
 
 [[package]]
 name = "simien_v8"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "v8",
  "v8x",
@@ -3670,7 +3670,7 @@ dependencies = [
 
 [[package]]
 name = "simien_wasm_dep_analyzer"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "pretty_assertions",
  "simien_error",
@@ -3679,7 +3679,7 @@ dependencies = [
 
 [[package]]
 name = "simien_web"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "approx",
  "async-trait",
@@ -3702,7 +3702,7 @@ dependencies = [
 
 [[package]]
 name = "simien_webidl"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "simien_bench_util",
  "simien_core",

@@ -1,6 +1,6 @@
 [package]
 name = "simien_wasm_dep_analyzer"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Wasm module dependency analysis for module resolution. Forked from Deno's wasm_dep_analyzer 0.4.0."
 repository = "https://github.com/simienapp/core"

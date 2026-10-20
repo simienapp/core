@@ -1,7 +1,7 @@
 [package]
 name = "simien_path_util"
 description = "Path utilities used by simien_core. Forked from Deno's deno_path_util 0.6.4."
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 authors = ["the Deno authors", "the Simien authors"]
 license = "MIT"

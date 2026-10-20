@@ -170,7 +170,14 @@ pub fn create_op_ctxs(
   enable_stack_trace_in_ops: bool,
 ) -> (OpCtxs, usize) {
   let op_count = op_decls.iter().map(|storage| storage.len()).sum::<usize>()
-    + op_method_decls.len();
+    + op_method_decls
+      .iter()
+      .map(|decl| {
+        usize::from(decl.constructor.is_some())
+          + decl.methods.len()
+          + decl.static_methods.len()
+      })
+      .sum::<usize>();
 
   // Lay the declarations out in op-context order: method ops, then regular
   // ops. Each entry is a run of declarations that the returned `OpCtxs` keeps
@@ -210,6 +217,9 @@ pub fn create_op_ctxs(
     ids.extend((start..start + storage.len()).map(|id| id as OpId));
     decls.push(storage);
   }
+
+  // Every id handed to the metrics factory is below `op_count`.
+  debug_assert_eq!(ids.len(), op_count);
 
   let runtime_state_ptr = runtime_state.as_ref() as *const _;
   let op_ctxs = OpCtxs::new(
