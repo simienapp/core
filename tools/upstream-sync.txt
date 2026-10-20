@@ -2,9 +2,11 @@
 # tools/upstream-paths.txt. The upstream watch reads `checked`: anything after
 # it on denoland/deno main that touches those paths is new.
 #
-# checked <deno main commit> <date>
-# ported  <deno commit> <title>
-# skipped <deno commit> <reason>
+# checked      <deno main commit> <date>
+# checked-repo <standalone repo> <commit reviewed up to>
+# checked-v8   <rusty_v8 version reviewed up to>
+# ported       <commit> <title>
+# skipped      <commit> <reason>
 
 checked a18ce33715 2026-10-06
 
