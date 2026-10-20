@@ -58,7 +58,6 @@ pub use crate::timers::StartTime;
 use crate::timers::op_defer;
 use crate::timers::op_now;
 use crate::timers::op_time_origin;
-pub mod locks;
 
 simien_core::extension!(simien_web,
   deps = [ simien_webidl ],
@@ -106,13 +105,6 @@ simien_core::extension!(simien_web,
     stream_resource::op_readable_stream_resource_write_sync,
     stream_resource::op_readable_stream_resource_close,
     stream_resource::op_readable_stream_resource_await_close,
-    locks::op_lock_manager_request,
-    locks::op_lock_manager_await_lock,
-    locks::op_lock_manager_await_steal,
-    locks::op_lock_manager_is_stolen,
-    locks::op_lock_manager_cancel,
-    locks::op_lock_manager_release,
-    locks::op_lock_manager_query,
     url::op_url_reparse,
     url::op_url_parse,
     url::op_url_get_serialization,
@@ -134,9 +126,6 @@ simien_core::extension!(simien_web,
   ],
   objects = [
     console::Console,
-  ],
-  lazy_loaded_esm = [
-    "locks.js",
   ],
   lazy_loaded_js = [
     "00_infra.js",
