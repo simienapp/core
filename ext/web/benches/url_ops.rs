@@ -24,8 +24,6 @@ fn setup() -> Vec<Extension> {
       std::sync::Arc::new(simien_web::BlobStore::default())
         as std::sync::Arc<dyn simien_web::BlobStoreTrait>,
       None,
-      Default::default(),
-      Default::default(),
     ),
     bench_setup::init(),
   ]
