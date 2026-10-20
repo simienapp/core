@@ -5,9 +5,9 @@ use std::borrow::Cow;
 use std::ffi::c_void;
 
 use bencher::*;
-use deno_core::*;
+use simien_core::*;
 
-deno_core::extension!(
+simien_core::extension!(
   testing,
   ops = [
     op_void,
@@ -197,7 +197,7 @@ fn bench_op(
     ..Default::default()
   });
   let err_mapper = |err| {
-    deno_error::JsErrorBox::generic(format!(
+    simien_error::JsErrorBox::generic(format!(
       "{op} test failed ({call}): {err:?}"
     ))
   };
@@ -225,7 +225,7 @@ fn bench_op(
     .map_err(err_mapper)
     .unwrap();
   let bench = runtime.execute_script("", ascii_str!("bench")).unwrap();
-  deno_core::scope!(scope, &mut runtime);
+  simien_core::scope!(scope, &mut runtime);
   #[allow(clippy::unnecessary_fallible_conversions, reason = "bench code")]
   let bench: v8::Local<v8::Function> =
     v8::Local::<v8::Value>::new(scope, bench)
@@ -432,7 +432,7 @@ fn bench_op_string_option_u32(b: &mut Bencher) {
   );
 }
 
-/// A #[serde] String function (exercises serde_v8 to_utf8 path).
+/// A #[serde] String function (exercises simien_serde_v8 to_utf8 path).
 fn bench_op_string_serde(b: &mut Bencher) {
   bench_op(
     b,

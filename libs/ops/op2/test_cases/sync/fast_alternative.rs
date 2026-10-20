@@ -3,7 +3,7 @@
 #![deny(warnings)]
 deno_ops_compile_test_runner::prelude!();
 
-use deno_core::v8;
+use simien_core::v8;
 
 // Unused scope would normally make this a slow-only op
 #[op2(fast(op_fast))]

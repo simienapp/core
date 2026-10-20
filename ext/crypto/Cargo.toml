@@ -1,7 +1,7 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_crypto"
+name = "simien_crypto"
 version = "0.273.0"
 authors.workspace = true
 edition.workspace = true
@@ -24,9 +24,9 @@ cbc.workspace = true
 const-oid.workspace = true
 ctr.workspace = true
 curve25519-dalek.workspace = true
-deno_core.workspace = true
-deno_crypto_provider.workspace = true
-deno_error.workspace = true
+simien_core.workspace = true
+simien_crypto_provider.workspace = true
+simien_error.workspace = true
 ecdsa.workspace = true
 elliptic-curve = { workspace = true, features = ["std", "pem", "arithmetic"] }
 fips203 = { workspace = true, features = ["ml-kem-512", "ml-kem-768", "ml-kem-1024"] }

@@ -1,10 +1,10 @@
-use deno_error::{JsErrorClass, PropertyValue};
+use simien_error::{JsErrorClass, PropertyValue};
 use std::borrow::Cow;
 use std::io::ErrorKind;
 
 #[test]
 fn test_properties() {
-  #[derive(Debug, thiserror::Error, deno_error::JsError)]
+  #[derive(Debug, thiserror::Error, simien_error::JsError)]
   #[class(type)]
   pub enum SomeError {
     #[error("Failure")]
@@ -114,7 +114,7 @@ fn test_property_values() {
   assert_eq!(from_i32, PropertyValue::Number(42.0));
 
   // Custom error with numeric property
-  #[derive(Debug, thiserror::Error, deno_error::JsError)]
+  #[derive(Debug, thiserror::Error, simien_error::JsError)]
   #[class(type)]
   #[property("code" = 404)]
   #[error("Not found")]

@@ -10,12 +10,12 @@
 
 use std::ffi::CStr;
 
-use deno_core::GarbageCollected;
-use deno_core::cppgc::UnsafePtr;
-use deno_core::cppgc::try_unwrap_cppgc_object;
-use deno_core::op2;
-use deno_core::v8;
-use deno_core::webidl::WebIdlInterfaceConverter;
+use simien_core::GarbageCollected;
+use simien_core::cppgc::UnsafePtr;
+use simien_core::cppgc::try_unwrap_cppgc_object;
+use simien_core::op2;
+use simien_core::v8;
+use simien_core::webidl::WebIdlInterfaceConverter;
 
 use crate::key_store::CryptoKeyHandle;
 use crate::shared::SharedError;

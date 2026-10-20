@@ -6,10 +6,10 @@ use crate::magic::transl8::FromV8;
 use crate::magic::transl8::ToV8;
 use crate::magic::transl8::impl_magic;
 
-/// serde_v8::Value is used internally to serialize/deserialize values in
+/// simien_serde_v8::Value is used internally to serialize/deserialize values in
 /// objects and arrays. This struct was exposed to user code in the past, but
 /// we don't want to do that anymore as it leads to inefficient usages - eg. wrapping
-/// a V8 object in `serde_v8::Value` and then immediately unwrapping it.
+/// a V8 object in `simien_serde_v8::Value` and then immediately unwrapping it.
 //
 // SAFETY: caveat emptor, the rust-compiler can no longer link lifetimes to their
 // original scope, you must take special care in ensuring your handles don't

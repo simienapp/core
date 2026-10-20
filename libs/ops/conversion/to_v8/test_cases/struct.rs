@@ -15,7 +15,7 @@ pub struct Struct {
 
 #[derive(ToV8)]
 pub struct LifetimeStruct<'a> {
-  a: deno_core::v8::Local<'a, deno_core::v8::Value>,
+  a: simien_core::v8::Local<'a, simien_core::v8::Value>,
   b: u8,
 }
 

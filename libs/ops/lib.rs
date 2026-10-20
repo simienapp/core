@@ -71,10 +71,10 @@ fn get_internalized_string(
   }
 
   Ok(quote::quote! {
-    ::deno_core::v8::String::new_from_one_byte(
+    ::simien_core::v8::String::new_from_one_byte(
       __scope,
       #name_str.as_bytes(),
-      ::deno_core::v8::NewStringType::Internalized,
+      ::simien_core::v8::NewStringType::Internalized,
     )
     .unwrap()
     .into()

@@ -6,8 +6,8 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicUsize;
 use std::sync::atomic::Ordering;
 
-use deno_error::JsErrorBox;
-use serde_v8::JsBuffer;
+use simien_error::JsErrorBox;
+use simien_serde_v8::JsBuffer;
 
 use crate::CrossIsolateStore;
 use crate::JsRuntime;
@@ -67,7 +67,7 @@ async fn op_test(
 
 fn setup(mode: Mode) -> (JsRuntime, Arc<AtomicUsize>) {
   let dispatch_count = Arc::new(AtomicUsize::new(0));
-  deno_core::extension!(
+  simien_core::extension!(
     test_ext,
     ops = [op_test],
     options = {

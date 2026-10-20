@@ -169,7 +169,7 @@ impl ResourceTable {
   /// # Example
   ///
   /// ```
-  /// # use deno_core::ResourceTable;
+  /// # use simien_core::ResourceTable;
   /// # let resource_table = ResourceTable::default();
   /// let resource_names = resource_table.names().collect::<Vec<_>>();
   /// ```
@@ -232,7 +232,7 @@ impl ResourceTable {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ResourceError {
   #[class(reference)]
   #[error("null or invalid handle")]

@@ -54,13 +54,13 @@ pub fn get_body(
         has_non_unit = true;
         let converter = if variant_attrs.serde {
           quote! {
-            ::deno_core::serde_v8::from_v8(__scope, __inner)
-              .map_err(::deno_error::JsErrorBox::from_err)?
+            ::simien_core::simien_serde_v8::from_v8(__scope, __inner)
+              .map_err(::simien_error::JsErrorBox::from_err)?
           }
         } else {
           quote! {
-            ::deno_core::convert::FromV8::from_v8(__scope, __inner)
-              .map_err(::deno_error::JsErrorBox::from_err)?
+            ::simien_core::convert::FromV8::from_v8(__scope, __inner)
+              .map_err(::simien_error::JsErrorBox::from_err)?
           }
         };
         let key = crate::get_internalized_string(Ident::new(
@@ -92,13 +92,13 @@ pub fn get_body(
   } else {
     quote! {
       if let Ok(__s) =
-        ::deno_core::v8::Local::<::deno_core::v8::String>::try_from(__value)
+        ::simien_core::v8::Local::<::simien_core::v8::String>::try_from(__value)
       {
         let __s = __s.to_rust_string_lossy(__scope);
         match __s.as_str() {
           #(#unit_arms)*
           _ => {
-            return Err(::deno_error::JsErrorBox::type_error(
+            return Err(::simien_error::JsErrorBox::type_error(
               concat!("Unknown string variant for '", #ident_string, "'"),
             ));
           }
@@ -109,25 +109,25 @@ pub fn get_body(
 
   let object_branch = if has_non_unit {
     quote! {
-      let __obj: ::deno_core::v8::Local<::deno_core::v8::Object> =
+      let __obj: ::simien_core::v8::Local<::simien_core::v8::Object> =
         match __value.try_into() {
           Ok(obj) => obj,
           Err(err) => {
-            return Err(::deno_error::JsErrorBox::from_err(
-              ::deno_core::error::DataError::from(err),
+            return Err(::simien_error::JsErrorBox::from_err(
+              ::simien_core::error::DataError::from(err),
             ));
           }
         };
 
       #(#variant_arms)*
 
-      Err(::deno_error::JsErrorBox::type_error(
+      Err(::simien_error::JsErrorBox::type_error(
         concat!("No matching variant key found for '", #ident_string, "'"),
       ))
     }
   } else {
     quote! {
-      Err(::deno_error::JsErrorBox::type_error(
+      Err(::simien_error::JsErrorBox::type_error(
         concat!("Expected string variant for '", #ident_string, "'"),
       ))
     }

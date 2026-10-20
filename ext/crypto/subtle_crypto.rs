@@ -19,11 +19,11 @@
 
 use std::ffi::CStr;
 
-use deno_core::GarbageCollected;
-use deno_core::op2;
-use deno_core::unsync::spawn_blocking;
-use deno_core::v8;
-use deno_core::webidl::WebIdlInterfaceConverter;
+use simien_core::GarbageCollected;
+use simien_core::op2;
+use simien_core::unsync::spawn_blocking;
+use simien_core::v8;
+use simien_core::webidl::WebIdlInterfaceConverter;
 
 use crate::CryptoError;
 use crate::algorithm::check_support_for_algorithm;
@@ -228,7 +228,7 @@ impl SubtleCrypto {
     length: Option<f64>,
   ) -> Result<Vec<u8>, CryptoError> {
     if !base_key.has_usage("deriveBits") {
-      return Err(CryptoError::Other(deno_error::JsErrorBox::new(
+      return Err(CryptoError::Other(simien_error::JsErrorBox::new(
         "DOMExceptionInvalidAccessError",
         "'baseKey' usages does not contain 'deriveBits'",
       )));
@@ -294,12 +294,12 @@ impl SubtleCrypto {
     // CryptoKey (an internal invariant violation -- `run_import_key`
     // always returns a make_crypto_key result), surface a `TypeError`
     // rather than silently skipping the check.
-    let key_type = deno_core::cppgc::try_unwrap_cppgc_object::<
+    let key_type = simien_core::cppgc::try_unwrap_cppgc_object::<
       crate::crypto_key::CryptoKey,
     >(scope, key.into())
     .map(|p| p.key_type())
     .ok_or_else(|| {
-      CryptoError::Other(deno_error::JsErrorBox::type_error(
+      CryptoError::Other(simien_error::JsErrorBox::type_error(
         "internal: imported key is not a CryptoKey",
       ))
     })?;
@@ -309,7 +309,7 @@ impl SubtleCrypto {
         | crate::crypto_key::CryptoKeyType::Secret
     ) && usages.is_empty()
     {
-      return Err(CryptoError::Other(deno_error::JsErrorBox::new(
+      return Err(CryptoError::Other(simien_error::JsErrorBox::new(
         "DOMExceptionSyntaxError",
         "Invalid key usage",
       )));

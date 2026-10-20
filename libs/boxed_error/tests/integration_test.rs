@@ -1,6 +1,6 @@
 use std::io::ErrorKind;
 
-use boxed_error::Boxed;
+use simien_boxed_error::Boxed;
 use thiserror::Error;
 
 #[test]

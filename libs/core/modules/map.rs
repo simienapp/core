@@ -12,9 +12,9 @@ use std::rc::Rc;
 use std::task::Context;
 use std::task::Poll;
 
-use deno_core::FastString;
-use deno_core::error::CoreError;
-use deno_error::JsErrorBox;
+use simien_core::FastString;
+use simien_core::error::CoreError;
+use simien_error::JsErrorBox;
 use futures::future::FutureExt;
 use futures::stream::StreamFuture;
 use futures::task::AtomicWaker;

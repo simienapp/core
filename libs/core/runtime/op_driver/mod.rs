@@ -5,7 +5,7 @@ use std::task::Context;
 use std::task::Poll;
 
 use bit_set::BitSet;
-use deno_error::JsErrorClass;
+use simien_error::JsErrorClass;
 
 use crate::OpId;
 use crate::PromiseId;
@@ -151,7 +151,7 @@ mod tests {
   use std::marker::PhantomData;
 
   use bit_set::BitSet;
-  use deno_error::JsErrorBox;
+  use simien_error::JsErrorBox;
   use rstest::rstest;
 
   use super::op_results::*;

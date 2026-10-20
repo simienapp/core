@@ -52,7 +52,8 @@ def tree(paths):
     files = subprocess.run(["git", "ls-files", *paths], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
     changed = 0
     for rel in files:
-        if rel.startswith("tools/"):
+        # The root README documents the mapping itself, upstream names included.
+        if rel.startswith("tools/") or rel in ("README.md", "LICENSE.md"):
             continue
         path = os.path.join(ROOT, rel)
         try:

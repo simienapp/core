@@ -13,12 +13,12 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
 
-use deno_core::GarbageCollected;
-use deno_core::cppgc;
-use deno_core::op2;
-use deno_core::v8;
-use deno_core::webidl::ContextFn;
-use deno_core::webidl::WebIdlConverter;
+use simien_core::GarbageCollected;
+use simien_core::cppgc;
+use simien_core::op2;
+use simien_core::v8;
+use simien_core::webidl::ContextFn;
+use simien_core::webidl::WebIdlConverter;
 
 pub struct CSSRule {
   text: String,
@@ -39,8 +39,8 @@ impl CSSRule {
   // `CSSStyleSheet.prototype.cssRules`).
   #[constructor]
   #[cppgc]
-  fn constructor() -> Result<CSSRule, deno_error::JsErrorBox> {
-    Err(deno_error::JsErrorBox::type_error("Illegal constructor"))
+  fn constructor() -> Result<CSSRule, simien_error::JsErrorBox> {
+    Err(simien_error::JsErrorBox::type_error("Illegal constructor"))
   }
 
   #[getter]
@@ -239,7 +239,7 @@ impl CSSStyleSheet {
         resolver.resolve(scope, this);
       }
       Err(err) => {
-        let exception = deno_core::error::to_v8_error(scope, &err);
+        let exception = simien_core::error::to_v8_error(scope, &err);
         resolver.reject(scope, exception);
       }
     }

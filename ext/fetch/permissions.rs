@@ -13,11 +13,11 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use deno_core::url::Url;
+use simien_core::url::Url;
 
 /// A denied network access. JavaScript sees it as a `NotCapable` error, as it
 /// did upstream.
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class("NotCapable")]
 #[error("{0}")]
 pub struct PermissionCheckError(pub String);

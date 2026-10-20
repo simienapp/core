@@ -10,11 +10,11 @@ use std::fmt::Formatter;
 use std::fmt::Write as _;
 use std::sync::Arc;
 
-use boxed_error::Boxed;
-use deno_error::JsError;
-use deno_error::JsErrorClass;
-use deno_error::PropertyValue;
-use deno_error::builtin_classes::*;
+use simien_boxed_error::Boxed;
+use simien_error::JsError;
+use simien_error::JsErrorClass;
+use simien_error::PropertyValue;
+use simien_error::builtin_classes::*;
 use thiserror::Error;
 
 pub use super::modules::ModuleConcreteError;
@@ -28,10 +28,10 @@ use crate::source_map::SourceMapApplication;
 use crate::url::Url;
 
 /// A generic wrapper that can encapsulate any concrete error type.
-// TODO(ry) Deprecate AnyError and encourage deno_core::anyhow::Error instead.
+// TODO(ry) Deprecate AnyError and encourage simien_core::anyhow::Error instead.
 pub type AnyError = anyhow::Error;
 
-deno_error::js_error_wrapper!(v8::DataError, DataError, TYPE_ERROR);
+simien_error::js_error_wrapper!(v8::DataError, DataError, TYPE_ERROR);
 
 impl PartialEq<DataError> for DataError {
   fn eq(&self, other: &DataError) -> bool {
@@ -117,7 +117,7 @@ pub enum CoreErrorKind {
   Io(#[from] std::io::Error),
   #[class(inherit)]
   #[error(transparent)]
-  ExtensionTranspiler(deno_error::JsErrorBox),
+  ExtensionTranspiler(simien_error::JsErrorBox),
   #[class(inherit)]
   #[error(transparent)]
   Parse(#[from] CoreModuleParseError),
@@ -148,7 +148,7 @@ pub enum CoreErrorKind {
   },
   #[class(inherit)]
   #[error(transparent)]
-  JsBox(#[from] deno_error::JsErrorBox),
+  JsBox(#[from] simien_error::JsErrorBox),
   #[class(inherit)]
   #[error(transparent)]
   Url(#[from] url::ParseError),
@@ -488,8 +488,8 @@ pub(crate) fn call_site_evals_key<'s, 'i>(
   Clone,
   serde::Deserialize,
   serde::Serialize,
-  deno_ops::FromV8,
-  deno_ops::ToV8,
+  simien_ops::FromV8,
+  simien_ops::ToV8,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct JsError {
@@ -573,7 +573,7 @@ impl JsErrorClass for JsError {
     }
   }
 
-  fn get_additional_properties(&self) -> deno_error::AdditionalProperties {
+  fn get_additional_properties(&self) -> simien_error::AdditionalProperties {
     Box::new(
       self
         .additional_properties
@@ -601,8 +601,8 @@ impl JsErrorClass for JsError {
   Clone,
   serde::Deserialize,
   serde::Serialize,
-  deno_ops::FromV8,
-  deno_ops::ToV8,
+  simien_ops::FromV8,
+  simien_ops::ToV8,
 )]
 #[serde(rename_all = "camelCase")]
 pub struct JsStackFrame {
@@ -745,7 +745,7 @@ impl JsStackFrame {
     macro_rules! call {
       ($key: ident : $t: ty) => {{
         let res = call_method(scope, callsite, $key, &[])?;
-        let res: $t = match serde_v8::from_v8(scope, res) {
+        let res: $t = match simien_serde_v8::from_v8(scope, res) {
           Ok(res) => res,
           Err(err) => {
             let message = format!(
@@ -1056,7 +1056,7 @@ impl JsError {
       let exception: v8::Local<v8::Object> = exception.try_into().unwrap();
       let cause = get_property(scope, exception, v8_static_strings::CAUSE);
       let e: NativeJsError =
-        serde_v8::from_v8(scope, exception.into()).unwrap_or_default();
+        simien_serde_v8::from_v8(scope, exception.into()).unwrap_or_default();
       // Get the message by formatting error.name and error.message.
       let name = e.name.clone().unwrap_or_else(|| GENERIC_ERROR.to_string());
       let message_prop = e.message.clone().unwrap_or_default();
@@ -1723,8 +1723,8 @@ v8_static_strings::v8_static_strings! {
   GET_PROMISE_INDEX = "getPromiseIndex",
   TO_STRING = "toString",
   PREPARE_STACK_TRACE = "prepareStackTrace",
-  ORIGINAL = "deno_core::original_call_site",
-  SOURCE_MAPPED_INFO = "deno_core::source_mapped_call_site_info",
+  ORIGINAL = "simien_core::original_call_site",
+  SOURCE_MAPPED_INFO = "simien_core::source_mapped_call_site_info",
   ERROR_RECEIVER_IS_NOT_VALID_CALLSITE_OBJECT = "The receiver is not a valid callsite object.",
 }
 
@@ -1803,7 +1803,7 @@ macro_rules! make_callsite_fn {
 fn maybe_to_path_str(string: &str) -> Option<String> {
   if string.starts_with("file://") {
     Some(
-      deno_path_util::url_to_file_path(&Url::parse(string).ok()?)
+      simien_path_util::url_to_file_path(&Url::parse(string).ok()?)
         .ok()?
         .to_string_lossy()
         .into_owned(),
@@ -1868,7 +1868,7 @@ pub mod callsite_fns {
     line_number: MaybeValue<'s>,
     column_number: MaybeValue<'s>,
   ) -> Option<(String, i64, i64)> {
-    let file_name = serde_v8::to_utf8(file_name?.try_cast().ok()?, scope);
+    let file_name = simien_serde_v8::to_utf8(file_name?.try_cast().ok()?, scope);
     let convert::Number(line_number) =
       FromV8::from_v8(scope, line_number?).ok()?;
     let convert::Number(column_number) =
@@ -1920,7 +1920,7 @@ pub mod callsite_fns {
     // For wasm frames, skip source map application and cache the original values
     let is_wasm = file_name
       .and_then(|v| v.try_cast::<v8::String>().ok())
-      .map(|s| serde_v8::to_utf8(s, scope).starts_with("wasm://"))
+      .map(|s| simien_serde_v8::to_utf8(s, scope).starts_with("wasm://"))
       .unwrap_or(false);
 
     let info = v8::Array::new(scope, 3);
@@ -2018,12 +2018,12 @@ pub mod callsite_fns {
     orig: v8::Local<'s, v8::Object>,
     orig_to_string_v8: v8::Local<'s, v8::String>,
   ) -> Option<v8::Local<'s, v8::String>> {
-    let orig_to_string = serde_v8::to_utf8(orig_to_string_v8, scope);
+    let orig_to_string = simien_serde_v8::to_utf8(orig_to_string_v8, scope);
     // `this[kOriginalCallsite].getFileName()`
     let orig_file_name =
       call_method::<v8::Value>(scope, orig, GET_FILE_NAME, &[])
         .and_then(|v| v.try_cast::<v8::String>().ok())?;
-    let orig_file_name = serde_v8::to_utf8(orig_file_name, scope);
+    let orig_file_name = simien_serde_v8::to_utf8(orig_file_name, scope);
 
     // For wasm frames, V8's original toString() already formats correctly
     // (with wasm-function[N]:0xOFFSET), so return it unchanged.
@@ -2345,7 +2345,7 @@ pub enum ErrorElement {
 ///
 /// This is to allow the `deno` crate to reuse `format_frame` and
 /// `format_location` but apply ANSI colors for terminal output,
-/// without adding extra dependencies to `deno_core`.
+/// without adding extra dependencies to `simien_core`.
 pub trait ErrorFormat {
   fn fmt_element(
     element: ErrorElement,
@@ -2537,13 +2537,13 @@ pub fn throw_error_one_byte<'s, 'i>(
   scope: &mut v8::PinCallbackScope<'s, 'i>,
   message: &str,
 ) {
-  let msg = deno_core::v8::String::new_from_one_byte(
+  let msg = simien_core::v8::String::new_from_one_byte(
     scope,
     message.as_bytes(),
-    deno_core::v8::NewStringType::Normal,
+    simien_core::v8::NewStringType::Normal,
   )
   .unwrap();
-  let exc = deno_core::v8::Exception::type_error(scope, msg);
+  let exc = simien_core::v8::Exception::type_error(scope, msg);
   scope.throw_exception(exc);
 }
 
@@ -2564,24 +2564,24 @@ pub fn throw_invalid_this_error_one_byte<'s, 'i>(
   scope: &mut v8::PinCallbackScope<'s, 'i>,
   message: &str,
 ) {
-  let msg = deno_core::v8::String::new_from_one_byte(
+  let msg = simien_core::v8::String::new_from_one_byte(
     scope,
     message.as_bytes(),
-    deno_core::v8::NewStringType::Normal,
+    simien_core::v8::NewStringType::Normal,
   )
   .unwrap();
-  let exc = deno_core::v8::Exception::type_error(scope, msg);
+  let exc = simien_core::v8::Exception::type_error(scope, msg);
   if let Some(exc_obj) = exc.to_object(scope) {
-    let code_key = deno_core::v8::String::new_from_one_byte(
+    let code_key = simien_core::v8::String::new_from_one_byte(
       scope,
       b"code",
-      deno_core::v8::NewStringType::Normal,
+      simien_core::v8::NewStringType::Normal,
     )
     .unwrap();
-    let code_val = deno_core::v8::String::new_from_one_byte(
+    let code_val = simien_core::v8::String::new_from_one_byte(
       scope,
       b"ERR_INVALID_THIS",
-      deno_core::v8::NewStringType::Normal,
+      simien_core::v8::NewStringType::Normal,
     )
     .unwrap();
     exc_obj.set(scope, code_key.into(), code_val.into());
@@ -2597,7 +2597,7 @@ mod tests {
   #[test]
   fn test_js_error_from_v8_exception_handles_cyclic_aggregate_error() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let exception: v8::Local<v8::Object> = JsRuntime::eval(
       scope,
@@ -2622,7 +2622,7 @@ mod tests {
   #[test]
   fn test_js_error_from_v8_exception_handles_crossed_aggregate_cycle() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let exception: v8::Local<v8::Object> = JsRuntime::eval(
       scope,
@@ -2646,7 +2646,7 @@ mod tests {
   #[test]
   fn test_js_error_from_v8_exception_truncates_deep_cause_chain() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let exception: v8::Local<v8::Object> = JsRuntime::eval(
       scope,
@@ -2677,7 +2677,7 @@ mod tests {
   #[test]
   fn test_js_error_from_v8_exception_bounds_shared_aggregate_graph() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let exception: v8::Local<v8::Object> = JsRuntime::eval(
       scope,
@@ -2735,7 +2735,7 @@ mod tests {
   #[test]
   fn test_js_error_from_v8_exception_handles_throwing_aggregate_element() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let exception: v8::Local<v8::Object> = JsRuntime::eval(
       scope,
@@ -2769,7 +2769,7 @@ mod tests {
   fn test_js_error_from_v8_exception_handles_throwing_aggregate_errors_getter()
   {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let exception: v8::Local<v8::Object> = JsRuntime::eval(
       scope,
@@ -2802,7 +2802,7 @@ mod tests {
   #[test]
   fn test_is_aggregate_error_recognizes_builtin() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let exception: v8::Local<v8::Object> = JsRuntime::eval(
       scope,
@@ -2822,7 +2822,7 @@ mod tests {
   #[test]
   fn test_is_aggregate_error_handles_malformed_constructors() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     for constructor in ["null", "undefined", "42", "'AggregateError'"] {
       let exception: v8::Local<v8::Object> = JsRuntime::eval(
@@ -2849,7 +2849,7 @@ mod tests {
   #[test]
   fn test_is_aggregate_error_handles_throwing_accessors() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     for source in [
       "(() => { const error = new Error('constructor getter'); Object.defineProperty(error, 'constructor', { get() { throw new Error('constructor lookup failed'); } }); return error; })()",
@@ -3033,7 +3033,7 @@ mod tests {
   fn test_to_v8_error_handles_null_builder_exception() {
     let mut runtime = JsRuntime::new(Default::default());
 
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let throw_null_fn: v8::Local<v8::Function> =
       JsRuntime::eval(scope, "(function () { throw null; })").unwrap();
@@ -3061,7 +3061,7 @@ mod tests {
   fn test_to_v8_error_handles_stack_overflow_in_builder() {
     let mut runtime = JsRuntime::new(Default::default());
 
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     // Simulate the error builder throwing RangeError (as happens during
     // stack overflow when the builder callback itself exceeds the call
@@ -3097,7 +3097,7 @@ mod tests {
     use crate::convert::ToV8;
 
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let frame = JsStackFrame {
       type_name: Some("Foo".to_string()),

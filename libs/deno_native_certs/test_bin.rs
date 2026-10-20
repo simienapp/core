@@ -1,4 +1,4 @@
-use deno_native_certs::load_native_certs;
+use simien_native_certs::load_native_certs;
 
 fn main() {
   let certs = load_native_certs().unwrap();

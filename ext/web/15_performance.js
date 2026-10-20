@@ -23,14 +23,14 @@ const {
   Uint32Array,
 } = primordials;
 
-const webidl = core.loadExtScript("ext:deno_webidl/00_webidl.js");
+const webidl = core.loadExtScript("ext:simien_webidl/00_webidl.js");
 
 // Lazy-load structuredClone from 02_structured_clone
 let _structuredClone;
 function getStructuredClone() {
   if (!_structuredClone) {
     _structuredClone = core.loadExtScript(
-      "ext:deno_web/02_structured_clone.js",
+      "ext:simien_web/02_structured_clone.js",
     ).structuredClone;
   }
   return _structuredClone;
@@ -41,14 +41,14 @@ let _createFilteredInspectProxy;
 function getCreateFilteredInspectProxy() {
   if (!_createFilteredInspectProxy) {
     _createFilteredInspectProxy = core.loadExtScript(
-      "ext:deno_web/01_console.js",
+      "ext:simien_web/01_console.js",
     ).createFilteredInspectProxy;
   }
   return _createFilteredInspectProxy;
 }
 
-const { EventTarget } = core.loadExtScript("ext:deno_web/02_event.js");
-const { DOMException } = core.loadExtScript("ext:deno_web/01_dom_exception.js");
+const { EventTarget } = core.loadExtScript("ext:simien_web/02_event.js");
+const { DOMException } = core.loadExtScript("ext:simien_web/01_dom_exception.js");
 
 const illegalConstructorKey = Symbol("illegalConstructorKey");
 let performanceEntries = [];

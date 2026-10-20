@@ -1,4 +1,4 @@
-# deno_error
+# simien_error
 
 [![Build Status - Cirrus][]][Build status] [![Twitter handle][]][Twitter badge]
 [![Discord Chat](https://img.shields.io/discord/684898665143206084?logo=discord&style=social)](https://discord.gg/deno)

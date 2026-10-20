@@ -1,6 +1,6 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_error::JsErrorBox;
+use simien_error::JsErrorBox;
 use fips205::traits::SerDes;
 use fips205::traits::Signer;
 use fips205::traits::Verifier;
@@ -9,7 +9,7 @@ use rsa::pkcs8::der::Decode;
 use spki::der::Encode;
 use spki::der::asn1::BitString;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum SlhDsaError {
   #[class(generic)]
   #[error("Invalid SLH-DSA key data")]

@@ -7,10 +7,10 @@ use std::future::Future;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
-use deno_error::JsErrorClass;
+use simien_error::JsErrorClass;
 use serde::Deserialize;
-use serde_v8::V8Sliceable;
-use serde_v8::from_v8;
+use simien_serde_v8::V8Sliceable;
+use simien_serde_v8::from_v8;
 
 use super::op_driver::OpDriver;
 use super::op_driver::OpScheduling;
@@ -349,14 +349,14 @@ where
 pub fn serde_v8_to_rust<'a, 's, 'i, T: Deserialize<'a>>(
   scope: &mut v8::PinScope<'s, 'i>,
   input: v8::Local<'s, v8::Value>,
-) -> serde_v8::Result<T> {
+) -> simien_serde_v8::Result<T> {
   from_v8(scope, input)
 }
 
-/// Retrieve a [`serde_v8::V8Slice`] from a typed array in an [`v8::ArrayBufferView`].
+/// Retrieve a [`simien_serde_v8::V8Slice`] from a typed array in an [`v8::ArrayBufferView`].
 pub fn to_v8_slice<'a, T>(
   input: v8::Local<'a, v8::Value>,
-) -> Result<serde_v8::V8Slice<T>, &'static str>
+) -> Result<simien_serde_v8::V8Slice<T>, &'static str>
 where
   T: V8Sliceable,
   v8::Local<'a, T::V8>: TryFrom<v8::Local<'a, v8::Value>>,
@@ -375,15 +375,15 @@ where
     }
   };
   let slice =
-    unsafe { serde_v8::V8Slice::from_parts(store, offset..(offset + length)) };
+    unsafe { simien_serde_v8::V8Slice::from_parts(store, offset..(offset + length)) };
   Ok(slice)
 }
 
-/// Retrieve a [`serde_v8::V8Slice`] from a typed array in an [`v8::ArrayBufferView`].
+/// Retrieve a [`simien_serde_v8::V8Slice`] from a typed array in an [`v8::ArrayBufferView`].
 pub fn to_v8_slice_detachable<'s, 'i, T>(
   scope: &mut v8::PinScope<'s, 'i>,
   input: v8::Local<'s, v8::Value>,
-) -> Result<serde_v8::V8Slice<T>, &'static str>
+) -> Result<simien_serde_v8::V8Slice<T>, &'static str>
 where
   T: V8Sliceable,
   v8::Local<'s, T::V8>: TryFrom<v8::Local<'s, v8::Value>>,
@@ -411,7 +411,7 @@ where
     }
   };
   let slice =
-    unsafe { serde_v8::V8Slice::from_parts(store, offset..(offset + length)) };
+    unsafe { simien_serde_v8::V8Slice::from_parts(store, offset..(offset + length)) };
   Ok(slice)
 }
 
@@ -474,23 +474,23 @@ pub unsafe fn to_slice_buffer_any(
   }
 }
 
-/// Retrieve a [`serde_v8::V8Slice`] from a [`v8::ArrayBuffer`].
+/// Retrieve a [`simien_serde_v8::V8Slice`] from a [`v8::ArrayBuffer`].
 pub fn to_v8_slice_buffer(
   input: v8::Local<v8::Value>,
-) -> Result<serde_v8::V8Slice<u8>, &'static str> {
+) -> Result<simien_serde_v8::V8Slice<u8>, &'static str> {
   let Ok(buf) = v8::Local::<v8::ArrayBuffer>::try_from(input) else {
     return Err("expected ArrayBuffer");
   };
   let slice = unsafe {
-    serde_v8::V8Slice::from_parts(buf.get_backing_store(), 0..buf.byte_length())
+    simien_serde_v8::V8Slice::from_parts(buf.get_backing_store(), 0..buf.byte_length())
   };
   Ok(slice)
 }
 
-/// Retrieve a [`serde_v8::V8Slice`] from a [`v8::ArrayBuffer`].
+/// Retrieve a [`simien_serde_v8::V8Slice`] from a [`v8::ArrayBuffer`].
 pub fn to_v8_slice_buffer_detachable(
   input: v8::Local<v8::Value>,
-) -> Result<serde_v8::V8Slice<u8>, &'static str> {
+) -> Result<simien_serde_v8::V8Slice<u8>, &'static str> {
   let (store, length) =
     if let Ok(buf) = v8::Local::<v8::ArrayBuffer>::try_from(input) {
       let res = (buf.get_backing_store(), buf.byte_length());
@@ -502,14 +502,14 @@ pub fn to_v8_slice_buffer_detachable(
     } else {
       return Err("expected ArrayBuffer");
     };
-  let slice = unsafe { serde_v8::V8Slice::from_parts(store, 0..length) };
+  let slice = unsafe { simien_serde_v8::V8Slice::from_parts(store, 0..length) };
   Ok(slice)
 }
 
-/// Retrieve a [`serde_v8::V8Slice`] from a [`v8::ArrayBuffer`].
+/// Retrieve a [`simien_serde_v8::V8Slice`] from a [`v8::ArrayBuffer`].
 pub fn to_v8_slice_any(
   input: v8::Local<v8::Value>,
-) -> Result<serde_v8::V8Slice<u8>, &'static str> {
+) -> Result<simien_serde_v8::V8Slice<u8>, &'static str> {
   if let Ok(buf) = v8::Local::<v8::ArrayBufferView>::try_from(input) {
     let offset = buf.byte_offset();
     let len = buf.byte_length();
@@ -517,7 +517,7 @@ pub fn to_v8_slice_any(
       return Err("buffer missing");
     };
     return Ok(unsafe {
-      serde_v8::V8Slice::<u8>::from_parts(buf, offset..offset + len)
+      simien_serde_v8::V8Slice::<u8>::from_parts(buf, offset..offset + len)
     });
   }
   if let Ok(buf) = to_v8_slice_buffer(input) {
@@ -542,10 +542,10 @@ mod tests {
   use std::time::Duration;
 
   use bytes::BytesMut;
-  use deno_error::JsErrorBox;
+  use simien_error::JsErrorBox;
   use serde::Deserialize;
   use serde::Serialize;
-  use serde_v8::JsBuffer;
+  use simien_serde_v8::JsBuffer;
 
   use crate::FromV8;
   use crate::GarbageCollected;
@@ -568,7 +568,7 @@ mod tests {
   /// For slower tests. Doesn't guarantee a JIT.
   pub const JIT_SLOW_ITERATIONS: usize = 500;
 
-  deno_core::extension!(
+  simien_core::extension!(
     testing,
     ops = [
       op_test_fail,

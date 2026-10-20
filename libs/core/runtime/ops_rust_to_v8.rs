@@ -55,7 +55,7 @@ pub trait RustToV8Fallible<'a> {
   fn to_v8_fallible<'i>(
     self,
     scope: &mut v8::PinScope<'a, 'i>,
-  ) -> serde_v8::Result<v8::Local<'a, v8::Value>>;
+  ) -> simien_serde_v8::Result<v8::Local<'a, v8::Value>>;
 }
 
 /// Places a value in a `v8::ReturnValue`, potentially allocating or failing.
@@ -64,7 +64,7 @@ pub trait RustToV8RetValFallible<'a>: RustToV8Fallible<'a> {
     self,
     scope: &mut v8::PinScope<'a, 'i>,
     rv: &mut v8::ReturnValue<'a>,
-  ) -> serde_v8::Result<()>;
+  ) -> simien_serde_v8::Result<()>;
 }
 
 /// Implement [`RustToV8`] for an `Option` of [`RustToV8`].
@@ -107,7 +107,7 @@ where
   fn to_v8_fallible<'i>(
     self,
     scope: &mut v8::PinScope<'a, 'i>,
-  ) -> serde_v8::Result<v8::Local<'a, v8::Value>> {
+  ) -> simien_serde_v8::Result<v8::Local<'a, v8::Value>> {
     match self {
       Some(value) => value.to_v8_fallible(scope),
       _ => Ok(v8::null(scope).into()),
@@ -125,7 +125,7 @@ where
     self,
     scope: &mut v8::PinScope<'a, 'i>,
     rv: &mut v8::ReturnValue<'a>,
-  ) -> serde_v8::Result<()> {
+  ) -> simien_serde_v8::Result<()> {
     match self {
       Some(value) => value.to_v8_rv_fallible(scope, rv),
       _ => {
@@ -235,7 +235,7 @@ macro_rules! to_v8_retval {
 /// to apply the same implementation.
 ///
 /// ```no_compile
-/// to_v8_fallible!(serde_v8::V8Slice: |value, scope| {
+/// to_v8_fallible!(simien_serde_v8::V8Slice: |value, scope| {
 ///   // Implementation
 ///   Ok(result)
 /// });
@@ -246,7 +246,7 @@ macro_rules! to_v8_fallible {
       #[allow(clippy::needless_borrow, reason = "borrow may be needed depending on macro instantiation type")]
       impl <'a> RustToV8Fallible<'a> for $ty {
         #[inline(always)]
-        fn to_v8_fallible<'i>(self, scope: &mut v8::PinScope<'a, 'i>) -> serde_v8::Result<v8::Local<'a, v8::Value>> {
+        fn to_v8_fallible<'i>(self, scope: &mut v8::PinScope<'a, 'i>) -> simien_serde_v8::Result<v8::Local<'a, v8::Value>> {
           let $value = self;
           let $scope = scope;
           let res = $block;
@@ -273,7 +273,7 @@ macro_rules! to_v8_retval_fallible {
     $(
       impl <'a> RustToV8RetValFallible<'a> for $ty {
         #[inline(always)]
-        fn to_v8_rv_fallible<'i>(self, scope: &mut v8::PinScope<'a, 'i>, rv: &mut v8::ReturnValue<'a>) -> serde_v8::Result<()>{
+        fn to_v8_rv_fallible<'i>(self, scope: &mut v8::PinScope<'a, 'i>, rv: &mut v8::ReturnValue<'a>) -> simien_serde_v8::Result<()>{
           let $value = self;
           let $scope = scope;
           let $rv = rv;
@@ -320,7 +320,7 @@ to_v8!((i64, isize): |value, scope| v8::BigInt::new_from_i64(scope, value as _))
 // Strings
 //
 
-to_v8_fallible!((String, Cow<'a, str>, &'a str): |value, scope| v8::String::new(scope, &value).ok_or_else(|| serde_v8::Error::Message("failed to allocate string; buffer exceeds maximum length".into())));
+to_v8_fallible!((String, Cow<'a, str>, &'a str): |value, scope| v8::String::new(scope, &value).ok_or_else(|| simien_serde_v8::Error::Message("failed to allocate string; buffer exceeds maximum length".into())));
 to_v8_retval_fallible!((String, Cow<'a, str>, &'a str): |value, scope, rv| {
   if value.is_empty() {
     rv.set_empty_string();
@@ -329,7 +329,7 @@ to_v8_retval_fallible!((String, Cow<'a, str>, &'a str): |value, scope, rv| {
   }
   Ok(())
 });
-to_v8_fallible!(Cow<'a, [u8]>: |value, scope| v8::String::new_from_one_byte(scope, &value, v8::NewStringType::Normal).ok_or_else(|| serde_v8::Error::Message("failed to allocate string; buffer exceeds maximum length".into())));
+to_v8_fallible!(Cow<'a, [u8]>: |value, scope| v8::String::new_from_one_byte(scope, &value, v8::NewStringType::Normal).ok_or_else(|| simien_serde_v8::Error::Message("failed to allocate string; buffer exceeds maximum length".into())));
 to_v8_retval_fallible!(Cow<'a, [u8]>: |value, scope, rv| {
   if value.is_empty() {
     rv.set_empty_string();
@@ -343,19 +343,19 @@ to_v8_retval_fallible!(Cow<'a, [u8]>: |value, scope, rv| {
 // Buffers
 //
 
-to_v8_fallible!(serde_v8::V8Slice<u8>: |value, scope| {
-  value.into_v8_local(scope).ok_or_else(|| serde_v8::Error::Message("failed to allocate array".into()))
+to_v8_fallible!(simien_serde_v8::V8Slice<u8>: |value, scope| {
+  value.into_v8_local(scope).ok_or_else(|| simien_serde_v8::Error::Message("failed to allocate array".into()))
 });
-to_v8!(RustToV8Marker<ArrayBufferMarker, serde_v8::V8Slice<u8>>: |value, scope| {
+to_v8!(RustToV8Marker<ArrayBufferMarker, simien_serde_v8::V8Slice<u8>>: |value, scope| {
   value.0.into_v8_unsliced_arraybuffer_local(scope)
 });
-to_v8_fallible!(serde_v8::V8Slice<u32>: |value, scope| {
-  value.into_v8_local(scope).ok_or_else(|| serde_v8::Error::Message("failed to allocate array".into()))
+to_v8_fallible!(simien_serde_v8::V8Slice<u32>: |value, scope| {
+  value.into_v8_local(scope).ok_or_else(|| simien_serde_v8::Error::Message("failed to allocate array".into()))
 });
-to_v8!(RustToV8Marker<ArrayBufferMarker, serde_v8::JsBuffer>: |value, scope| {
+to_v8!(RustToV8Marker<ArrayBufferMarker, simien_serde_v8::JsBuffer>: |value, scope| {
   RustToV8Marker::<ArrayBufferMarker, _>::from(value.0.into_parts()).to_v8(scope)
 });
-to_v8_fallible!(serde_v8::JsBuffer: |value, scope| {
+to_v8_fallible!(simien_serde_v8::JsBuffer: |value, scope| {
   value.into_parts().to_v8_fallible(scope)
 });
 to_v8!(RustToV8Marker<ArrayBufferMarker, BytesMut>: |value, scope| {
@@ -381,7 +381,7 @@ to_v8!(RustToV8Marker<ArrayBufferMarker, BytesMut>: |value, scope| {
 to_v8_fallible!(BytesMut: |buf, scope| {
   let len = buf.len();
   let ab = unsafe { v8::Local::cast_unchecked(RustToV8Marker::<ArrayBufferMarker, _>::from(buf).to_v8(scope)) };
-  v8::Uint8Array::new(scope, ab, 0, len).ok_or_else(|| serde_v8::Error::Message("failed to allocate array".into()))
+  v8::Uint8Array::new(scope, ab, 0, len).ok_or_else(|| simien_serde_v8::Error::Message("failed to allocate array".into()))
 });
 
 macro_rules! typedarray {
@@ -402,7 +402,7 @@ macro_rules! typedarray {
       let ab = unsafe {
         v8::Local::cast_unchecked(RustToV8Marker::<ArrayBufferMarker, _>::from(buf).to_v8(scope))
       };
-      v8::$v8ty::new(scope, ab, 0, len).ok_or_else(|| serde_v8::Error::Message("failed to allocate array".into()))
+      v8::$v8ty::new(scope, ab, 0, len).ok_or_else(|| simien_serde_v8::Error::Message("failed to allocate array".into()))
     });
     to_v8!(RustToV8Marker<ArrayBufferMarker, Vec<$rty>>: |value, scope| {
       RustToV8Marker::<ArrayBufferMarker, _>::from(value.0.into_boxed_slice()).to_v8(scope)
@@ -433,8 +433,8 @@ impl<'a, T: serde::Serialize> RustToV8Fallible<'a>
   fn to_v8_fallible<'i>(
     self,
     scope: &mut v8::PinScope<'a, 'i>,
-  ) -> serde_v8::Result<v8::Local<'a, v8::Value>> {
-    serde_v8::to_v8(scope, self.0)
+  ) -> simien_serde_v8::Result<v8::Local<'a, v8::Value>> {
+    simien_serde_v8::to_v8(scope, self.0)
   }
 }
 
@@ -449,7 +449,7 @@ impl<'a, T: crate::cppgc::GarbageCollected + 'static> RustToV8<'a>
     self,
     scope: &mut v8::PinScope<'a, 'i>,
   ) -> v8::Local<'a, v8::Value> {
-    v8::Local::<v8::Value>::from(deno_core::cppgc::make_cppgc_object(
+    v8::Local::<v8::Value>::from(simien_core::cppgc::make_cppgc_object(
       scope, self.0,
     ))
   }
@@ -475,11 +475,11 @@ impl<'a, T: crate::ToV8<'a>> RustToV8Fallible<'a>
   fn to_v8_fallible<'i>(
     self,
     scope: &mut v8::PinScope<'a, 'i>,
-  ) -> serde_v8::Result<v8::Local<'a, v8::Value>> {
+  ) -> simien_serde_v8::Result<v8::Local<'a, v8::Value>> {
     self
       .0
       .to_v8(scope)
-      .map_err(|e| serde_v8::Error::Custom(Box::new(e)))
+      .map_err(|e| simien_serde_v8::Error::Custom(Box::new(e)))
   }
 }
 

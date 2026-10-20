@@ -355,15 +355,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "boxed_error"
-version = "0.2.3"
-dependencies = [
- "quote",
- "syn",
- "thiserror 2.0.12",
-]
-
-[[package]]
 name = "brotli"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -848,290 +839,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "deno_bench_util"
-version = "0.253.0"
-dependencies = [
- "bencher",
- "deno_core",
- "tokio",
-]
-
-[[package]]
-name = "deno_core"
-version = "0.412.0"
-dependencies = [
- "anyhow",
- "base64",
- "bencher",
- "bit-set",
- "bit-vec",
- "boxed_error",
- "bytes",
- "cooked-waker",
- "criterion",
- "deno_core_icudata",
- "deno_error",
- "deno_ops",
- "deno_path_util",
- "deno_unsync",
- "deno_v8",
- "futures",
- "indexmap",
- "inventory",
- "libc",
- "num-bigint",
- "parking_lot",
- "paste",
- "percent-encoding",
- "pin-project",
- "pretty_assertions",
- "rstest",
- "serde",
- "serde_json",
- "serde_v8",
- "smallvec",
- "sourcemap",
- "static_assertions",
- "sys_traits",
- "thiserror 2.0.12",
- "tokio",
- "twox-hash",
- "unicycle",
- "url",
- "uuid",
- "wasm_dep_analyzer",
- "windows-sys 0.59.0",
-]
-
-[[package]]
 name = "deno_core_icudata"
 version = "0.77.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9efff8990a82c1ae664292507e1a5c6749ddd2312898cdf9cd7cb1fd4bc64c6"
-
-[[package]]
-name = "deno_crypto"
-version = "0.273.0"
-dependencies = [
- "aes",
- "aes-gcm",
- "aes-kw",
- "argon2",
- "aws-lc-rs",
- "base64",
- "cbc",
- "const-oid 0.9.6",
- "ctr",
- "curve25519-dalek",
- "deno_core",
- "deno_crypto_provider",
- "deno_error",
- "ecdsa",
- "elliptic-curve 0.13.8",
- "fips203",
- "fips205",
- "hmac",
- "num-traits",
- "ocb3",
- "once_cell",
- "p256",
- "p384",
- "p521",
- "rand 0.8.5",
- "rsa",
- "serde",
- "serde_bytes",
- "sha1",
- "sha2",
- "sha3 0.10.8",
- "signature 2.2.0",
- "spki 0.7.3",
- "subtle",
- "thiserror 2.0.12",
- "tiny-keccak",
- "tokio",
- "uuid",
- "x25519-dalek",
-]
-
-[[package]]
-name = "deno_crypto_provider"
-version = "0.53.0"
-dependencies = [
- "aws-lc-sys",
- "ed448-goldilocks",
-]
-
-[[package]]
-name = "deno_error"
-version = "0.7.1"
-dependencies = [
- "deno_error_macro",
- "libc",
- "serde",
- "serde_json",
- "thiserror 2.0.12",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "deno_error_macro"
-version = "0.7.1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "deno_fetch"
-version = "0.283.0"
-dependencies = [
- "async-compression",
- "base64",
- "bytes",
- "data-url",
- "deno_bench_util",
- "deno_core",
- "deno_error",
- "deno_path_util",
- "deno_tls",
- "deno_web",
- "deno_webidl",
- "error_reporter",
- "fast-socks5",
- "h2",
- "hickory-resolver",
- "http",
- "http-body-util",
- "hyper",
- "hyper-rustls",
- "hyper-util",
- "ipnet",
- "percent-encoding",
- "rustls",
- "rustls-webpki",
- "serde_json",
- "thiserror 2.0.12",
- "tokio",
- "tokio-rustls",
- "tokio-socks",
- "tokio-util",
- "tokio-vsock",
- "tower",
- "tower-service",
-]
-
-[[package]]
-name = "deno_native_certs"
-version = "0.3.1"
-dependencies = [
- "dlopen2",
- "dlopen2_derive",
- "once_cell",
- "rustls-native-certs",
- "rustls-pemfile",
-]
-
-[[package]]
-name = "deno_ops"
-version = "0.288.0"
-dependencies = [
- "indexmap",
- "pretty_assertions",
- "prettyplease",
- "proc-macro2",
- "quote",
- "stringcase",
- "strum",
- "strum_macros",
- "syn",
- "syn-match",
- "testing_macros",
- "thiserror 2.0.12",
-]
-
-[[package]]
-name = "deno_path_util"
-version = "0.6.4"
-dependencies = [
- "deno_error",
- "divan",
- "percent-encoding",
- "pretty_assertions",
- "sys_traits",
- "tempfile",
- "thiserror 2.0.12",
- "url",
-]
-
-[[package]]
-name = "deno_tls"
-version = "0.246.0"
-dependencies = [
- "deno_core",
- "deno_error",
- "deno_native_certs",
- "log",
- "rustls",
- "rustls-pemfile",
- "rustls-tokio-stream",
- "rustls-webpki",
- "serde",
- "thiserror 2.0.12",
- "tokio",
- "webpki-roots",
-]
-
-[[package]]
-name = "deno_unsync"
-version = "0.4.4"
-dependencies = [
- "futures-util",
- "parking_lot",
- "tokio",
-]
-
-[[package]]
-name = "deno_v8"
-version = "0.4.0"
-dependencies = [
- "v8",
- "v8x",
-]
-
-[[package]]
-name = "deno_web"
-version = "0.290.0"
-dependencies = [
- "approx",
- "async-trait",
- "brotli",
- "bytes",
- "cssparser",
- "deno_bench_util",
- "deno_core",
- "deno_error",
- "deno_webidl",
- "encoding_rs",
- "flate2",
- "futures",
- "serde",
- "thiserror 2.0.12",
- "tokio",
- "unicode-normalization",
- "urlpattern",
- "uuid",
-]
-
-[[package]]
-name = "deno_webidl"
-version = "0.259.0"
-dependencies = [
- "deno_bench_util",
- "deno_core",
-]
 
 [[package]]
 name = "der"
@@ -3654,25 +3365,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_v8"
-version = "0.321.0"
-dependencies = [
- "deno_error",
- "deno_v8",
- "num-bigint",
- "serde",
- "serde_bytes",
- "serde_json",
- "serde_v8_utilities",
- "smallvec",
- "thiserror 2.0.12",
-]
-
-[[package]]
 name = "serde_v8_utilities"
 version = "0.28.0"
 dependencies = [
- "deno_v8",
+ "simien_v8",
 ]
 
 [[package]]
@@ -3779,6 +3475,319 @@ checksum = "7f1880df446116126965eeec169136b2e0251dba37c6223bcc819569550edea3"
 dependencies = [
  "digest 0.11.1",
  "rand_core 0.10.0",
+]
+
+[[package]]
+name = "simien_bench_util"
+version = "0.253.0"
+dependencies = [
+ "bencher",
+ "simien_core",
+ "tokio",
+]
+
+[[package]]
+name = "simien_boxed_error"
+version = "0.2.3"
+dependencies = [
+ "quote",
+ "syn",
+ "thiserror 2.0.12",
+]
+
+[[package]]
+name = "simien_core"
+version = "0.412.0"
+dependencies = [
+ "anyhow",
+ "base64",
+ "bencher",
+ "bit-set",
+ "bit-vec",
+ "bytes",
+ "cooked-waker",
+ "criterion",
+ "deno_core_icudata",
+ "futures",
+ "indexmap",
+ "inventory",
+ "libc",
+ "num-bigint",
+ "parking_lot",
+ "paste",
+ "percent-encoding",
+ "pin-project",
+ "pretty_assertions",
+ "rstest",
+ "serde",
+ "serde_json",
+ "simien_boxed_error",
+ "simien_error",
+ "simien_ops",
+ "simien_path_util",
+ "simien_serde_v8",
+ "simien_unsync",
+ "simien_v8",
+ "simien_wasm_dep_analyzer",
+ "smallvec",
+ "sourcemap",
+ "static_assertions",
+ "sys_traits",
+ "thiserror 2.0.12",
+ "tokio",
+ "twox-hash",
+ "unicycle",
+ "url",
+ "uuid",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "simien_crypto"
+version = "0.273.0"
+dependencies = [
+ "aes",
+ "aes-gcm",
+ "aes-kw",
+ "argon2",
+ "aws-lc-rs",
+ "base64",
+ "cbc",
+ "const-oid 0.9.6",
+ "ctr",
+ "curve25519-dalek",
+ "ecdsa",
+ "elliptic-curve 0.13.8",
+ "fips203",
+ "fips205",
+ "hmac",
+ "num-traits",
+ "ocb3",
+ "once_cell",
+ "p256",
+ "p384",
+ "p521",
+ "rand 0.8.5",
+ "rsa",
+ "serde",
+ "serde_bytes",
+ "sha1",
+ "sha2",
+ "sha3 0.10.8",
+ "signature 2.2.0",
+ "simien_core",
+ "simien_crypto_provider",
+ "simien_error",
+ "spki 0.7.3",
+ "subtle",
+ "thiserror 2.0.12",
+ "tiny-keccak",
+ "tokio",
+ "uuid",
+ "x25519-dalek",
+]
+
+[[package]]
+name = "simien_crypto_provider"
+version = "0.53.0"
+dependencies = [
+ "aws-lc-sys",
+ "ed448-goldilocks",
+]
+
+[[package]]
+name = "simien_error"
+version = "0.7.1"
+dependencies = [
+ "libc",
+ "serde",
+ "serde_json",
+ "simien_error_macro",
+ "thiserror 2.0.12",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "simien_error_macro"
+version = "0.7.1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "simien_fetch"
+version = "0.283.0"
+dependencies = [
+ "async-compression",
+ "base64",
+ "bytes",
+ "data-url",
+ "error_reporter",
+ "fast-socks5",
+ "h2",
+ "hickory-resolver",
+ "http",
+ "http-body-util",
+ "hyper",
+ "hyper-rustls",
+ "hyper-util",
+ "ipnet",
+ "percent-encoding",
+ "rustls",
+ "rustls-webpki",
+ "serde_json",
+ "simien_bench_util",
+ "simien_core",
+ "simien_error",
+ "simien_path_util",
+ "simien_tls",
+ "simien_web",
+ "simien_webidl",
+ "thiserror 2.0.12",
+ "tokio",
+ "tokio-rustls",
+ "tokio-socks",
+ "tokio-util",
+ "tokio-vsock",
+ "tower",
+ "tower-service",
+]
+
+[[package]]
+name = "simien_native_certs"
+version = "0.3.1"
+dependencies = [
+ "dlopen2",
+ "dlopen2_derive",
+ "once_cell",
+ "rustls-native-certs",
+ "rustls-pemfile",
+]
+
+[[package]]
+name = "simien_ops"
+version = "0.288.0"
+dependencies = [
+ "indexmap",
+ "pretty_assertions",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "stringcase",
+ "strum",
+ "strum_macros",
+ "syn",
+ "syn-match",
+ "testing_macros",
+ "thiserror 2.0.12",
+]
+
+[[package]]
+name = "simien_path_util"
+version = "0.6.4"
+dependencies = [
+ "divan",
+ "percent-encoding",
+ "pretty_assertions",
+ "simien_error",
+ "sys_traits",
+ "tempfile",
+ "thiserror 2.0.12",
+ "url",
+]
+
+[[package]]
+name = "simien_serde_v8"
+version = "0.321.0"
+dependencies = [
+ "num-bigint",
+ "serde",
+ "serde_bytes",
+ "serde_json",
+ "serde_v8_utilities",
+ "simien_error",
+ "simien_v8",
+ "smallvec",
+ "thiserror 2.0.12",
+]
+
+[[package]]
+name = "simien_tls"
+version = "0.246.0"
+dependencies = [
+ "log",
+ "rustls",
+ "rustls-pemfile",
+ "rustls-tokio-stream",
+ "rustls-webpki",
+ "serde",
+ "simien_core",
+ "simien_error",
+ "simien_native_certs",
+ "thiserror 2.0.12",
+ "tokio",
+ "webpki-roots",
+]
+
+[[package]]
+name = "simien_unsync"
+version = "0.4.4"
+dependencies = [
+ "futures-util",
+ "parking_lot",
+ "tokio",
+]
+
+[[package]]
+name = "simien_v8"
+version = "0.4.0"
+dependencies = [
+ "v8",
+ "v8x",
+]
+
+[[package]]
+name = "simien_wasm_dep_analyzer"
+version = "0.4.0"
+dependencies = [
+ "pretty_assertions",
+ "simien_error",
+ "thiserror 2.0.12",
+]
+
+[[package]]
+name = "simien_web"
+version = "0.290.0"
+dependencies = [
+ "approx",
+ "async-trait",
+ "brotli",
+ "bytes",
+ "cssparser",
+ "encoding_rs",
+ "flate2",
+ "futures",
+ "serde",
+ "simien_bench_util",
+ "simien_core",
+ "simien_error",
+ "simien_webidl",
+ "thiserror 2.0.12",
+ "tokio",
+ "unicode-normalization",
+ "urlpattern",
+ "uuid",
+]
+
+[[package]]
+name = "simien_webidl"
+version = "0.259.0"
+dependencies = [
+ "simien_bench_util",
+ "simien_core",
 ]
 
 [[package]]
@@ -4693,15 +4702,6 @@ dependencies = [
  "indexmap",
  "wasm-encoder",
  "wasmparser",
-]
-
-[[package]]
-name = "wasm_dep_analyzer"
-version = "0.4.0"
-dependencies = [
- "deno_error",
- "pretty_assertions",
- "thiserror 2.0.12",
 ]
 
 [[package]]

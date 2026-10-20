@@ -6,9 +6,9 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 
-use deno_core::extension;
-use deno_core::snapshot::CreateSnapshotOptions;
-use deno_core::snapshot::create_snapshot;
+use simien_core::extension;
+use simien_core::snapshot::CreateSnapshotOptions;
+use simien_core::snapshot::create_snapshot;
 
 fn main() {
   extension!(

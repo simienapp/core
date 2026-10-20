@@ -14,28 +14,28 @@ use std::task::Poll;
 use std::task::Waker;
 
 use bytes::BytesMut;
-use deno_core::AsyncResult;
-use deno_core::BufView;
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::ExternalPointer;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcLike;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::external;
-use deno_core::op2;
-use deno_core::serde_v8::V8Slice;
-use deno_core::unsync::TaskQueue;
+use simien_core::AsyncResult;
+use simien_core::BufView;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::ExternalPointer;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcLike;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::external;
+use simien_core::op2;
+use simien_core::simien_serde_v8::V8Slice;
+use simien_core::unsync::TaskQueue;
 use futures::TryFutureExt;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum StreamResourceError {
   #[class(inherit)]
   #[error(transparent)]
-  Canceled(#[from] deno_core::Canceled),
+  Canceled(#[from] simien_core::Canceled),
   #[class(type)]
   #[error("{0}")]
   Js(String),
@@ -413,7 +413,7 @@ impl Resource for ReadableStreamResource {
   fn read(self: Rc<Self>, limit: usize) -> AsyncResult<BufView> {
     Box::pin(
       ReadableStreamResource::read(self, limit)
-        .map_err(deno_error::JsErrorBox::from_err),
+        .map_err(simien_error::JsErrorBox::from_err),
     )
   }
 
@@ -432,7 +432,7 @@ impl Drop for ReadableStreamResource {
   }
 }
 
-// TODO(mmastrac): Move this to deno_core
+// TODO(mmastrac): Move this to simien_core
 #[derive(Clone, Debug, Default)]
 pub struct CompletionHandle {
   inner: Rc<RefCell<CompletionHandleInner>>,
@@ -623,7 +623,7 @@ mod tests {
   use std::sync::atomic::AtomicUsize;
   use std::time::Duration;
 
-  use deno_core::v8;
+  use simien_core::v8;
 
   use super::*;
 
@@ -674,7 +674,7 @@ mod tests {
     let channel_send = channel.clone();
 
     // Fast writer
-    let a = deno_core::unsync::spawn(async move {
+    let a = simien_core::unsync::spawn(async move {
       for _ in 0..BUFFER_CHANNEL_SIZE * 2 {
         poll_fn(|cx| channel_send.poll_write_ready(cx)).await;
         channel_send
@@ -684,7 +684,7 @@ mod tests {
     });
 
     // Slightly slower reader
-    let b = deno_core::unsync::spawn(async move {
+    let b = simien_core::unsync::spawn(async move {
       for _ in 0..BUFFER_CHANNEL_SIZE * 2 {
         if cfg!(windows) {
           // windows has ~15ms resolution on sleep, so just yield so
@@ -713,7 +713,7 @@ mod tests {
     let total_recv_task = total_recv.clone();
 
     // Fast writer
-    let a = deno_core::unsync::spawn(async move {
+    let a = simien_core::unsync::spawn(async move {
       for _ in 0..BUFFER_CHANNEL_SIZE * 2 {
         poll_fn(|cx| channel_send.poll_write_ready(cx)).await;
         channel_send.write(create_buffer(16)).unwrap();
@@ -724,7 +724,7 @@ mod tests {
     });
 
     // Slightly slower reader
-    let b = deno_core::unsync::spawn(async move {
+    let b = simien_core::unsync::spawn(async move {
       for _ in 0..BUFFER_CHANNEL_SIZE * 2 {
         poll_fn(|cx| channel.poll_read_ready(cx)).await;
         // We want to make sure we're aggregating at least some packets

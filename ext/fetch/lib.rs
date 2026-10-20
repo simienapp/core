@@ -31,39 +31,39 @@ use bytes::Bytes;
 // Re-export data_url
 pub use data_url;
 use data_url::DataUrl;
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::BufView;
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::Canceled;
-use deno_core::FromV8;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::ToV8;
-use deno_core::convert::ByteString;
-use deno_core::convert::Uint8Array;
-use deno_core::futures::FutureExt;
-use deno_core::futures::Stream;
-use deno_core::futures::StreamExt;
-use deno_core::futures::TryFutureExt;
-use deno_core::futures::stream::Peekable;
-use deno_core::op2;
-use deno_core::url;
-use deno_core::url::Url;
-use deno_core::v8;
-use deno_error::JsErrorBox;
-use deno_path_util::PathToUrlError;
-use deno_tls::Proxy;
-use deno_tls::RootCertStoreProvider;
-use deno_tls::SocketUse;
-use deno_tls::TlsKey;
-use deno_tls::TlsKeys;
-use deno_tls::TlsKeysHolder;
-use deno_tls::rustls::RootCertStore;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::BufView;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::Canceled;
+use simien_core::FromV8;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::ToV8;
+use simien_core::convert::ByteString;
+use simien_core::convert::Uint8Array;
+use simien_core::futures::FutureExt;
+use simien_core::futures::Stream;
+use simien_core::futures::StreamExt;
+use simien_core::futures::TryFutureExt;
+use simien_core::futures::stream::Peekable;
+use simien_core::op2;
+use simien_core::url;
+use simien_core::url::Url;
+use simien_core::v8;
+use simien_error::JsErrorBox;
+use simien_path_util::PathToUrlError;
+use simien_tls::Proxy;
+use simien_tls::RootCertStoreProvider;
+use simien_tls::SocketUse;
+use simien_tls::TlsKey;
+use simien_tls::TlsKeys;
+use simien_tls::TlsKeysHolder;
+use simien_tls::rustls::RootCertStore;
 pub use permissions::FetchPermissions;
 pub use permissions::PermissionCheckError;
 pub use permissions::PermissionsContainer;
@@ -154,8 +154,8 @@ impl Default for Options {
   }
 }
 
-deno_core::extension!(deno_fetch,
-  deps = [ deno_webidl, deno_web ],
+simien_core::extension!(simien_fetch,
+  deps = [ simien_webidl, simien_web ],
   ops = [
     op_fetch,
     op_fetch_send,
@@ -181,11 +181,11 @@ deno_core::extension!(deno_fetch,
   },
 );
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum FetchError {
   #[class(inherit)]
   #[error(transparent)]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(inherit)]
   #[error(transparent)]
   Permission(#[from] PermissionCheckError),
@@ -233,7 +233,7 @@ pub enum FetchError {
   Url(#[from] url::ParseError),
   #[class(inherit)]
   #[error(transparent)]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
   #[class(type)]
   #[error(transparent)]
   Method(#[from] http::method::InvalidMethod),
@@ -710,7 +710,7 @@ pub enum FetchResponseReader {
 
 impl Default for FetchResponseReader {
   fn default() -> Self {
-    let stream: BytesStream = Box::pin(deno_core::futures::stream::empty());
+    let stream: BytesStream = Box::pin(simien_core::futures::stream::empty());
     Self::BodyReader(stream.peekable())
   }
 }
@@ -979,11 +979,11 @@ impl Default for CreateHttpClientOptions {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum HttpClientCreateError {
   #[error(transparent)]
-  Tls(deno_tls::TlsError),
+  Tls(simien_tls::TlsError),
   #[error("Illegal characters in User-Agent: received {0}")]
   InvalidUserAgent(String),
   #[error("Invalid address: {0}")]
@@ -1016,14 +1016,14 @@ pub fn create_http_client(
   options: CreateHttpClientOptions,
 ) -> Result<Client, HttpClientCreateError> {
   let mut tls_config =
-    deno_tls::create_client_config(deno_tls::TlsClientConfigOptions {
+    simien_tls::create_client_config(simien_tls::TlsClientConfigOptions {
       root_cert_store: options.root_cert_store,
       ca_certs: options.ca_certs,
       unsafely_ignore_certificate_errors: options
         .unsafely_ignore_certificate_errors,
       unsafely_disable_hostname_verification: false,
       cert_chain_and_key: options.client_cert_chain_and_key.into(),
-      socket_use: deno_tls::SocketUse::Http,
+      socket_use: simien_tls::SocketUse::Http,
     })
     .map_err(HttpClientCreateError::Tls)?;
 
@@ -1358,7 +1358,7 @@ fn box_raw_body(body: Incoming) -> ResBody {
     .boxed()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ClientConnectError {
   #[class(type)]
   #[error("HTTP/1.1 not supported by this client")]
@@ -1416,7 +1416,7 @@ type Connector = proxy::ProxyConnector<dns::PermissionedHttpConnector>;
 )]
 const STAR_STAR: HeaderValue = HeaderValue::from_static("*/*");
 
-#[derive(Debug, deno_error::JsError)]
+#[derive(Debug, simien_error::JsError)]
 #[class(type)]
 pub struct ClientSendError {
   uri: Uri,
@@ -1702,7 +1702,7 @@ where
 {
   type Response = TrackedIo<C::Response>;
   type Error = C::Error;
-  type Future = deno_core::futures::future::MapOk<
+  type Future = simien_core::futures::future::MapOk<
     C::Future,
     fn(C::Response) -> TrackedIo<C::Response>,
   >;

@@ -13,8 +13,8 @@
 
 use base64::Engine;
 use base64::prelude::BASE64_URL_SAFE_NO_PAD;
-use deno_core::v8;
-use deno_error::JsErrorBox;
+use simien_core::v8;
+use simien_error::JsErrorBox;
 
 use crate::CryptoError;
 use crate::crypto_key::CryptoKeyType;

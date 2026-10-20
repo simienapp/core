@@ -3,7 +3,7 @@
 #![deny(warnings)]
 deno_ops_compile_test_runner::prelude!();
 
-use deno_core::JsBuffer;
+use simien_core::JsBuffer;
 
 #[op2(fast)]
 fn op_buffers(

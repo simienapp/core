@@ -12,10 +12,10 @@ use std::sync::Mutex;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 
-use deno_core::OpState;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::op2;
+use simien_core::OpState;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::op2;
 use tokio::sync::oneshot;
 
 #[derive(

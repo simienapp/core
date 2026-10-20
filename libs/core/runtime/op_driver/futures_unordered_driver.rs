@@ -14,10 +14,10 @@ use std::task::Waker;
 use std::task::ready;
 
 use bit_set::BitSet;
-use deno_error::JsErrorClass;
-use deno_unsync::JoinHandle;
-use deno_unsync::UnsyncWaker;
-use deno_unsync::spawn;
+use simien_error::JsErrorClass;
+use simien_unsync::JoinHandle;
+use simien_unsync::UnsyncWaker;
+use simien_unsync::spawn;
 use futures::FutureExt;
 use futures::Stream;
 use futures::stream::FuturesUnordered;

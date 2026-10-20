@@ -1,0 +1,13 @@
+# Paths in denoland/deno that this repo keeps, at the same paths here.
+# tools/port-upstream.sh ports changes to these; the upstream watch reads it too.
+libs/core
+libs/ops
+libs/serde_v8
+libs/deno_v8
+libs/crypto
+ext/webidl
+ext/web
+ext/fetch
+ext/crypto
+ext/tls
+tests/bench_util

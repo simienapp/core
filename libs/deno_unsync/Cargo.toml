@@ -1,5 +1,5 @@
 [package]
-name = "deno_unsync"
+name = "simien_unsync"
 version = "0.4.4"
 edition = "2021"
 authors = ["the Deno authors"]
@@ -21,4 +21,4 @@ tokio = { version = "1", features = ["rt"], optional = true }
 tokio = { version = "1", features = ["io-util", "macros", "rt", "sync", "time"] }
 
 [lib]
-name = "deno_unsync"
+name = "simien_unsync"

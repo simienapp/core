@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::path::PathBuf;
 
-use deno_path_util::normalize_path;
+use simien_path_util::normalize_path;
 
 fn main() {
   // Run registered benchmarks.

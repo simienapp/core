@@ -1,5 +1,5 @@
 [package]
-name = "wasm_dep_analyzer"
+name = "simien_wasm_dep_analyzer"
 version = "0.4.0"
 edition = "2021"
 description = "Wasm module dependency analysis for module resolution"
@@ -10,7 +10,7 @@ license = "MIT"
 
 [dependencies]
 thiserror = "2"
-deno_error.workspace = true
+simien_error.workspace = true
 
 [dev-dependencies]
 pretty_assertions = "1.0.0"

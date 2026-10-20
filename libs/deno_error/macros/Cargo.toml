@@ -1,7 +1,7 @@
 # Copyright 2018-2024 the Deno authors. All rights reserved. MIT license.
 
 [package]
-name = "deno_error_macro"
+name = "simien_error_macro"
 version = "0.7.1"
 description = "Macro for writing Deno errors"
 homepage = "https://deno.land/"

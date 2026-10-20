@@ -3,7 +3,7 @@
 #![deny(warnings)]
 deno_ops_compile_test_runner::prelude!();
 
-use deno_core::v8;
+use simien_core::v8;
 
 // Regression test for https://github.com/denoland/deno/issues/32953
 // `&v8::Isolate` / `&mut v8::Isolate` arguments on `#[op2(fast)]` ops must

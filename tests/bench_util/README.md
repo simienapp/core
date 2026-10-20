@@ -1,13 +1,13 @@
-# Benching utility for `deno_core` op system
+# Benching utility for `simien_core` op system
 
 Example:
 
 ```rust
-use deno_bench_util::bench_js_sync;
-use deno_bench_util::bench_or_profile;
-use deno_bench_util::bencher::Bencher;
-use deno_bench_util::bencher::benchmark_group;
-use deno_core::Extension;
+use simien_bench_util::bench_js_sync;
+use simien_bench_util::bench_or_profile;
+use simien_bench_util::bencher::Bencher;
+use simien_bench_util::bencher::benchmark_group;
+use simien_core::Extension;
 
 #[op2]
 #[number]

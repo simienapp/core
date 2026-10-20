@@ -13,7 +13,7 @@ use std::rc::Rc;
 use std::task::Context;
 use std::task::Poll;
 
-use deno_error::JsErrorClass;
+use simien_error::JsErrorClass;
 use futures::future::FusedFuture;
 use futures::future::TryFuture;
 use pin_project::pin_project;
@@ -242,9 +242,9 @@ impl From<Canceled> for io::Error {
   }
 }
 
-impl From<Canceled> for deno_error::JsErrorBox {
+impl From<Canceled> for simien_error::JsErrorBox {
   fn from(value: Canceled) -> Self {
-    deno_error::JsErrorBox::from_err(value)
+    simien_error::JsErrorBox::from_err(value)
   }
 }
 
@@ -259,7 +259,7 @@ impl JsErrorClass for Canceled {
     io_err.get_message()
   }
 
-  fn get_additional_properties(&self) -> deno_error::AdditionalProperties {
+  fn get_additional_properties(&self) -> simien_error::AdditionalProperties {
     let io_err: io::Error = self.to_owned().into();
     io_err.get_additional_properties()
   }

@@ -10,8 +10,8 @@ deno_ops_compile_test_runner::prelude!();
 // not on the `trait Callable` declaration, so any external crate that
 // denied the lint hit the warning at the trait method signature.
 
-use deno_core::cppgc::GarbageCollected;
-use deno_core::v8;
+use simien_core::cppgc::GarbageCollected;
+use simien_core::v8;
 
 pub struct Big;
 

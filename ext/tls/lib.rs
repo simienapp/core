@@ -6,8 +6,8 @@ use std::io::Cursor;
 use std::net::IpAddr;
 use std::sync::Arc;
 
-use deno_error::JsErrorBox;
-pub use deno_native_certs;
+use simien_error::JsErrorBox;
+pub use simien_native_certs;
 pub use rustls;
 use rustls::ClientConfig;
 use rustls::DigitallySignedStruct;
@@ -34,7 +34,7 @@ mod tls_key;
 pub use keylog::get_ssl_key_log;
 pub use tls_key::*;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum TlsError {
   #[class(generic)]
   #[error(transparent)]
@@ -65,8 +65,8 @@ pub trait RootCertStoreProvider: Send + Sync {
 }
 
 // This extension has no runtime apis, it only exports some shared native functions.
-deno_core::extension!(
-  deno_tls,
+simien_core::extension!(
+  simien_tls,
   state = |_state| {
     // Resolve `SSLKEYLOGFILE` before user JavaScript can mutate env vars.
     keylog::init_ssl_key_log();

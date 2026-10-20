@@ -33,18 +33,18 @@ repository = "https://github.com/denoland/deno"
 [workspace.dependencies]
 deno_core_icudata = "0.77.0"
 deno_doc = "=0.207.0"
-deno_error = { version = "=0.7.1", path = "./libs/deno_error" }
+simien_error = { version = "=0.7.1", path = "./libs/deno_error" }
 deno_graph = { version = "=0.111.0", default-features = false }
 deno_lint = "=0.84.1"
 deno_media_type = { version = "=0.4.0", features = ["module_specifier"] }
-deno_native_certs = { version = "0.3.1", path = "./libs/deno_native_certs" }
-deno_path_util = { version = "=0.6.4", path = "./libs/deno_path_util" }
+simien_native_certs = { version = "0.3.1", path = "./libs/deno_native_certs" }
+simien_path_util = { version = "=0.6.4", path = "./libs/deno_path_util" }
 deno_semver = "=0.10.1"
 deno_task_shell = "=0.33.3"
 deno_terminal = "=0.2.3"
-deno_unsync = { version = "0.4.4", path = "./libs/deno_unsync", default-features = false }
+simien_unsync = { version = "0.4.4", path = "./libs/deno_unsync", default-features = false }
 deno_whoami = "0.1.0"
-v8 = { package = "deno_v8", version = "0.4.0", path = "./libs/deno_v8", default-features = false, features = ["v8", "simdutf"] }
+v8 = { package = "simien_v8", version = "0.4.0", path = "./libs/deno_v8", default-features = false, features = ["v8", "simdutf"] }
 
 denokv_proto = "0.14.0"
 denokv_remote = "0.14.0"
@@ -56,8 +56,8 @@ deno_bundle_runtime = { version = "0.46.0" }
 deno_cache = { version = "0.192.0" }
 deno_canvas = { version = "0.121.0" }
 deno_cron = { version = "0.139.0" }
-deno_crypto = { version = "0.273.0", path = "./ext/crypto" }
-deno_fetch = { version = "0.283.0", path = "./ext/fetch" }
+simien_crypto = { version = "0.273.0", path = "./ext/crypto" }
+simien_fetch = { version = "0.283.0", path = "./ext/fetch" }
 deno_ffi = { version = "0.246.0" }
 deno_fs = { version = "0.169.0" }
 deno_http = { version = "0.257.0" }
@@ -73,25 +73,25 @@ deno_os = { version = "0.76.0" }
 deno_process = { version = "0.74.0" }
 deno_signals = { version = "0.50.0" }
 deno_telemetry = { version = "0.81.0" }
-deno_tls = { version = "0.246.0", path = "./ext/tls" }
-deno_web = { version = "0.290.0", path = "./ext/web" }
+simien_tls = { version = "0.246.0", path = "./ext/tls" }
+simien_web = { version = "0.290.0", path = "./ext/web" }
 deno_webgpu = { version = "0.226.0" }
-deno_webidl = { version = "0.259.0", path = "./ext/webidl" }
+simien_webidl = { version = "0.259.0", path = "./ext/webidl" }
 deno_websocket = { version = "0.264.0" }
 deno_webstorage = { version = "0.254.0" }
 denort_helper = { version = "0.57.0" }
 
 # workspace libraries
-deno_bench_util = { version = "0.253.0", path = "./tests/bench_util" }
+simien_bench_util = { version = "0.253.0", path = "./tests/bench_util" }
 deno_cache_dir = { version = "0.51.0" }
 deno_cli_parser = { version = "0.9.0" }
 deno_config = { version = "0.109.0", features = ["workspace"] }
 # Workspace binaries select the JavaScript engine at their top level. Keep the
-# backend-independent runtime defaults enabled here without pulling deno_core's
+# backend-independent runtime defaults enabled here without pulling simien_core's
 # public V8 default into a QuickJS feature graph.
-deno_core = { version = "0.412.0", path = "./libs/core", default-features = false, features = ["reactor-tokio", "v8_use_custom_libcxx"] }
+simien_core = { version = "0.412.0", path = "./libs/core", default-features = false, features = ["reactor-tokio", "v8_use_custom_libcxx"] }
 deno_core_testing = { }
-deno_crypto_provider = { version = "0.53.0", path = "./libs/crypto" }
+simien_crypto_provider = { version = "0.53.0", path = "./libs/crypto" }
 deno_dotenv = { version = "0.28.0" }
 deno_features = { version = "0.56.0" }
 deno_http_h1 = { version = "0.10.0" }
@@ -103,7 +103,7 @@ deno_npm = { version = "0.71.0" }
 deno_npm_cache = { version = "0.78.0" }
 deno_npm_installer = { version = "0.54.0" }
 deno_npmrc = { version = "0.20.0" }
-deno_ops = { version = "0.288.0", path = "./libs/ops" }
+simien_ops = { version = "0.288.0", path = "./libs/ops" }
 deno_package_json = { version = "0.61.0", default-features = false }
 deno_permissions = { version = "0.118.0" }
 deno_print = { version = "0.7.0" }
@@ -115,7 +115,7 @@ eszip = { version = "0.137.0" }
 napi_sym = { version = "0.189.0" }
 node_resolver = { version = "0.97.0" }
 node_shim = { version = "0.34.0" }
-serde_v8 = { version = "0.321.0", path = "./libs/serde_v8", default-features = false }
+simien_serde_v8 = { version = "0.321.0", path = "./libs/serde_v8", default-features = false }
 test_macro = { }
 test_util = { }
 
@@ -138,8 +138,8 @@ bencher = "0.1"
 bincode = "1"
 bit-set = "0.8.0"
 bit-vec = "0.8.0"
-boxed_error = { version = "0.2.3", path = "./libs/boxed_error" }
-wasm_dep_analyzer = { version = "0.4.0", path = "./libs/wasm_dep_analyzer" }
+simien_boxed_error = { version = "0.2.3", path = "./libs/boxed_error" }
+simien_wasm_dep_analyzer = { version = "0.4.0", path = "./libs/wasm_dep_analyzer" }
 brotli = { version = "6.0.0", features = ["ffi-api"] }
 bsdiff = "0.2.1"
 bytemuck = "1.17.1"

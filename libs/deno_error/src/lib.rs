@@ -46,7 +46,7 @@
 //!
 //! #### Basic usage
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! pub enum SomeError {
 //!   #[class(generic)]
 //!   #[error("Failure")]
@@ -59,7 +59,7 @@
 //!
 //! #### Top-level class
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[class(generic)]
 //! pub enum SomeError {
 //!   #[error("Failure")]
@@ -72,7 +72,7 @@
 //!
 //! #### Defining properties
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[class(generic)]
 //! pub enum SomeError {
 //!   #[class(not_supported)]
@@ -91,7 +91,7 @@
 //!
 //! ##### Defining external properties
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[property("code" = 10)]
 //! #[property("kind" = self.get_name())]
 //! #[class(generic)]
@@ -108,7 +108,7 @@
 //! #### Explicit property inheritance
 //!
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[class(generic)]
 //! #[properties(inherit)]
 //! #[error(transparent)]
@@ -116,7 +116,7 @@
 //! ```
 //!
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[class(inherit)]
 //! #[properties(no_inherit)]
 //! #[error(transparent)]
@@ -125,27 +125,27 @@
 //!
 //! #### Inferred inheritance
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[error("My io error")]
 //! pub struct SomeError(std::io::Error);
 //! ```
 //!
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[class(inherit)]
 //! #[error("My io error")]
 //! pub struct SomeError(std::io::Error);
 //! ```
 //!
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[class(generic)] // don't inherit the error
 //! #[error("My io error")]
 //! pub struct SomeError(std::io::Error);
 //! ```
 //!
 //! ```
-//! #[derive(Debug, thiserror::Error, deno_error::JsError)]
+//! #[derive(Debug, thiserror::Error, simien_error::JsError)]
 //! #[class(type)]
 //! pub enum SomeError {
 //!   #[error("Failure")]
@@ -158,7 +158,7 @@
 
 mod error_codes;
 
-pub use deno_error_macro::*;
+pub use simien_error_macro::*;
 pub use error_codes::*;
 use std::any::Any;
 use std::borrow::Cow;
@@ -273,12 +273,12 @@ pub trait JsErrorClass:
 /// ## Examples
 ///
 /// ```rust
-/// # use deno_error::js_error_wrapper;
+/// # use simien_error::js_error_wrapper;
 /// js_error_wrapper!(std::net::AddrParseError, JsAddrParseError, "TypeError");
 /// ```
 ///
 /// ```rust
-/// # use deno_error::js_error_wrapper;
+/// # use simien_error::js_error_wrapper;
 /// js_error_wrapper!(std::net::AddrParseError, JsAddrParseError, |err| {
 ///   // match or do some logic to get the error class
 ///   "TypeError"
@@ -287,7 +287,7 @@ pub trait JsErrorClass:
 #[macro_export]
 macro_rules! js_error_wrapper {
   ($err_path:path, $err_name:ident, $js_err_type:tt) => {
-    deno_error::js_error_wrapper!($err_path, $err_name, |_error| $js_err_type);
+    simien_error::js_error_wrapper!($err_path, $err_name, |_error| $js_err_type);
   };
   ($err_path:path, $err_name:ident, |$inner:ident| $js_err_type:tt) => {
     #[derive(Debug)]
@@ -314,14 +314,14 @@ macro_rules! js_error_wrapper {
         std::fmt::Display::fmt(&self.0, f)
       }
     }
-    impl deno_error::JsErrorClass for $err_name {
+    impl simien_error::JsErrorClass for $err_name {
       fn get_class(&self) -> std::borrow::Cow<'static, str> {
         Self::get_error_class(&self.0).into()
       }
       fn get_message(&self) -> std::borrow::Cow<'static, str> {
         self.to_string().into()
       }
-      fn get_additional_properties(&self) -> deno_error::AdditionalProperties {
+      fn get_additional_properties(&self) -> simien_error::AdditionalProperties {
         Box::new(std::iter::empty())
       }
       fn get_ref(&self) -> &(dyn std::error::Error + Send + Sync + 'static) {

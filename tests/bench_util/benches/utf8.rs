@@ -1,14 +1,14 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_bench_util::BenchOptions;
-use deno_bench_util::bench_js_sync_with;
-use deno_bench_util::bench_or_profile;
-use deno_bench_util::bencher::Bencher;
-use deno_bench_util::bencher::benchmark_group;
-use deno_core::Extension;
+use simien_bench_util::BenchOptions;
+use simien_bench_util::bench_js_sync_with;
+use simien_bench_util::bench_or_profile;
+use simien_bench_util::bencher::Bencher;
+use simien_bench_util::bencher::benchmark_group;
+use simien_core::Extension;
 
 fn setup() -> Vec<Extension> {
-  deno_core::extension!(
+  simien_core::extension!(
     bench_setup,
     js = ["ext:bench_setup/setup.js" = {
       source = r#"

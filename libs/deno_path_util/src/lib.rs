@@ -5,7 +5,7 @@
 #![deny(clippy::unused_async)]
 #![deny(clippy::unnecessary_wraps)]
 
-use deno_error::JsError;
+use simien_error::JsError;
 use std::borrow::Cow;
 use std::path::Component;
 use std::path::Path;
@@ -36,7 +36,7 @@ pub fn url_parent(url: &Url) -> Url {
   url
 }
 
-#[derive(Debug, Error, deno_error::JsError)]
+#[derive(Debug, Error, simien_error::JsError)]
 #[class(uri)]
 #[error("Could not convert URL to file path.\n  URL: {0}")]
 pub struct UrlToFilePathError(pub Url);
@@ -291,7 +291,7 @@ pub fn normalize_path(path: Cow<Path>) -> Cow<Path> {
   }
 }
 
-#[derive(Debug, Clone, Error, deno_error::JsError, PartialEq, Eq)]
+#[derive(Debug, Clone, Error, simien_error::JsError, PartialEq, Eq)]
 #[class(uri)]
 #[error("Could not convert path to URL.\n  Path: {0}")]
 pub struct PathToUrlError(pub PathBuf);
@@ -499,7 +499,7 @@ pub fn resolve_path(
   url_from_file_path(&path)
 }
 
-#[derive(Debug, Error, Clone, PartialEq, Eq, deno_error::JsError)]
+#[derive(Debug, Error, Clone, PartialEq, Eq, simien_error::JsError)]
 pub enum SpecifierError {
   // don't make this error a source because it's short
   // and that causes unnecessary verbosity

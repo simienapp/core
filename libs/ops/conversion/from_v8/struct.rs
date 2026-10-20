@@ -65,7 +65,7 @@ pub fn get_body(
           Some(default) => default.to_token_stream(),
           None => {
             quote! {
-              return Err(::deno_error::JsErrorBox::type_error(concat!("Missing required field '", #js_name ,"' on '", #ident_string, "'")));
+              return Err(::simien_error::JsErrorBox::type_error(concat!("Missing required field '", #js_name ,"' on '", #ident_string, "'")));
             }
         }};
 
@@ -85,9 +85,9 @@ pub fn get_body(
       }).collect::<Result<Vec<_>, Error>>()?;
 
       let body = quote! {
-        let __obj: ::deno_core::v8::Local<::deno_core::v8::Object> =  match __value.try_into() {
+        let __obj: ::simien_core::v8::Local<::simien_core::v8::Object> =  match __value.try_into() {
           Ok(obj) => obj,
-          Err(err) => return Err(::deno_error::JsErrorBox::from_err(::deno_core::error::DataError::from(err))),
+          Err(err) => return Err(::simien_error::JsErrorBox::from_err(::simien_core::error::DataError::from(err))),
         };
 
         #(#fields)*
@@ -120,7 +120,7 @@ pub fn get_body(
 
             quote! {
               {
-                let __element_value = __array.get_index(__scope, #i).ok_or_else(|| ::deno_error::JsErrorBox::type_error(concat!("Missing element ", #i, " on '", #ident_string, "'")))?;
+                let __element_value = __array.get_index(__scope, #i).ok_or_else(|| ::simien_error::JsErrorBox::type_error(concat!("Missing element ", #i, " on '", #ident_string, "'")))?;
                 #converter
               }
             }
@@ -128,8 +128,8 @@ pub fn get_body(
           .collect::<Vec<_>>();
 
         quote! {
-          let __array = ::deno_core::v8::Local::<::deno_core::v8::Array>::try_from(__value)
-            .map_err(|err| ::deno_error::JsErrorBox::from_err(::deno_core::error::DataError::from(err)))?;
+          let __array = ::simien_core::v8::Local::<::simien_core::v8::Array>::try_from(__value)
+            .map_err(|err| ::simien_error::JsErrorBox::from_err(::simien_core::error::DataError::from(err)))?;
 
           Ok(Self(#(#fields),*))
         }

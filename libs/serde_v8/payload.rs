@@ -38,6 +38,6 @@ impl ValueType {
     } else if v.is_null_or_undefined() {
       return Self::Null;
     }
-    panic!("serde_v8: unknown ValueType for v8::Value")
+    panic!("simien_serde_v8: unknown ValueType for v8::Value")
   }
 }

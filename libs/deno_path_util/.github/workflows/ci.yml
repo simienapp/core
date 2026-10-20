@@ -4,10 +4,10 @@ on: [push, pull_request]
 
 jobs:
   rust:
-    name: deno_path_util-${{ matrix.os }}
+    name: simien_path_util-${{ matrix.os }}
     if: |
       (github.event_name == 'push' || !startsWith(github.event.pull_request.head.label, 'denoland:'))
-      && github.ref_name != 'deno_path_util'
+      && github.ref_name != 'simien_path_util'
       && !startsWith(github.ref, 'refs/tags/deno/')
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15

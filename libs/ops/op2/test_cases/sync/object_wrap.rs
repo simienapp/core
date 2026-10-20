@@ -4,9 +4,9 @@
 deno_ops_compile_test_runner::prelude!();
 use std::cell::Cell;
 
-use deno_core::cppgc::GarbageCollected;
-use deno_core::v8;
-use deno_error::JsErrorBox;
+use simien_core::cppgc::GarbageCollected;
+use simien_core::v8;
+use simien_error::JsErrorBox;
 
 pub struct Foo {
   x: Cell<u32>,

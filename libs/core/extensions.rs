@@ -339,33 +339,33 @@ impl OpDecl {
 }
 
 /// Declares a block of Deno `#[op]`s. The first parameter determines the name of the
-/// op declaration block, and is usually `deno_ops`. This block generates a function that
+/// op declaration block, and is usually `simien_ops`. This block generates a function that
 /// returns a [`Vec<OpDecl>`].
 ///
 /// This can be either a compact form like:
 ///
 /// ```no_compile
-/// # use deno_core::*;
+/// # use simien_core::*;
 /// #[op]
 /// fn op_xyz() {}
 ///
-/// deno_core::ops!(deno_ops, [
+/// simien_core::ops!(simien_ops, [
 ///   op_xyz
 /// ]);
 ///
 /// // Use the ops:
-/// deno_ops()
+/// simien_ops()
 /// ```
 ///
 /// ... or a parameterized form like so that allows passing a number of type parameters
 /// to each `#[op]`:
 ///
 /// ```no_compile
-/// # use deno_core::*;
+/// # use simien_core::*;
 /// #[op]
 /// fn op_xyz<P>() where P: Clone {}
 ///
-/// deno_core::ops!(deno_ops,
+/// simien_core::ops!(simien_ops,
 ///   parameters = [P: Clone],
 ///   ops = [
 ///     op_xyz<P>
@@ -373,7 +373,7 @@ impl OpDecl {
 /// );
 ///
 /// // Use the ops, with `String` as the parameter `P`:
-/// deno_ops::<String>()
+/// simien_ops::<String>()
 /// ```
 #[macro_export]
 macro_rules! ops {
@@ -418,7 +418,7 @@ macro_rules! or {
 /// fn op_xyz() {
 /// }
 ///
-/// deno_core::extension!(
+/// simien_core::extension!(
 ///   my_extension,
 ///   ops = [ op_xyz ],
 ///   esm = [ "my_script.js" ],
@@ -484,7 +484,7 @@ macro_rules! extension {
     /// To use it, provide it as an argument when instantiating your runtime:
     ///
     /// ```rust,ignore
-    /// use deno_core::{ JsRuntime, RuntimeOptions };
+    /// use simien_core::{ JsRuntime, RuntimeOptions };
     ///
     #[doc = concat!("let mut extensions = vec![", stringify!($name), "::init()];")]
     /// let mut js_runtime = JsRuntime::new(RuntimeOptions {
@@ -919,7 +919,7 @@ pub struct ExtensionArguments {
 /// [`ExtensionFileSource`], that represents the filename and source code.
 ///
 /// ```
-/// # use deno_core::include_js_files_doctest as include_js_files;
+/// # use simien_core::include_js_files_doctest as include_js_files;
 /// // Example (for "my_extension"):
 /// let files = include_js_files!(
 ///   my_extension
@@ -936,7 +936,7 @@ pub struct ExtensionArguments {
 /// directory name.
 ///
 /// ```
-/// # use deno_core::include_js_files_doctest as include_js_files;
+/// # use simien_core::include_js_files_doctest as include_js_files;
 /// // Example with "dir" option (for "my_extension"):
 /// include_js_files!(
 ///   my_extension
@@ -952,7 +952,7 @@ pub struct ExtensionArguments {
 /// You may also override the specifiers for each file like so:
 ///
 /// ```
-/// # use deno_core::include_js_files_doctest as include_js_files;
+/// # use simien_core::include_js_files_doctest as include_js_files;
 /// // Example with "dir" option (for "my_extension"):
 /// include_js_files!(
 ///   my_extension

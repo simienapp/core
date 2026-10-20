@@ -1,5 +1,5 @@
 [package]
-name = "boxed_error"
+name = "simien_boxed_error"
 description = "Macro for easily boxing an error"
 version = "0.2.3"
 edition = "2021"

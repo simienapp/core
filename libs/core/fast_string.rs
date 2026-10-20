@@ -145,7 +145,7 @@ impl Display for FastStaticString {
   }
 }
 
-#[derive(Debug, deno_error::JsError)]
+#[derive(Debug, simien_error::JsError)]
 #[class(type)]
 pub struct FastStringV8AllocationError;
 
@@ -169,7 +169,7 @@ impl std::fmt::Display for FastStringV8AllocationError {
 /// Examples of ways to construct a [`FastString`]:
 ///
 /// ```rust
-/// # use deno_core::{ascii_str, FastString};
+/// # use simien_core::{ascii_str, FastString};
 ///
 /// let code: FastString = ascii_str!("a string").into();
 /// let code: FastString = format!("a string").into();

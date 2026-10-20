@@ -3,8 +3,8 @@
 #![deny(warnings)]
 deno_ops_compile_test_runner::prelude!();
 
-use deno_core::v8;
-use deno_error::JsErrorBox;
+use simien_core::v8;
+use simien_error::JsErrorBox;
 
 #[op2(fast)]
 pub fn op_void_with_result(

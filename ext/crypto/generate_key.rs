@@ -12,7 +12,7 @@ use rsa::pkcs1::EncodeRsaPrivateKey;
 
 use crate::shared::*;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class("DOMExceptionOperationError")]
 pub enum GenerateKeyError {
   #[class(inherit)]

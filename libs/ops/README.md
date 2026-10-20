@@ -1,9 +1,9 @@
-# deno_ops
+# simien_ops
 
 `proc_macro` for generating highly optimized V8 functions from Rust functions.
 
 ```rust,ignore
-use deno_core::{op2, extension};
+use simien_core::{op2, extension};
 
 // Declare an op.
 #[op2(fast)]

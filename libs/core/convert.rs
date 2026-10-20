@@ -9,8 +9,8 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 use std::sync::Arc;
 
-use deno_error::JsErrorBox;
-use deno_error::JsErrorClass;
+use simien_error::JsErrorBox;
+use simien_error::JsErrorClass;
 use smallvec::SmallVec;
 use uuid::Uuid;
 use v8::Local;
@@ -24,7 +24,7 @@ use crate::runtime::ops;
 /// When passing data from Rust into JS, either
 /// via an op or by calling a JS function directly,
 /// you need to serialize the data into a native
-/// V8 value. When using the [`op2`][deno_core::op2] macro, the return
+/// V8 value. When using the [`op2`][simien_core::op2] macro, the return
 /// value is converted to a `v8::Local<Value>` automatically,
 /// and the strategy for conversion is controlled by attributes
 /// like `#[smi]`, `#[number]`, `#[string]`. For types with support
@@ -41,9 +41,9 @@ use crate::runtime::ops;
 /// # Example
 ///
 /// ```ignore
-/// use deno_core::ToV8;
-/// use deno_core::convert::Smi;
-/// use deno_core::op2;
+/// use simien_core::ToV8;
+/// use simien_core::convert::Smi;
+/// use simien_core::op2;
 ///
 /// struct Foo(i32);
 ///
@@ -91,20 +91,20 @@ pub trait ToV8<'a> {
 /// A conversion from a v8 value to a rust value.
 ///
 /// When writing a op, or otherwise writing a function in Rust called
-/// from JS, arguments passed from JS are represented as [`v8::Local<v8::Value>>`][deno_core::v8::Value].
+/// from JS, arguments passed from JS are represented as [`v8::Local<v8::Value>>`][simien_core::v8::Value].
 /// To convert these values into custom Rust types, you can implement the [`FromV8`] trait.
 ///
 /// Once you've implemented this trait, you can use the `#[from_v8]` attribute
-/// to tell the [`op2`][deno_core::op2] macro to use your implementation to convert the argument
+/// to tell the [`op2`][simien_core::op2] macro to use your implementation to convert the argument
 /// to the desired type.
 ///
 /// # Example
 ///
 /// ```ignore
-/// use deno_core::FromV8;
-/// use deno_error::JsErrorBox;
-/// use deno_core::convert::Smi;
-/// use deno_core::op2;
+/// use simien_core::FromV8;
+/// use simien_error::JsErrorBox;
+/// use simien_core::convert::Smi;
+/// use simien_core::op2;
 ///
 /// struct Foo(i32);
 ///
@@ -114,7 +114,7 @@ pub trait ToV8<'a> {
 ///   type Error = JsErrorBox;
 ///
 ///   fn from_v8(scope: &mut v8::PinScope<'a, '_>, value: v8::Local<'a, v8::Value>) -> Result<Self, Self::Error> {
-///     /// We expect this value to be a `v8::Integer`, so we use the [`Smi`][deno_core::convert::Smi] wrapper type to convert it.
+///     /// We expect this value to be a `v8::Integer`, so we use the [`Smi`][simien_core::convert::Smi] wrapper type to convert it.
 ///     Smi::from_v8(scope, value).map(|Smi(v)| Foo(v))
 ///   }
 /// }
@@ -650,7 +650,7 @@ impl<'a> ToV8<'a> for ByteString {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum ByteStringError {
   #[error("Invalid type, expected: string but got: {0}")]
@@ -1167,11 +1167,11 @@ macro_rules! impl_tuple {
       where
         $($name: ToV8<'a>,)+
       {
-        type Error = deno_error::JsErrorBox;
+        type Error = simien_error::JsErrorBox;
         fn to_v8(self, scope: &mut v8::PinScope<'a, '_>) -> Result<v8::Local<'a, v8::Value>, Self::Error> {
           #[allow(non_snake_case, reason = "macro-generated bindings match type parameter names")]
           let ($($name,)+) = self;
-          let elements = &[$($name.to_v8(scope).map_err(deno_error::JsErrorBox::from_err)?),+];
+          let elements = &[$($name.to_v8(scope).map_err(simien_error::JsErrorBox::from_err)?),+];
           Ok(v8::Array::new_with_elements(scope, elements).into())
         }
       }
@@ -1179,16 +1179,16 @@ macro_rules! impl_tuple {
       where
         $($name: FromV8<'a>,)+
       {
-        type Error = deno_error::JsErrorBox;
+        type Error = simien_error::JsErrorBox;
 
         fn from_v8(
           scope: &mut v8::PinScope<'a, '_>,
           value: v8::Local<'a, v8::Value>,
         ) -> Result<Self, Self::Error> {
           let array = v8::Local::<v8::Array>::try_from(value)
-            .map_err(|e| deno_error::JsErrorBox::from_err(crate::error::DataError(e)))?;
+            .map_err(|e| simien_error::JsErrorBox::from_err(crate::error::DataError(e)))?;
           if array.length() != $len {
-            return Err(deno_error::JsErrorBox::type_error(format!("Expected {} elements, got {}", $len, array.length())));
+            return Err(simien_error::JsErrorBox::type_error(format!("Expected {} elements, got {}", $len, array.length())));
           }
           let mut i = 0;
           #[allow(non_snake_case, reason = "macro-generated bindings match type parameter names")]
@@ -1196,7 +1196,7 @@ macro_rules! impl_tuple {
             $(
               {
                 let element = array.get_index(scope, i).unwrap();
-                let res = $name::from_v8(scope, element).map_err(deno_error::JsErrorBox::from_err)?;
+                let res = $name::from_v8(scope, element).map_err(simien_error::JsErrorBox::from_err)?;
                 #[allow(unused, reason = "counter is used in multi-element tuples")]
                 {
                   i += 1;
@@ -1303,7 +1303,7 @@ where
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum V8ConvertError {
   #[class(inherit)]
   #[error(transparent)]
@@ -1399,7 +1399,7 @@ mod tests {
   use std::sync::atomic::AtomicUsize;
   use std::sync::atomic::Ordering;
 
-  use deno_error::JsErrorClass;
+  use simien_error::JsErrorClass;
   use v8::Local;
 
   use super::*;
@@ -1986,7 +1986,7 @@ function equal(a, b) {
 
   #[test]
   fn derive_struct() {
-    #[derive(deno_ops::FromV8, deno_ops::ToV8, Eq, PartialEq, Clone, Debug)]
+    #[derive(simien_ops::FromV8, simien_ops::ToV8, Eq, PartialEq, Clone, Debug)]
     pub struct Struct {
       a: u8,
       #[from_v8(default = Some(3))]
@@ -1998,7 +1998,7 @@ function equal(a, b) {
     }
 
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let value = Struct {
       a: 242,
@@ -2013,7 +2013,7 @@ function equal(a, b) {
 
   #[test]
   fn derive_from_struct() {
-    #[derive(deno_ops::FromV8, Eq, PartialEq, Clone, Debug)]
+    #[derive(simien_ops::FromV8, Eq, PartialEq, Clone, Debug)]
     pub struct Struct {
       a: u8,
       #[from_v8(default = Some(3))]
@@ -2033,7 +2033,7 @@ function equal(a, b) {
       .execute_script("", "({ a: 1, e: 'foo', b: {} })")
       .unwrap();
 
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let val = Local::new(scope, val);
     let from = Struct::from_v8(scope, val).unwrap();
@@ -2062,16 +2062,16 @@ function equal(a, b) {
 
   #[test]
   fn derive_from_tuple_struct() {
-    #[derive(deno_ops::FromV8, Eq, PartialEq, Clone, Debug)]
+    #[derive(simien_ops::FromV8, Eq, PartialEq, Clone, Debug)]
     pub struct Tuple(u8, String);
-    #[derive(deno_ops::FromV8, Eq, PartialEq, Clone, Debug)]
+    #[derive(simien_ops::FromV8, Eq, PartialEq, Clone, Debug)]
     pub struct TupleSingle(u8);
 
     let mut runtime = JsRuntime::new(Default::default());
     let val = runtime.execute_script("", "([1, 'foo'])").unwrap();
     let val2 = runtime.execute_script("", "(1)").unwrap();
 
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
     let val = Local::new(scope, val);
 
     let from = Tuple::from_v8(scope, val).unwrap();
@@ -2085,7 +2085,7 @@ function equal(a, b) {
 
   #[test]
   fn derive_to_struct() {
-    #[derive(deno_ops::ToV8, Eq, PartialEq, Clone, Debug)]
+    #[derive(simien_ops::ToV8, Eq, PartialEq, Clone, Debug)]
     pub struct Struct {
       a: u8,
       c: Option<u32>,
@@ -2096,7 +2096,7 @@ function equal(a, b) {
     }
 
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let from = ToV8::to_v8(
       Struct {
@@ -2198,13 +2198,13 @@ function equal(a, b) {
 
   #[test]
   fn derive_to_tuple_struct() {
-    #[derive(deno_ops::ToV8, Eq, PartialEq, Clone, Debug)]
+    #[derive(simien_ops::ToV8, Eq, PartialEq, Clone, Debug)]
     pub struct Tuple(u8, String);
-    #[derive(deno_ops::ToV8, Eq, PartialEq, Clone, Debug)]
+    #[derive(simien_ops::ToV8, Eq, PartialEq, Clone, Debug)]
     pub struct TupleSingle(u8);
 
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     let from = ToV8::to_v8(Tuple(1, "foo".to_string()), scope).unwrap();
     let arr = from.cast::<v8::Array>();
@@ -2228,7 +2228,7 @@ function equal(a, b) {
   #[test]
   fn test_box_roundtrip() {
     let mut runtime = JsRuntime::new(Default::default());
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
 
     // Box<T> forwards to T's ToV8/FromV8 — JS sees the inner shape, never
     // a wrapper.

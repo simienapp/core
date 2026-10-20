@@ -5,8 +5,8 @@ use std::ops::DerefMut;
 
 use bytes::Buf;
 use bytes::BytesMut;
-use serde_v8::JsBuffer;
-use serde_v8::V8Slice;
+use simien_serde_v8::JsBuffer;
+use simien_serde_v8::V8Slice;
 
 /// BufView is a wrapper around an underlying contiguous chunk of bytes. It can
 /// be created from a [JsBuffer], [bytes::Bytes], or [Vec<u8>] and implements

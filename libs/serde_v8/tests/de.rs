@@ -2,11 +2,11 @@
 
 use serde::Deserialize;
 use serde::Deserializer;
-use serde_v8::BigInt;
-use serde_v8::ByteString;
-use serde_v8::Error;
-use serde_v8::JsBuffer;
-use serde_v8::U16String;
+use simien_serde_v8::BigInt;
+use simien_serde_v8::ByteString;
+use simien_serde_v8::Error;
+use simien_serde_v8::JsBuffer;
+use simien_serde_v8::U16String;
 use serde_v8_utilities::js_exec;
 use serde_v8_utilities::v8_do;
 
@@ -57,7 +57,7 @@ macro_rules! decheck {
         reason = "explicit comparison improves clarity in tests"
       )]
       dedo($src, |scope, v| {
-        let rt = serde_v8::from_v8(scope, v);
+        let rt = simien_serde_v8::from_v8(scope, v);
         assert!(rt.is_ok(), "from_v8(\"{}\"): {:?}", $src, rt.err());
         let $x: $t = rt.unwrap();
         $check
@@ -82,7 +82,7 @@ macro_rules! defail {
         reason = "macro-generated test code"
       )]
       dedo($src, |scope, v| {
-        let rt: serde_v8::Result<$t> = serde_v8::from_v8(scope, v);
+        let rt: simien_serde_v8::Result<$t> = simien_serde_v8::from_v8(scope, v);
         let rtstr = format!("{:?}", rt);
         let failed_as_expected = $failcase(rt);
         assert!(
@@ -218,7 +218,7 @@ detest!(
 #[test]
 fn de_f64() {
   dedo("12345.0", |scope, v| {
-    let x: f64 = serde_v8::from_v8(scope, v).unwrap();
+    let x: f64 = simien_serde_v8::from_v8(scope, v).unwrap();
     assert!((x - 12345.0).abs() < f64::EPSILON);
   });
 }
@@ -228,7 +228,7 @@ fn de_map() {
   use std::collections::HashMap;
 
   dedo("({a: 1, b: 2, c: 3})", |scope, v| {
-    let map: HashMap<String, u64> = serde_v8::from_v8(scope, v).unwrap();
+    let map: HashMap<String, u64> = simien_serde_v8::from_v8(scope, v).unwrap();
     assert_eq!(map.get("a").cloned(), Some(1));
     assert_eq!(map.get("b").cloned(), Some(2));
     assert_eq!(map.get("c").cloned(), Some(3));
@@ -268,7 +268,7 @@ fn de_obj_with_numeric_keys() {
   }
 })"#,
     |scope, v| {
-      let json: serde_json::Value = serde_v8::from_v8(scope, v).unwrap();
+      let json: serde_json::Value = simien_serde_v8::from_v8(scope, v).unwrap();
       assert_eq!(
         json.to_string(),
         r#"{"lines":{"100":{"unit":"m"},"200":{"unit":"cm"}}}"#
@@ -280,24 +280,24 @@ fn de_obj_with_numeric_keys() {
 #[test]
 fn de_string_or_buffer() {
   dedo("'hello'", |scope, v| {
-    let sob: serde_v8::StringOrBuffer = serde_v8::from_v8(scope, v).unwrap();
+    let sob: simien_serde_v8::StringOrBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
     assert_eq!(sob.as_ref(), &[0x68, 0x65, 0x6C, 0x6C, 0x6F]);
   });
 
   dedo("new Uint8Array([97])", |scope, v| {
-    let sob: serde_v8::StringOrBuffer = serde_v8::from_v8(scope, v).unwrap();
+    let sob: simien_serde_v8::StringOrBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
     assert_eq!(sob.as_ref(), &[97]);
   });
 
   dedo("new Uint8Array([128])", |scope, v| {
-    let sob: serde_v8::StringOrBuffer = serde_v8::from_v8(scope, v).unwrap();
+    let sob: simien_serde_v8::StringOrBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
     assert_eq!(sob.as_ref(), &[128]);
   });
 
   dedo(
     "(Uint8Array.from([0x68, 0x65, 0x6C, 0x6C, 0x6F]))",
     |scope, v| {
-      let sob: serde_v8::StringOrBuffer = serde_v8::from_v8(scope, v).unwrap();
+      let sob: simien_serde_v8::StringOrBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
       assert_eq!(sob.as_ref(), &[0x68, 0x65, 0x6C, 0x6C, 0x6F]);
     },
   );
@@ -307,31 +307,31 @@ fn de_string_or_buffer() {
 fn de_buffers() {
   // ArrayBufferView
   dedo("new Uint8Array([97])", |scope, v| {
-    let buf: JsBuffer = serde_v8::from_v8(scope, v).unwrap();
+    let buf: JsBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
     assert_eq!(&*buf, &[97]);
   });
 
   // ArrayBuffer
   dedo("(new Uint8Array([97])).buffer", |scope, v| {
-    let buf: JsBuffer = serde_v8::from_v8(scope, v).unwrap();
+    let buf: JsBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
     assert_eq!(&*buf, &[97]);
   });
 
   dedo(
     "(Uint8Array.from([0x68, 0x65, 0x6C, 0x6C, 0x6F]))",
     |scope, v| {
-      let buf: JsBuffer = serde_v8::from_v8(scope, v).unwrap();
+      let buf: JsBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
       assert_eq!(&*buf, &[0x68, 0x65, 0x6C, 0x6C, 0x6F]);
     },
   );
 
   dedo("(new ArrayBuffer(4))", |scope, v| {
-    let buf: JsBuffer = serde_v8::from_v8(scope, v).unwrap();
+    let buf: JsBuffer = simien_serde_v8::from_v8(scope, v).unwrap();
     assert_eq!(&*buf, &[0x0, 0x0, 0x0, 0x0]);
   });
 
   dedo("(new ArrayBuffer(8, { maxByteLength: 16}))", |scope, v| {
-    let result: Result<JsBuffer, Error> = serde_v8::from_v8(scope, v);
+    let result: Result<JsBuffer, Error> = simien_serde_v8::from_v8(scope, v);
     matches!(result, Err(Error::ResizableBackingStoreNotSupported));
   });
 }
@@ -374,7 +374,7 @@ detest!(de_unit_struct, StructUnit, "'StructUnit'", StructUnit);
 #[test]
 fn de_struct() {
   dedo("({ a: 1, b: 2 })", |scope, v| {
-    let mut de = serde_v8::Deserializer::new(scope, v, None);
+    let mut de = simien_serde_v8::Deserializer::new(scope, v, None);
     let payload = de
       .deserialize_struct("StructPayload", &[], StructVisitor)
       .unwrap();
@@ -385,7 +385,7 @@ fn de_struct() {
 #[test]
 fn de_struct_hint() {
   dedo("({ a: 1, b: 2 })", |scope, v| {
-    let mut de = serde_v8::Deserializer::new(scope, v, None);
+    let mut de = simien_serde_v8::Deserializer::new(scope, v, None);
     let payload = de
       .deserialize_struct("StructPayload", &["a", "b"], StructVisitor)
       .unwrap();
@@ -687,11 +687,11 @@ detest!(
 // Recursion limit: deeply nested input must error, not overflow the stack.
 //
 // Builds nesting with a flat loop so the JS stack stays O(1); the depth is far
-// past serde_v8's recursion limit. Before the limit existed this overflowed the
+// past simien_serde_v8's recursion limit. Before the limit existed this overflowed the
 // Rust stack and aborted the process; now it must return an error.
 fn build_nested(scope: &mut v8::PinScope, code: &str) -> bool {
   let v = js_exec(scope, code);
-  let res: serde_v8::Result<serde_json::Value> = serde_v8::from_v8(scope, v);
+  let res: simien_serde_v8::Result<serde_json::Value> = simien_serde_v8::from_v8(scope, v);
   matches!(res, Err(Error::RecursionLimitExceeded))
 }
 
@@ -738,7 +738,7 @@ fn de_shallow_nesting_ok() {
         return obj;
       })()"#,
     );
-    let res: serde_v8::Result<serde_json::Value> = serde_v8::from_v8(scope, v);
+    let res: simien_serde_v8::Result<serde_json::Value> = simien_serde_v8::from_v8(scope, v);
     assert!(res.is_ok(), "shallow nesting should deserialize: {res:?}");
   });
 }

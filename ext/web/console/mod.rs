@@ -19,10 +19,10 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::time::Instant;
 
-use deno_core::GarbageCollected;
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::v8;
+use simien_core::GarbageCollected;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::v8;
 use inspect::*;
 pub use preview::op_preview_entries;
 

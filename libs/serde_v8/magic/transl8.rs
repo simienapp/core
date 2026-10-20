@@ -73,7 +73,7 @@ where
         {
           // DESERIALIZATION CRIMES
 
-          // serde_v8 was originally taking a pointer to a stack value here. This code is crazy
+          // simien_serde_v8 was originally taking a pointer to a stack value here. This code is crazy
           // but there's no way to fix it easily. As a bandaid, we boxed it before.
           let ptr: *mut T = ptr as _;
           *Box::<T>::from_raw(ptr)
@@ -98,7 +98,7 @@ where
 {
   // DESERIALIZATION CRIMES
 
-  // serde_v8 was originally taking a pointer to a stack value here. This code is crazy
+  // simien_serde_v8 was originally taking a pointer to a stack value here. This code is crazy
   // but there's no way to fix it easily. As a bandaid, let's box it.
   let x = Box::new(x);
   visitor.visit_u64::<E>(Box::into_raw(x) as _)

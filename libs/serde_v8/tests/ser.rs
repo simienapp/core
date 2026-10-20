@@ -2,7 +2,7 @@
 
 use serde::Serialize;
 use serde_json::json;
-use serde_v8::BigInt;
+use simien_serde_v8::BigInt;
 use serde_v8_utilities::js_exec;
 use serde_v8_utilities::v8_do;
 
@@ -60,8 +60,8 @@ fn sercheck<T: Serialize>(val: T, code: &str, pollute: bool) -> bool {
 
     // Set value as "x" in global scope
     let global = context.global(scope);
-    let v8_key = serde_v8::to_v8(scope, "x").unwrap();
-    let v8_val = serde_v8::to_v8(scope, val).unwrap();
+    let v8_key = simien_serde_v8::to_v8(scope, "x").unwrap();
+    let v8_val = simien_serde_v8::to_v8(scope, val).unwrap();
     global.set(scope, v8_key, v8_val);
 
     // Pollution check
@@ -73,7 +73,7 @@ fn sercheck<T: Serialize>(val: T, code: &str, pollute: bool) -> bool {
     // Execute equality check in JS (e.g: x == ...)
     let v = js_exec(scope, code);
     // Cast to bool
-    equal = serde_v8::from_v8(scope, v).unwrap();
+    equal = simien_serde_v8::from_v8(scope, v).unwrap();
   });
 
   equal
