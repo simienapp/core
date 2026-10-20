@@ -10,6 +10,8 @@ publishing uses --no-verify. The `simien` placeholder in placeholders/simien
 goes first.
 
   CARGO_REGISTRY_TOKEN=... tools/publish.py [--dry-run]
+
+In CI the token comes from crates.io trusted publishing (publish.yml).
 """
 
 import email.utils

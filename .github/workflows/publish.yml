@@ -1,15 +1,18 @@
 name: Publish crates
 
-# Manual for now: publishes every crate crates.io doesn't have yet
-# (tools/publish.py), with the release environment's CARGO_REGISTRY_TOKEN.
-# Rerunning is safe. Once each crate exists, this moves to crates.io trusted
-# publishing and the token goes.
+# Manual: publishes every crate version crates.io doesn't have yet
+# (tools/publish.py). Rerunning is safe. Authenticates with crates.io trusted
+# publishing: each crate trusts simienapp/core, this file and the release
+# environment, and the short-lived token is revoked when the job ends. A
+# brand-new crate can't be published this way; its first version needs a
+# token from crates.io before it can trust this workflow.
 
 on:
   workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: publish
@@ -19,12 +22,13 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     environment: release
-    # crates.io allows about one new crate every ten minutes after a burst.
-    timeout-minutes: 300
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: rustup show active-toolchain || rustup toolchain install
+      - uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+        id: auth
       - name: Publish
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: python3 tools/publish.py
