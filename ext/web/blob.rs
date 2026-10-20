@@ -181,6 +181,10 @@ impl Blob {
   }
 }
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed futures it generates #[must_use]"
+)]
 #[async_trait]
 pub trait BlobPart: Debug {
   // TODO(lucacsonato): this should be a stream!
