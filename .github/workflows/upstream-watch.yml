@@ -1,0 +1,44 @@
+name: Upstream watch
+
+# Once a day, list what denoland/deno, the standalone crate repos and
+# rusty_v8 changed since this repo last looked (tools/upstream-watch.sh),
+# and keep one open issue with that list.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Compare with upstream
+        run: tools/upstream-watch.sh "$RUNNER_TEMP/upstream" > "$RUNNER_TEMP/report.md"
+      - name: Open or update the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Upstream changes to review"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number -q '.[0].number')
+          if [ ! -s "$RUNNER_TEMP/report.md" ]; then
+            if [ -n "$existing" ]; then
+              gh issue close "$existing" --comment "Nothing upstream is waiting any more."
+            fi
+            exit 0
+          fi
+          {
+            echo "Found by the upstream watch on $(date -u +%Y-%m-%d). Port what we need with \`tools/port-upstream.sh\`, record each decision in \`tools/upstream-sync.txt\`, and this issue closes itself once nothing is left."
+            echo
+            cat "$RUNNER_TEMP/report.md"
+          } > "$RUNNER_TEMP/body.md"
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh issue create --title "$title" --body-file "$RUNNER_TEMP/body.md"
+          fi

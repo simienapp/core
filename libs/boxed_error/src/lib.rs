@@ -41,10 +41,10 @@ pub fn derive_boxed(item: TokenStream) -> TokenStream {
     }
   };
   let inner_type = match field_type {
-    Type::Path(type_path) => {
+    Type::Path(type_path)
       if type_path.path.segments.len() == 1
         && type_path.path.segments[0].ident == "Box"
-      {
+      => {
         // Extract the inner type from `Box<T>`
         match &type_path.path.segments[0].arguments {
           syn::PathArguments::AngleBracketed(args) => {
@@ -74,12 +74,7 @@ pub fn derive_boxed(item: TokenStream) -> TokenStream {
             return TokenStream::from(error.to_compile_error());
           }
         }
-      } else {
-        let error =
-          Error::new(field_type.span(), "Field must be of type `Box<T>`");
-        return TokenStream::from(error.to_compile_error());
       }
-    }
     _ => {
       let error =
         Error::new(field_type.span(), "Field must be of type `Box<T>`");

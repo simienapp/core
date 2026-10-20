@@ -6,7 +6,7 @@ use dlopen2::Error as DlopenError;
 use once_cell::unsync::OnceCell;
 use std::collections::HashMap;
 use std::ffi::c_void;
-use std::io::{Error, ErrorKind};
+use std::io::Error;
 use std::ptr;
 
 #[repr(C)]
@@ -217,8 +217,7 @@ fn find_frameworks() -> Result<Frameworks, DlopenError> {
 pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
   let cell = OnceCell::new();
   let (framework, cf) = cell.get_or_try_init(find_frameworks).map_err(|e| {
-    Error::new(
-      ErrorKind::Other,
+    Error::other(
       format!("Failed to load frameworks: {}", e),
     )
   })?;
@@ -237,14 +236,13 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
       errSecNoTrustSettings => continue,
       errSecSuccess => {}
       _ => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "SecTrustSettingsCopyCertificates",
         ))
       }
     };
 
-    let certs: Array<OpaqueSecCertificateRef> = Array::new(array_ptr, &cf);
+    let certs: Array<OpaqueSecCertificateRef> = Array::new(array_ptr, cf);
     for cert in certs.iter() {
       let der = unsafe { (framework.SecCertificateCopyData)(cert) };
 
@@ -256,8 +254,8 @@ pub fn load_native_certs() -> Result<Vec<Certificate>, Error> {
           &mut array_ptr,
         );
 
-        let settings: Array<__CFDictionary> = Array::new(array_ptr, &cf);
-        tls_trust_settings_for_certificates(&cf, settings)
+        let settings: Array<__CFDictionary> = Array::new(array_ptr, cf);
+        tls_trust_settings_for_certificates(cf, settings)
           .unwrap_or(kSecTrustSettingsResultTrustRoot)
       };
 
@@ -292,8 +290,8 @@ unsafe fn tls_trust_settings_for_certificates<'a>(
 ) -> Option<SecTrustSettingsResult> {
   for dict in settings.iter() {
     let policy_name_key =
-      CFString::from_static_str("kSecTrustSettingsPolicyName", &cf);
-    let ssl_policy_name = CFString::from_static_str("sslServer", &cf);
+      CFString::from_static_str("kSecTrustSettingsPolicyName", cf);
+    let ssl_policy_name = CFString::from_static_str("sslServer", cf);
 
     let maybe_name = {
       let mut value: *const c_void = ptr::null();
@@ -303,7 +301,7 @@ unsafe fn tls_trust_settings_for_certificates<'a>(
         &mut value,
       ) != 0
       {
-        Some(CFString::from_raw(value as _, &cf))
+        Some(CFString::from_raw(value as _, cf))
       } else {
         None
       }
@@ -314,7 +312,7 @@ unsafe fn tls_trust_settings_for_certificates<'a>(
     }
 
     let settings_result_key =
-      CFString::from_static_str("kSecTrustSettingsResult", &cf);
+      CFString::from_static_str("kSecTrustSettingsResult", cf);
     let mut value: *const c_void = ptr::null();
     let trust_result = if (cf.CFDictionaryGetValueIfPresent)(
       dict,
