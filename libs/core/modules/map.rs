@@ -1740,7 +1740,8 @@ impl ModuleMap {
       .get_handle(module_id)
       .expect("ModuleInfo not found");
 
-    let module = module_handle.open(scope);
+    // SAFETY: used at once, in this scope, on the isolate's own thread.
+    let module = unsafe { module_handle.open(scope) };
 
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
