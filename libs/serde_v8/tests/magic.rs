@@ -3,8 +3,8 @@
 use serde::Deserialize;
 use serde::Serialize;
 use simien_serde_v8::Result;
-use serde_v8_utilities::js_exec;
-use serde_v8_utilities::v8_do;
+use simien_serde_v8_utilities::js_exec;
+use simien_serde_v8_utilities::v8_do;
 
 #[derive(Serialize, Deserialize)]
 struct MagicOp {
@@ -166,8 +166,8 @@ fn magic_byte_string() {
 
 #[test]
 fn magic_value() {
-  use serde_v8_utilities::js_exec;
-  use serde_v8_utilities::v8_do;
+  use simien_serde_v8_utilities::js_exec;
+  use simien_serde_v8_utilities::v8_do;
 
   struct TestLocal<'a>(v8::Local<'a, v8::Value>);
   impl<'de> serde::Deserialize<'de> for TestLocal<'_> {

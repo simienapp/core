@@ -7,8 +7,8 @@ use simien_serde_v8::ByteString;
 use simien_serde_v8::Error;
 use simien_serde_v8::JsBuffer;
 use simien_serde_v8::U16String;
-use serde_v8_utilities::js_exec;
-use serde_v8_utilities::v8_do;
+use simien_serde_v8_utilities::js_exec;
+use simien_serde_v8_utilities::v8_do;
 
 #[derive(Debug, Deserialize, PartialEq)]
 struct MathOp {
