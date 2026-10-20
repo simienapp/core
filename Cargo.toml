@@ -33,16 +33,16 @@ repository = "https://github.com/denoland/deno"
 [workspace.dependencies]
 deno_core_icudata = "0.77.0"
 deno_doc = "=0.207.0"
-deno_error = "=0.7.1"
+deno_error = { version = "=0.7.1", path = "./libs/deno_error" }
 deno_graph = { version = "=0.111.0", default-features = false }
 deno_lint = "=0.84.1"
 deno_media_type = { version = "=0.4.0", features = ["module_specifier"] }
-deno_native_certs = "0.3.0"
-deno_path_util = "=0.6.4"
+deno_native_certs = { version = "0.3.1", path = "./libs/deno_native_certs" }
+deno_path_util = { version = "=0.6.4", path = "./libs/deno_path_util" }
 deno_semver = "=0.10.1"
 deno_task_shell = "=0.33.3"
 deno_terminal = "=0.2.3"
-deno_unsync = { version = "0.4.4", default-features = false }
+deno_unsync = { version = "0.4.4", path = "./libs/deno_unsync", default-features = false }
 deno_whoami = "0.1.0"
 v8 = { package = "deno_v8", version = "0.4.0", path = "./libs/deno_v8", default-features = false, features = ["v8", "simdutf"] }
 
@@ -138,7 +138,8 @@ bencher = "0.1"
 bincode = "1"
 bit-set = "0.8.0"
 bit-vec = "0.8.0"
-boxed_error = "0.2.3"
+boxed_error = { version = "0.2.3", path = "./libs/boxed_error" }
+wasm_dep_analyzer = { version = "0.4.0", path = "./libs/wasm_dep_analyzer" }
 brotli = { version = "6.0.0", features = ["ffi-api"] }
 bsdiff = "0.2.1"
 bytemuck = "1.17.1"
@@ -434,24 +435,3 @@ opt-level = 1
 opt-level = 3
 
 
-# Crates still taken from crates.io (deno_fs, deno_io, deno_permissions until
-# simien_fetch drops them) must build against these copies, not a second Deno.
-[patch.crates-io]
-deno_core = { path = "./libs/core" }
-deno_ops = { path = "./libs/ops" }
-serde_v8 = { path = "./libs/serde_v8" }
-deno_v8 = { path = "./libs/deno_v8" }
-deno_crypto_provider = { path = "./libs/crypto" }
-deno_webidl = { path = "./ext/webidl" }
-deno_web = { path = "./ext/web" }
-deno_fetch = { path = "./ext/fetch" }
-deno_crypto = { path = "./ext/crypto" }
-deno_tls = { path = "./ext/tls" }
-deno_error = { path = "./libs/deno_error" }
-deno_error_macro = { path = "./libs/deno_error/macros" }
-deno_unsync = { path = "./libs/deno_unsync" }
-deno_path_util = { path = "./libs/deno_path_util" }
-boxed_error = { path = "./libs/boxed_error" }
-wasm_dep_analyzer = { path = "./libs/wasm_dep_analyzer" }
-deno_native_certs = { path = "./libs/deno_native_certs" }
-deno_bench_util = { path = "./tests/bench_util" }
