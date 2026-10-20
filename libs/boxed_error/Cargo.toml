@@ -1,11 +1,11 @@
 [package]
 name = "simien_boxed_error"
-description = "Macro for easily boxing an error"
-version = "0.2.3"
+description = "Macro for easily boxing an error. Forked from Deno's boxed_error 0.2.3."
+version = "0.1.0"
 edition = "2021"
-authors = ["the Deno authors"]
+authors = ["the Deno authors", "the Simien authors"]
 license = "MIT"
-repository = "https://github.com/denoland/boxed_error"
+repository = "https://github.com/simienapp/core"
 
 [lib]
 proc-macro = true

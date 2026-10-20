@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_core"
-version = "0.412.0"
-authors.workspace = true
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "A modern JavaScript/TypeScript runtime built with V8, Rust, and Tokio"
+repository = "https://github.com/simienapp/core"
+description = "Simien's JavaScript engine core: isolates, modules, ops, the event loop and snapshots, on V8. Forked from Deno's deno_core 0.412.0."
 
 [lib]
 path = "lib.rs"

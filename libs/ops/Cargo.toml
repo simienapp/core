@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_ops"
-version = "0.288.0"
-authors.workspace = true
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "Proc macro for writing Deno Ops"
+repository = "https://github.com/simienapp/core"
+description = "Proc macros for writing simien_core ops. Forked from Deno's deno_ops 0.288.0."
 
 [lib]
 path = "./lib.rs"

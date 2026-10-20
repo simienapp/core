@@ -1,11 +1,11 @@
 [package]
 name = "simien_wasm_dep_analyzer"
-version = "0.4.0"
+version = "0.1.0"
 edition = "2021"
-description = "Wasm module dependency analysis for module resolution"
-repository = "https://github.com/denoland/wasm_dep_analyzer"
+description = "Wasm module dependency analysis for module resolution. Forked from Deno's wasm_dep_analyzer 0.4.0."
+repository = "https://github.com/simienapp/core"
 documentation = "https://docs.rs/wasm_dep_analyzer"
-authors = ["the Deno authors"]
+authors = ["the Deno authors", "the Simien authors"]
 license = "MIT"
 
 [dependencies]

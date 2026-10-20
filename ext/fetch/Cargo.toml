@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_fetch"
-version = "0.283.0"
-authors.workspace = true
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "Fetch API implementation for Deno"
+repository = "https://github.com/simienapp/core"
+description = "Fetch API for the Simien runtime (WinterTC). Forked from Deno's deno_fetch 0.283.0."
 
 [lib]
 path = "lib.rs"

@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_webidl"
-version = "0.259.0"
-authors.workspace = true
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "WebIDL implementation for Deno"
+repository = "https://github.com/simienapp/core"
+description = "WebIDL conversions for Simien's web APIs. Forked from Deno's deno_webidl 0.259.0."
 
 [lib]
 path = "lib.rs"

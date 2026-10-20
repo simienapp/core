@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_web"
-version = "0.290.0"
-authors.workspace = true
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "Collection of Web APIs"
+repository = "https://github.com/simienapp/core"
+description = "Web APIs for the Simien runtime: streams, encoding, URL, events, timers, Blob and more (WinterTC). Forked from Deno's deno_web 0.290.0."
 
 [lib]
 path = "lib.rs"

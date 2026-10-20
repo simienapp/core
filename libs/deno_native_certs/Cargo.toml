@@ -1,11 +1,11 @@
 [package]
 name = "simien_native_certs"
-description = "deno-native-certs loads native certificate store into rustls"
-version = "0.3.1"
+description = "Loads the native certificate store for simien_tls. Forked from Deno's deno_native_certs 0.3.1."
+version = "0.1.0"
 edition = "2021"
-authors = ["Divy Srivastava <dj.srivastava23@gmail.com>"]
+authors = ["the Deno authors", "the Simien authors"]
 license = "MIT"
-repository = "https://github.com/denoland/deno_native_certs"
+repository = "https://github.com/simienapp/core"
 
 [[bin]]
 name = "deno_native_certs_test"
