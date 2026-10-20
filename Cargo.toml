@@ -15,6 +15,10 @@ members = [
   "ext/fetch",
   "ext/crypto",
   "ext/tls",
+  "ext/net",
+  "ext/websocket",
+  "ext/http",
+  "libs/http_h1",
   "libs/deno_error",
   "libs/deno_error/macros",
   "libs/deno_unsync",
@@ -75,6 +79,10 @@ deno_process = { version = "0.74.0" }
 deno_signals = { version = "0.50.0" }
 deno_telemetry = { version = "0.81.0" }
 simien_tls = { version = "0.1.1", path = "./ext/tls" }
+simien_net = { version = "0.1.1", path = "./ext/net" }
+simien_websocket = { version = "0.1.1", path = "./ext/websocket" }
+simien_http = { version = "0.1.1", path = "./ext/http" }
+simien_http_h1 = { version = "0.1.1", path = "./libs/http_h1" }
 simien_web = { version = "0.1.1", path = "./ext/web" }
 deno_webgpu = { version = "0.226.0" }
 simien_webidl = { version = "0.1.1", path = "./ext/webidl" }

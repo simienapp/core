@@ -447,38 +447,6 @@ network_stream!(
     crate::io::UnixStreamResource,
     tokio::net::unix::OwnedReadHalf,
     tokio::net::unix::OwnedWriteHalf,
-  ],
-  #[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
-  [
-    Vsock,
-    vsock,
-    tokio_vsock::VsockStream,
-    tokio_vsock::VsockListener,
-    tokio_vsock::VsockAddr,
-    crate::io::VsockStreamResource,
-    tokio_vsock::OwnedReadHalf,
-    tokio_vsock::OwnedWriteHalf,
-  ],
-  [
-    Tunnel,
-    tunnel,
-    crate::tunnel::TunnelStream,
-    crate::tunnel::TunnelConnection,
-    crate::tunnel::TunnelAddr,
-    crate::tunnel::TunnelStreamResource,
-    crate::tunnel::OwnedReadHalf,
-    crate::tunnel::OwnedWriteHalf,
-  ],
-  #[cfg(windows)]
-  [
-    WindowsPipe,
-    windowsPipe,
-    crate::win_pipe::WindowsPipeStream,
-    crate::win_pipe::WindowsPipeListener,
-    crate::win_pipe::WindowsPipeAddr,
-    crate::win_pipe::NamedPipe,
-    tokio::io::ReadHalf<crate::win_pipe::WindowsPipeStream>,
-    tokio::io::WriteHalf<crate::win_pipe::WindowsPipeStream>,
   ]
 );
 
@@ -486,11 +454,6 @@ pub enum NetworkStreamAddress {
   Ip(std::net::SocketAddr),
   #[cfg(unix)]
   Unix(tokio::net::unix::SocketAddr),
-  #[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
-  Vsock(tokio_vsock::VsockAddr),
-  Tunnel(crate::tunnel::TunnelAddr),
-  #[cfg(windows)]
-  WindowsPipe(crate::win_pipe::WindowsPipeAddr),
 }
 
 impl From<std::net::SocketAddr> for NetworkStreamAddress {
@@ -506,26 +469,6 @@ impl From<tokio::net::unix::SocketAddr> for NetworkStreamAddress {
   }
 }
 
-#[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
-impl From<tokio_vsock::VsockAddr> for NetworkStreamAddress {
-  fn from(value: tokio_vsock::VsockAddr) -> Self {
-    NetworkStreamAddress::Vsock(value)
-  }
-}
-
-impl From<crate::tunnel::TunnelAddr> for NetworkStreamAddress {
-  fn from(value: crate::tunnel::TunnelAddr) -> Self {
-    NetworkStreamAddress::Tunnel(value)
-  }
-}
-
-#[cfg(windows)]
-impl From<crate::win_pipe::WindowsPipeAddr> for NetworkStreamAddress {
-  fn from(value: crate::win_pipe::WindowsPipeAddr) -> Self {
-    NetworkStreamAddress::WindowsPipe(value)
-  }
-}
-
 #[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum TakeNetworkStreamError {
   #[class("Busy")]
@@ -538,17 +481,6 @@ pub enum TakeNetworkStreamError {
   #[class("Busy")]
   #[error("Unix socket is currently in use")]
   UnixBusy,
-  #[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
-  #[class("Busy")]
-  #[error("Vsock socket is currently in use")]
-  VsockBusy,
-  #[class("Busy")]
-  #[error("Tunnel socket is currently in use")]
-  TunnelBusy,
-  #[cfg(windows)]
-  #[class("Busy")]
-  #[error("Windows named pipe is currently in use")]
-  WindowsPipeBusy,
   #[class(generic)]
   #[error(transparent)]
   ReuniteTcp(#[from] tokio::net::tcp::ReuniteError),
@@ -556,10 +488,6 @@ pub enum TakeNetworkStreamError {
   #[class(generic)]
   #[error(transparent)]
   ReuniteUnix(#[from] tokio::net::unix::ReuniteError),
-  #[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
-  #[class(generic)]
-  #[error("Cannot reunite halves from different streams")]
-  ReuniteVsock,
   #[class(inherit)]
   #[error(transparent)]
   Resource(simien_core::error::ResourceError),
@@ -604,44 +532,6 @@ pub fn take_network_stream_resource(
     let (read_half, write_half) = resource.into_inner();
     let unix_stream = read_half.reunite(write_half)?;
     return Ok(NetworkStream::Unix(unix_stream));
-  }
-
-  #[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
-  if let Ok(resource_rc) =
-    resource_table.take::<crate::io::VsockStreamResource>(stream_rid)
-  {
-    // This Vsock socket might be used somewhere else.
-    let resource = Rc::try_unwrap(resource_rc)
-      .map_err(|_| TakeNetworkStreamError::VsockBusy)?;
-    let (read_half, write_half) = resource.into_inner();
-    if !read_half.is_pair_of(&write_half) {
-      return Err(TakeNetworkStreamError::ReuniteVsock);
-    }
-    let vsock_stream = read_half.unsplit(write_half);
-    return Ok(NetworkStream::Vsock(vsock_stream));
-  }
-
-  if let Ok(resource_rc) =
-    resource_table.take::<crate::tunnel::TunnelStreamResource>(stream_rid)
-  {
-    let resource = Rc::try_unwrap(resource_rc)
-      .map_err(|_| TakeNetworkStreamError::TunnelBusy)?;
-    let stream = resource.into_inner();
-    return Ok(NetworkStream::Tunnel(stream));
-  }
-
-  #[cfg(windows)]
-  if let Ok(resource_rc) =
-    resource_table.take::<crate::win_pipe::NamedPipe>(stream_rid)
-  {
-    let resource = Rc::try_unwrap(resource_rc)
-      .map_err(|_| TakeNetworkStreamError::WindowsPipeBusy)?;
-    let client = resource.into_client().map_err(|_| {
-      TakeNetworkStreamError::Resource(ResourceError::BadResourceId)
-    })?;
-    return Ok(NetworkStream::WindowsPipe(
-      crate::win_pipe::WindowsPipeStream::new(client),
-    ));
   }
 
   Err(TakeNetworkStreamError::Resource(
