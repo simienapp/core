@@ -1,7 +1,7 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
 pub mod dns;
-mod fs_fetch_handler;
+mod permissions;
 mod proxy;
 #[cfg(test)]
 mod tests;
@@ -56,11 +56,7 @@ use deno_core::url;
 use deno_core::url::Url;
 use deno_core::v8;
 use deno_error::JsErrorBox;
-pub use deno_fs::FsError;
 use deno_path_util::PathToUrlError;
-use deno_permissions::OpenAccessKind;
-use deno_permissions::PermissionCheckError;
-use deno_permissions::PermissionsContainer;
 use deno_tls::Proxy;
 use deno_tls::RootCertStoreProvider;
 use deno_tls::SocketUse;
@@ -68,7 +64,9 @@ use deno_tls::TlsKey;
 use deno_tls::TlsKeys;
 use deno_tls::TlsKeysHolder;
 use deno_tls::rustls::RootCertStore;
-pub use fs_fetch_handler::FsFetchHandler;
+pub use permissions::FetchPermissions;
+pub use permissions::PermissionCheckError;
+pub use permissions::PermissionsContainer;
 use http::Extensions;
 use http::HeaderMap;
 use http::Method;
@@ -195,9 +193,6 @@ pub enum FetchError {
   #[error("NetworkError when attempting to fetch resource")]
   NetworkError,
   #[class(type)]
-  #[error("Error fetching file '{0}': {1}")]
-  FileFetch(String, deno_fs::FsError),
-  #[class(type)]
   #[error("Fetching files only supports the GET method: received {0}")]
   FsNotGet(Method),
   #[class(inherit)]
@@ -260,22 +255,6 @@ pub enum FetchError {
   #[class(inherit)]
   #[error(transparent)]
   Other(JsErrorBox),
-}
-
-impl From<deno_fs::FsError> for FetchError {
-  fn from(value: deno_fs::FsError) -> Self {
-    match value {
-      deno_fs::FsError::Io(_)
-      | deno_fs::FsError::FileBusy
-      | deno_fs::FsError::NotSupported => FetchError::NetworkError,
-      deno_fs::FsError::PermissionCheck(err) => {
-        FetchError::PermissionCheck(err)
-      }
-      deno_fs::FsError::JoinError(err) => {
-        FetchError::Other(JsErrorBox::from_err(err))
-      }
-    }
-  }
 }
 
 pub type CancelableResponseFuture =
@@ -893,20 +872,10 @@ pub fn op_fetch_custom_client(
         path: original_path,
       } => {
         let path = Path::new(original_path);
+        // Unix sockets are an outbound network primitive: the embedder's
+        // policy checks the socket and says which path to connect to.
         let resolved_path = permissions
-          .check_open(
-            Cow::Borrowed(path),
-            OpenAccessKind::ReadWriteNoFollow,
-            Some("Deno.createHttpClient()"),
-          )?
-          .into_path();
-        // Unix sockets are an outbound network primitive, so a Unix proxy
-        // requires an `--allow-net=unix:<path>` rule in addition to the
-        // filesystem check above, mirroring the direct Unix socket ops.
-        permissions.check_net_unix_socket(
-          &resolved_path,
-          Some("Deno.createHttpClient()"),
-        )?;
+          .check_net_unix_socket(path, "Deno.createHttpClient()")?;
         if path != resolved_path {
           *original_path = resolved_path.to_string_lossy().into_owned();
         }

@@ -20,10 +20,7 @@ bytes.workspace = true
 data-url.workspace = true
 deno_core.workspace = true
 deno_error.workspace = true
-deno_fs.workspace = true
-deno_io.workspace = true
 deno_path_util.workspace = true
-deno_permissions.workspace = true
 deno_tls.workspace = true
 error_reporter.workspace = true
 h2.workspace = true
@@ -54,7 +51,6 @@ deno_web.workspace = true
 deno_webidl.workspace = true
 fast-socks5.workspace = true
 rustls.workspace = true
-sys_traits = { workspace = true, features = ["libc", "real", "winapi"] }
 
 [[bench]]
 name = "headers_methods"
