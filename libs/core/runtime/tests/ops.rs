@@ -193,7 +193,8 @@ fn test_op_high_arity() {
     .execute_script("test.js", "Deno.core.ops.op_add_4(1, 2, 3, 4)")
     .unwrap();
   simien_core::scope!(scope, runtime);
-  assert_eq!(r.open(scope).integer_value(scope), Some(10));
+  // SAFETY: used at once, in this scope, on the isolate's own thread.
+  assert_eq!(unsafe { r.open(scope) }.integer_value(scope), Some(10));
 }
 
 #[test]

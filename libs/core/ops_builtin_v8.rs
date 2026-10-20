@@ -1433,8 +1433,9 @@ pub fn wasm_streaming_callback<'a>(
 
   let undefined = v8::undefined(scope);
   let rid = simien_serde_v8::to_v8(scope, streaming_rid).unwrap();
-  cb_handle
-    .open(scope)
+  // SAFETY: used at once, in this scope, on the isolate's own thread.
+  unsafe { cb_handle
+    .open(scope) }
     .call(scope, undefined.into(), &[arg, rid]);
 }
 

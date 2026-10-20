@@ -403,7 +403,8 @@ pub fn to_v8_error<'s, 'i>(
     .borrow()
     .clone()
     .expect("Custom error builder must be set");
-  let cb = cb.open(tc_scope);
+  // SAFETY: used at once, in this scope, on the isolate's own thread.
+  let cb = unsafe { cb.open(tc_scope) };
   let this = v8::undefined(tc_scope).into();
   let class = v8::String::new(tc_scope, &error.get_class()).unwrap();
   let message = v8::String::new(tc_scope, &error.get_message()).unwrap();
@@ -1040,7 +1041,8 @@ impl JsError {
     let js_format_exception_cb =
       exception_state.js_format_exception_cb.borrow().clone();
     if let Some(format_exception_cb) = js_format_exception_cb {
-      let format_exception_cb = format_exception_cb.open(scope);
+      // SAFETY: used at once, in this scope, on the isolate's own thread.
+      let format_exception_cb = unsafe { format_exception_cb.open(scope) };
       let this = v8::undefined(scope).into();
       let formatted = format_exception_cb.call(scope, this, &[exception]);
       if let Some(formatted) = formatted

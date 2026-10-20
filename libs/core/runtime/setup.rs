@@ -163,8 +163,9 @@ fn v8_init(
     v8::icu::set_common_data_77(deno_core_icudata::ICU_DATA).unwrap();
   }
 
+  // V8 152 dropped --no-validate-asm along with asm.js validation itself: asm.js
+  // now always runs as plain JavaScript, which is what that flag asked for.
   let base_flags = concat!(
-    " --no-validate-asm",
     " --turbo_fast_api_calls",
     " --harmony-temporal",
     " --js-float16array",

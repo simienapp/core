@@ -356,7 +356,8 @@ impl JsRealmInner {
     std::mem::take(&mut *state.js_wasm_streaming_cb.borrow_mut());
 
     {
-      let ctx = self.context().open(scope);
+      // SAFETY: used at once, in this scope, on the isolate's own thread.
+      let ctx = unsafe { self.context().open(scope) };
       // SAFETY: Clear all embedder data
       unsafe {
         let ctx_state =
