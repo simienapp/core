@@ -1,0 +1,21 @@
+# Upstream Deno crate name -> the name it's published under here. One per line.
+# tools/rename.py applies this map to the tree, and to upstream patches before
+# they're applied (tools/port-upstream.sh), so both stay in step.
+deno_core simien_core
+deno_ops simien_ops
+serde_v8 simien_serde_v8
+deno_v8 simien_v8
+deno_crypto_provider simien_crypto_provider
+deno_webidl simien_webidl
+deno_web simien_web
+deno_fetch simien_fetch
+deno_crypto simien_crypto
+deno_tls simien_tls
+deno_error_macro simien_error_macro
+deno_error simien_error
+deno_unsync simien_unsync
+deno_path_util simien_path_util
+boxed_error simien_boxed_error
+wasm_dep_analyzer simien_wasm_dep_analyzer
+deno_native_certs simien_native_certs
+deno_bench_util simien_bench_util
