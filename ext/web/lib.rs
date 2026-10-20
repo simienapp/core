@@ -2,14 +2,8 @@
 
 mod blob;
 
-mod broadcast_channel;
 mod compression;
 mod console;
-mod css_stylesheet;
-mod css_value;
-mod f64;
-mod geometry;
-mod image_data;
 mod message_port;
 mod stream_resource;
 mod timers;
@@ -22,7 +16,6 @@ use std::sync::Arc;
 
 pub use blob::BlobError;
 pub use compression::CompressionError;
-pub use css_stylesheet::create_css_style_sheet;
 use simien_core::U16String;
 use simien_core::convert::ByteString;
 use simien_core::convert::Uint8Array;
@@ -49,7 +42,6 @@ use crate::blob::op_blob_read_part;
 use crate::blob::op_blob_remove_part;
 use crate::blob::op_blob_revoke_object_url;
 use crate::blob::op_blob_slice_part;
-pub use crate::broadcast_channel::InMemoryBroadcastChannel;
 pub use crate::message_port::JsMessageData;
 pub use crate::message_port::MessagePort;
 pub use crate::message_port::RecvMessageData;
@@ -106,9 +98,6 @@ simien_core::extension!(simien_web,
     op_now,
     op_time_origin,
     op_defer,
-    geometry::op_geometry_get_enable_css_parser_features,
-    geometry::op_geometry_matrix_set_matrix_value,
-    geometry::op_geometry_matrix_to_string,
     stream_resource::op_readable_stream_resource_allocate,
     stream_resource::op_readable_stream_resource_allocate_sized,
     stream_resource::op_readable_stream_resource_get_sink,
@@ -142,35 +131,16 @@ simien_core::extension!(simien_web,
     console::op_console_css_to_ansi,
     console::op_console_get_string_width,
     console::op_console_strip_vt,
-    broadcast_channel::op_broadcast_subscribe,
-    broadcast_channel::op_broadcast_unsubscribe,
-    broadcast_channel::op_broadcast_serialize,
-    broadcast_channel::op_broadcast_deserialize,
-    broadcast_channel::op_broadcast_free,
-    broadcast_channel::op_broadcast_send,
-    broadcast_channel::op_broadcast_recv,
   ],
   objects = [
-    css_stylesheet::CSSRule,
-    css_stylesheet::CSSStyleSheet,
-    geometry::DOMPointReadOnly,
-    geometry::DOMPoint,
-    geometry::DOMRectReadOnly,
-    geometry::DOMRect,
-    geometry::DOMQuad,
-    geometry::DOMMatrixReadOnly,
-    geometry::DOMMatrix,
-    image_data::ImageData,
     console::Console,
   ],
   lazy_loaded_esm = [
     "locks.js",
-    "webtransport.js",
   ],
   lazy_loaded_js = [
     "00_infra.js",
     "00_url.js",
-    "01_broadcast_channel.js",
     "01_console.js",
     "01_dom_exception.js",
     "01_mimesniff.js",
@@ -189,15 +159,10 @@ simien_core::extension!(simien_web,
     "13_message_port.js",
     "14_compression.js",
     "15_performance.js",
-    "16_image_data.js",
-    "17_geometry.js",
-    "18_css_stylesheet.js",
   ],
   options = {
     blob_store: Arc<dyn BlobStoreTrait>,
     maybe_location: Option<Url>,
-    enable_css_parser_features: bool,
-    bc: InMemoryBroadcastChannel,
   },
   state = |state, options| {
     state.put(options.blob_store);
@@ -205,9 +170,6 @@ simien_core::extension!(simien_web,
       state.put(Location(location));
     }
     state.put(StartTime::default());
-    state.put(geometry::State::new(options.enable_css_parser_features));
-    state.put(options.bc);
-    state.put(broadcast_channel::BroadcastSabStash::default());
   }
 );
 

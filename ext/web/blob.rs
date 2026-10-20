@@ -456,8 +456,6 @@ mod tests {
     let ext = crate::simien_web::init(
       blob_store,
       None,
-      Default::default(),
-      Default::default(),
     );
 
     // Run the extension's state initializer on a fresh OpState.

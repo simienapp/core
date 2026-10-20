@@ -34,8 +34,6 @@ fn setup() -> Vec<Extension> {
     simien_web::simien_web::init(
       simien_web::BlobStore::default_arc(),
       None,
-      Default::default(),
-      Default::default(),
     ),
     bench_setup::init(),
   ]
