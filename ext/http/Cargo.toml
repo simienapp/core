@@ -1,0 +1,62 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_http"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+readme = "README.md"
+repository = "https://github.com/simienapp/core"
+description = "HTTP server for the Simien runtime. Forked from Deno's deno_http 0.257.0."
+
+[features]
+default = ["default_property_extractor"]
+"__http_tracing" = []
+default_property_extractor = []
+
+[lib]
+path = "lib.rs"
+
+[[bench]]
+name = "compressible"
+harness = false
+
+[dependencies]
+async-compression = { workspace = true, features = ["tokio", "brotli", "gzip"] }
+async-trait.workspace = true
+aws-lc-rs.workspace = true
+base64.workspace = true
+brotli.workspace = true
+bytes.workspace = true
+simien_core.workspace = true
+simien_error.workspace = true
+simien_http_h1.workspace = true
+simien_net.workspace = true
+simien_websocket.workspace = true
+flate2.workspace = true
+http.workspace = true
+http-body-util = { workspace = true, features = ["channel"] }
+httpdate.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+itertools.workspace = true
+log.workspace = true
+mime.workspace = true
+once_cell.workspace = true
+percent-encoding.workspace = true
+phf.workspace = true
+pin-project.workspace = true
+scopeguard.workspace = true
+smallvec.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-util = { workspace = true, features = ["io"] }
+
+[dev-dependencies]
+simien_fetch.workspace = true
+simien_web.workspace = true
+simien_webidl.workspace = true
+bencher.workspace = true
+http-body-util.workspace = true
+rand.workspace = true

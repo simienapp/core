@@ -1,0 +1,26 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_http_h1"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+repository = "https://github.com/simienapp/core"
+description = "HTTP/1 protocol pieces for the Simien runtime. Forked from Deno's deno_http_h1 0.10.0."
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+httparse.workspace = true
+memchr.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["io-util", "macros", "net", "rt", "time"] }
+
+[dev-dependencies]
+criterion.workspace = true
+
+[[bench]]
+name = "h1"
+harness = false

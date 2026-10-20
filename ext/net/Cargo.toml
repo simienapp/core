@@ -1,0 +1,24 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_net"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+readme = "README.md"
+repository = "https://github.com/simienapp/core"
+description = "TCP, TLS and Unix stream types for the Simien runtime. Forked from the stream layer of Deno's deno_net 0.251.0."
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+simien_core.workspace = true
+simien_error.workspace = true
+simien_tls.workspace = true
+pin-project.workspace = true
+rustls-tokio-stream.workspace = true
+socket2.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
