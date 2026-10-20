@@ -2,8 +2,34 @@
 
 (function () {
 const { core, primordials } = __bootstrap;
-const { op_fetch_custom_client } = core.ops;
-const { loadTlsKeyPair } = core.loadExtScript("ext:deno_net/02_tls.js");
+const {
+  op_fetch_custom_client,
+  op_fetch_tls_key_null,
+  op_fetch_tls_key_static,
+} = core.ops;
+
+// Upstream loaded this from deno_net (02_tls.js); simien_fetch carries the
+// part createHttpClient needs: a PEM cert and key, or no client certificate.
+function loadTlsKeyPair(api, { keyFormat, cert, key }) {
+  if (keyFormat !== undefined && keyFormat !== "pem") {
+    throw new TypeError(
+      `If "keyFormat" is specified, it must be "pem": received "${keyFormat}"`,
+    );
+  }
+  if (cert !== undefined && key === undefined) {
+    throw new TypeError(
+      `If \`cert\` is specified, \`key\` must be specified as well for \`${api}\``,
+    );
+  }
+  if (cert === undefined && key !== undefined) {
+    throw new TypeError(
+      `If \`key\` is specified, \`cert\` must be specified as well for \`${api}\``,
+    );
+  }
+  return cert !== undefined
+    ? op_fetch_tls_key_static(cert, key)
+    : op_fetch_tls_key_null();
+}
 
 const { internalRidSymbol } = core;
 const {

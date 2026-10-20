@@ -63,30 +63,20 @@ const {
   toInnerResponse,
 } = core.loadExtScript("ext:simien_fetch/23_response.js");
 const abortSignal = core.loadExtScript("ext:simien_web/03_abort_signal.js");
-// Make sure both telemetry modules are loaded before destructuring their
-// `internals` slots. 99_main.js / 90_deno_ns.js used to load `telemetry.ts`
-// unconditionally at snapshot time, but now defer it to actual telemetry
-// use. Fetch is the one always-on caller that depends on `__telemetry` and
-// `__telemetryUtil`, so it loads both modules on first use.
-if (!internals.__telemetry) {
-  core.loadExtScript("ext:deno_telemetry/telemetry.ts");
-}
-if (!internals.__telemetryUtil) {
-  core.loadExtScript("ext:deno_telemetry/util.ts");
-}
-const {
-  builtinTracer,
-  ContextManager,
-  DID_NOT_ENTER,
-  enterSpan,
-  exitSpan,
-} = internals.__telemetry;
-const __telemetry = internals.__telemetry;
-const {
-  updateSpanFromClientResponse,
-  updateSpanFromError,
-  updateSpanFromRequest,
-} = internals.__telemetryUtil;
+// Deno's OpenTelemetry integration (deno_telemetry) isn't part of
+// simien_fetch. Tracing is always off, so no span is ever started and the
+// span helpers below are never reached.
+const DID_NOT_ENTER = Symbol("DID_NOT_ENTER");
+const __telemetry = { TRACING_ENABLED: false, PROPAGATORS: [] };
+const builtinTracer = () => {
+  throw new Error("tracing is not available in simien_fetch");
+};
+const ContextManager = { active: () => undefined };
+const enterSpan = () => DID_NOT_ENTER;
+const exitSpan = () => {};
+const updateSpanFromClientResponse = () => {};
+const updateSpanFromError = () => {};
+const updateSpanFromRequest = () => {};
 
 const REQUEST_BODY_HEADER_NAMES = [
   "content-encoding",
