@@ -68,7 +68,6 @@ windows-sys.workspace = true
 [dev-dependencies]
 bencher.workspace = true
 criterion.workspace = true
-deno_ast.workspace = true
 paste.workspace = true
 pretty_assertions.workspace = true
 rstest.workspace = true
@@ -97,7 +96,3 @@ name = "arena"
 path = "benches/infra/arena.rs"
 harness = false
 
-[[bench]]
-name = "snapshot"
-path = "benches/snapshot/snapshot.rs"
-harness = false

@@ -21,6 +21,7 @@ members = [
   "libs/boxed_error",
   "libs/wasm_dep_analyzer",
   "libs/deno_native_certs",
+  "tests/bench_util",
 ]
 
 [workspace.package]
@@ -30,7 +31,6 @@ license = "MIT"
 repository = "https://github.com/denoland/deno"
 
 [workspace.dependencies]
-deno_ast = { version = "=0.53.3", features = ["transpiling"] }
 deno_core_icudata = "0.77.0"
 deno_doc = "=0.207.0"
 deno_error = "=0.7.1"
@@ -82,7 +82,7 @@ deno_webstorage = { version = "0.254.0" }
 denort_helper = { version = "0.57.0" }
 
 # workspace libraries
-deno_bench_util = { version = "0.253.0" }
+deno_bench_util = { version = "0.253.0", path = "./tests/bench_util" }
 deno_cache_dir = { version = "0.51.0" }
 deno_cli_parser = { version = "0.9.0" }
 deno_config = { version = "0.109.0", features = ["workspace"] }
@@ -454,3 +454,4 @@ deno_path_util = { path = "./libs/deno_path_util" }
 boxed_error = { path = "./libs/boxed_error" }
 wasm_dep_analyzer = { path = "./libs/wasm_dep_analyzer" }
 deno_native_certs = { path = "./libs/deno_native_certs" }
+deno_bench_util = { path = "./tests/bench_util" }
