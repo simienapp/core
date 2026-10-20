@@ -46,7 +46,7 @@ const {
   newInnerRequest,
 } = core.loadExtScript("ext:simien_fetch/23_request.js");
 const loadWebSocket = core.createLazyLoader(
-  "ext:deno_websocket/01_websocket.js",
+  "ext:simien_websocket/01_websocket.js",
 );
 const {
   getReadableStreamResourceBacking,

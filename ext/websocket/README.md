@@ -1,4 +1,4 @@
-# deno_websocket
+# simien_websocket
 
 This op crate implements the websocket functions of Deno.
 

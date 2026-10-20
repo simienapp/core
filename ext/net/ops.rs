@@ -9,19 +9,19 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::time::Duration;
 
-use deno_core::AsyncRefCell;
-use deno_core::ByteString;
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::FromV8;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::ToV8;
-use deno_core::op2;
+use simien_core::AsyncRefCell;
+use simien_core::ByteString;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::FromV8;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::ToV8;
+use simien_core::op2;
 use deno_permissions::PermissionsContainer;
 use hickory_proto::ProtoError;
 use hickory_proto::ProtoErrorKind;
@@ -110,7 +110,7 @@ fn default_attempt_delay() -> u64 {
   crate::happy_eyeballs::DEFAULT_ATTEMPT_DELAY_MS
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum NetError {
   #[class("BadResource")]
   #[error("Listener has been closed")]
@@ -138,7 +138,7 @@ pub enum NetError {
   Permission(#[from] deno_permissions::PermissionCheckError),
   #[class(inherit)]
   #[error("{0}")]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(generic)]
   #[error("No resolved address found")]
   NoResolvedAddress,
@@ -150,7 +150,7 @@ pub enum NetError {
   Map(crate::io::MapError),
   #[class(inherit)]
   #[error("{0}")]
-  Canceled(#[from] deno_core::Canceled),
+  Canceled(#[from] simien_core::Canceled),
   #[class("NotFound")]
   #[error("{0}")]
   #[property("ares_code" = self.ares_code())]
@@ -186,16 +186,16 @@ pub enum NetError {
   TcpStreamBusy,
   #[class(generic)]
   #[error("{0}")]
-  Rustls(#[from] deno_tls::rustls::Error),
+  Rustls(#[from] simien_tls::rustls::Error),
   #[class(inherit)]
   #[error("{0}")]
-  Tls(#[from] deno_tls::TlsError),
+  Tls(#[from] simien_tls::TlsError),
   #[class("InvalidData")]
   #[error("Error creating TLS certificate: Deno.listenTls requires a key")]
   ListenTlsRequiresKey,
   #[class(inherit)]
   #[error("{0}")]
-  RootCertStore(deno_error::JsErrorBox),
+  RootCertStore(simien_error::JsErrorBox),
   #[class(generic)]
   #[error("{0}")]
   Reunite(tokio::net::tcp::ReuniteError),
@@ -551,8 +551,8 @@ pub struct NetPermToken {
 }
 
 // SAFETY: we're sure `NetPermToken` can be GCed
-unsafe impl deno_core::GarbageCollected for NetPermToken {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for NetPermToken {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"NetPermToken"
@@ -1408,9 +1408,9 @@ mod tests {
   use std::net::ToSocketAddrs;
   use std::sync::Mutex;
 
-  use deno_core::JsRuntime;
-  use deno_core::RuntimeOptions;
-  use deno_core::futures::FutureExt;
+  use simien_core::JsRuntime;
+  use simien_core::RuntimeOptions;
+  use simien_core::futures::FutureExt;
   use hickory_proto::rr::Name;
   use hickory_proto::rr::rdata::NULL;
   use hickory_proto::rr::rdata::SOA;
@@ -1754,7 +1754,7 @@ mod tests {
 
     use deno_permissions::RuntimePermissionDescriptorParser;
 
-    deno_core::extension!(
+    simien_core::extension!(
       test_ext,
       state = |state| {
         let parser = Arc::new(RuntimePermissionDescriptorParser::new(
@@ -1817,7 +1817,7 @@ mod tests {
 
     use deno_permissions::RuntimePermissionDescriptorParser;
 
-    deno_core::extension!(
+    simien_core::extension!(
       test_ext,
       state = |state| {
         let parser = Arc::new(RuntimePermissionDescriptorParser::new(

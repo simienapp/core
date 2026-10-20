@@ -6,10 +6,10 @@ use std::net::SocketAddr;
 use std::rc::Rc;
 use std::time::Duration;
 
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::futures::StreamExt;
-use deno_core::futures::stream::FuturesUnordered;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::futures::StreamExt;
+use simien_core::futures::stream::FuturesUnordered;
 use tokio::net::TcpStream;
 use tokio::time::Instant;
 use tokio::time::sleep_until;

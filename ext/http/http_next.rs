@@ -38,11 +38,11 @@ use simien_core::unsync::JoinHandle;
 use simien_core::unsync::spawn;
 use simien_core::v8;
 use simien_http_h1 as h1;
-use deno_net::ops_tls::TlsStream;
-use deno_net::raw::NetworkStream;
-use deno_websocket::ServerWebSocket;
-use deno_websocket::ws_create_server_stream;
-use deno_websocket::ws_create_server_stream_with_guard;
+use simien_net::ops_tls::TlsStream;
+use simien_net::raw::NetworkStream;
+use simien_websocket::ServerWebSocket;
+use simien_websocket::ws_create_server_stream;
+use simien_websocket::ws_create_server_stream_with_guard;
 use fly_accept_encoding::Encoding;
 use hyper::StatusCode;
 use hyper::body::Incoming;
@@ -344,7 +344,7 @@ pub enum HttpNextError {
   TakeNetworkStream(
     #[from]
     #[inherit]
-    deno_net::raw::TakeNetworkStreamError,
+    simien_net::raw::TakeNetworkStreamError,
   ),
 }
 
@@ -1837,7 +1837,7 @@ fn register_server_websocket(
 
 /// Create a server WebSocket from a TCP stream resource (e.g. taken from a
 /// node:http TCPWrap handle). This lets ext/node hand off the raw stream
-/// without depending on deno_websocket directly.
+/// without depending on simien_websocket directly.
 #[op2(fast)]
 #[smi]
 pub fn op_http_ws_create_from_stream_resource(
@@ -1845,7 +1845,7 @@ pub fn op_http_ws_create_from_stream_resource(
   #[smi] stream_rid: ResourceId,
   #[buffer] extra_bytes: &[u8],
 ) -> Result<ResourceId, HttpNextError> {
-  let stream = deno_net::raw::take_network_stream_resource(
+  let stream = simien_net::raw::take_network_stream_resource(
     &mut state.resource_table,
     stream_rid,
   )?;
@@ -5656,8 +5656,8 @@ fn is_normal_close(err: &(dyn std::error::Error + 'static)) -> bool {
     return false;
   }
 
-  if let Some(err) = err.downcast_ref::<deno_net::tunnel::Error>() {
-    if let deno_net::tunnel::Error::QuinnConnection(err) = err {
+  if let Some(err) = err.downcast_ref::<simien_net::tunnel::Error>() {
+    if let simien_net::tunnel::Error::QuinnConnection(err) = err {
       return is_normal_close(err);
     }
 
@@ -5665,9 +5665,9 @@ fn is_normal_close(err: &(dyn std::error::Error + 'static)) -> bool {
   }
 
   if let Some(err) =
-    err.downcast_ref::<deno_net::tunnel::quinn::ConnectionError>()
+    err.downcast_ref::<simien_net::tunnel::quinn::ConnectionError>()
   {
-    if matches!(err, deno_net::tunnel::quinn::ConnectionError::LocallyClosed) {
+    if matches!(err, simien_net::tunnel::quinn::ConnectionError::LocallyClosed) {
       return true;
     }
 

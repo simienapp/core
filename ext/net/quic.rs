@@ -18,33 +18,33 @@ use std::task::Poll;
 use std::task::Waker;
 use std::time::Duration;
 
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::BufMutView;
-use deno_core::BufView;
-use deno_core::FromV8;
-use deno_core::GarbageCollected;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::ToV8;
-use deno_core::WriteOutcome;
-use deno_core::convert::Uint8Array;
-use deno_core::error::ResourceError;
-use deno_core::op2;
-use deno_error::JsError;
-use deno_error::JsErrorBox;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::BufMutView;
+use simien_core::BufView;
+use simien_core::FromV8;
+use simien_core::GarbageCollected;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::ToV8;
+use simien_core::WriteOutcome;
+use simien_core::convert::Uint8Array;
+use simien_core::error::ResourceError;
+use simien_core::op2;
+use simien_error::JsError;
+use simien_error::JsErrorBox;
 use deno_permissions::PermissionCheckError;
 use deno_permissions::PermissionsContainer;
-use deno_tls::SocketUse;
-use deno_tls::TlsClientConfigOptions;
-use deno_tls::TlsError;
-use deno_tls::TlsKey;
-use deno_tls::TlsKeys;
-use deno_tls::TlsKeysHolder;
-use deno_tls::create_client_config;
+use simien_tls::SocketUse;
+use simien_tls::TlsClientConfigOptions;
+use simien_tls::TlsError;
+use simien_tls::TlsKey;
+use simien_tls::TlsKeys;
+use simien_tls::TlsKeysHolder;
+use simien_tls::create_client_config;
 use quinn::crypto::rustls::QuicClientConfig;
 use quinn::crypto::rustls::QuicServerConfig;
 use quinn::rustls::client::ClientSessionMemoryCache;
@@ -243,7 +243,7 @@ struct EndpointResource {
 
 // SAFETY: we're sure `EndpointResource` can be GCed
 unsafe impl GarbageCollected for EndpointResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"EndpointResource"
@@ -331,7 +331,7 @@ impl Drop for ListenerResource {
 
 // SAFETY: we're sure `ListenerResource` can be GCed
 unsafe impl GarbageCollected for ListenerResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"ListenerResource"
@@ -350,7 +350,7 @@ pub(crate) fn op_quic_endpoint_listen(
     return Err(QuicError::CannotListen);
   }
 
-  let TlsKeys::Static(deno_tls::TlsKey(cert, key)) = keys.take() else {
+  let TlsKeys::Static(simien_tls::TlsKey(cert, key)) = keys.take() else {
     return Err(QuicError::MissingTlsKey);
   };
 
@@ -389,7 +389,7 @@ struct ConnectionResource(
 
 // SAFETY: we're sure `ConnectionResource` can be GCed
 unsafe impl GarbageCollected for ConnectionResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"ConnectionResource"
@@ -403,7 +403,7 @@ struct IncomingResource(
 
 // SAFETY: we're sure `Incoming` can be GCed
 unsafe impl GarbageCollected for IncomingResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"IncomingResource"
@@ -536,7 +536,7 @@ struct ConnectingResource(RefCell<Option<quinn::Connecting>>);
 
 // SAFETY: we're sure `ConnectingResource` can be GCed
 unsafe impl GarbageCollected for ConnectingResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"ConnectingResource"
@@ -647,7 +647,7 @@ pub(crate) fn op_quic_endpoint_connect(
       _ => {
         let mut tls_config =
           if let Some(hashes) = server_certificate_hashes.clone() {
-            deno_tls::rustls::ClientConfig::builder()
+            simien_tls::rustls::ClientConfig::builder()
               .dangerous()
               .with_custom_certificate_verifier(Arc::new(
                 webtransport::ServerFingerprints::new(hashes),
@@ -1094,8 +1094,8 @@ pub(crate) mod webtransport {
   //
   // https://github.com/kixelated/web-transport-rs
 
-  use deno_core::futures::try_join;
-  use deno_tls::rustls;
+  use simien_core::futures::try_join;
+  use simien_tls::rustls;
   use rustls::client::danger::ServerCertVerifier;
   use rustls::crypto::CryptoProvider;
   use rustls::crypto::verify_tls12_signature;

@@ -16,10 +16,10 @@ pub mod win_pipe;
 
 use std::sync::Arc;
 
-use deno_core::OpState;
+use simien_core::OpState;
 use deno_features::FeatureChecker;
-use deno_tls::RootCertStoreProvider;
-use deno_tls::rustls::RootCertStore;
+use simien_tls::RootCertStoreProvider;
+use simien_tls::rustls::RootCertStore;
 pub use quic::QuicError;
 
 pub const UNSTABLE_FEATURE_NAME: &str = "net";
@@ -100,7 +100,7 @@ pub struct DefaultTlsOptions {
 impl DefaultTlsOptions {
   pub fn root_cert_store(
     &self,
-  ) -> Result<Option<RootCertStore>, deno_error::JsErrorBox> {
+  ) -> Result<Option<RootCertStore>, simien_error::JsErrorBox> {
     Ok(match &self.root_cert_store_provider {
       Some(provider) => Some(provider.get_or_try_init()?.clone()),
       None => None,
@@ -114,8 +114,8 @@ impl DefaultTlsOptions {
 /// would override previously used alias.
 pub struct UnsafelyIgnoreCertificateErrors(pub Option<Vec<String>>);
 
-deno_core::extension!(deno_net,
-  deps = [ deno_web ],
+simien_core::extension!(simien_net,
+  deps = [ simien_web ],
   ops = [
     ops::op_net_accept_tcp,
     ops::op_net_get_ips_from_perm_token,
@@ -218,7 +218,7 @@ deno_core::extension!(deno_net,
 /// Stub ops for non-unix platforms.
 #[cfg(not(unix))]
 mod ops_unix {
-  use deno_core::op2;
+  use simien_core::op2;
 
   macro_rules! stub_op {
     ($name:ident) => {

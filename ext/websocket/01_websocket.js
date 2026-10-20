@@ -51,16 +51,16 @@ const {
   TypeError,
 } = primordials;
 
-const { URL } = core.loadExtScript("ext:deno_web/00_url.js");
-const webidl = core.loadExtScript("ext:deno_webidl/00_webidl.js");
+const { URL } = core.loadExtScript("ext:simien_web/00_url.js");
+const webidl = core.loadExtScript("ext:simien_webidl/00_webidl.js");
 const { createFilteredInspectProxy } = core.loadExtScript(
-  "ext:deno_web/01_console.js",
+  "ext:simien_web/01_console.js",
 );
 const { HTTP_TOKEN_CODE_POINT_RE, byteLowerCase, forgivingBase64Encode } = core
   .loadExtScript(
-    "ext:deno_web/00_infra.js",
+    "ext:simien_web/00_infra.js",
   );
-const { DOMException } = core.loadExtScript("ext:deno_web/01_dom_exception.js");
+const { DOMException } = core.loadExtScript("ext:simien_web/01_dom_exception.js");
 const {
   CloseEvent,
   defineEventHandler,
@@ -70,16 +70,16 @@ const {
   EventTarget,
   MessageEvent,
   setIsTrusted,
-} = core.loadExtScript("ext:deno_web/02_event.js");
-const { Blob, BlobPrototype } = core.loadExtScript("ext:deno_web/09_file.js");
-const { getLocationHref } = core.loadExtScript("ext:deno_web/12_location.js");
+} = core.loadExtScript("ext:simien_web/02_event.js");
+const { Blob, BlobPrototype } = core.loadExtScript("ext:simien_web/09_file.js");
+const { getLocationHref } = core.loadExtScript("ext:simien_web/12_location.js");
 const {
   fillHeaders,
   headerListFromHeaders,
   headersFromHeaderList,
-} = core.loadExtScript("ext:deno_fetch/20_headers.js");
+} = core.loadExtScript("ext:simien_fetch/20_headers.js");
 const { HttpClientPrototype } = core.loadExtScript(
-  "ext:deno_fetch/22_http_client.js",
+  "ext:simien_fetch/22_http_client.js",
 );
 
 const kNodeUndiciDispatcherOptions = SymbolFor(

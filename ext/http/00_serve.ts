@@ -110,9 +110,9 @@ const {
 const {
   listen,
   listenOptionApiName,
-} = core.loadExtScript("ext:deno_net/01_net.js");
+} = core.loadExtScript("ext:simien_net/01_net.js");
 const { hasTlsKeyPairOptions, listenTls } = core.loadExtScript(
-  "ext:deno_net/02_tls.js",
+  "ext:simien_net/02_tls.js",
 );
 const {
   otelState,

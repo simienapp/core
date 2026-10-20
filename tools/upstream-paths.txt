@@ -13,3 +13,5 @@ ext/tls
 tests/bench_util
 ext/http
 libs/http_h1
+ext/net
+ext/websocket

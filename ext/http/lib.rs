@@ -50,12 +50,12 @@ use simien_core::futures::stream::Peekable;
 use simien_core::op2;
 use simien_core::unsync::spawn;
 use simien_error::JsErrorBox;
-use deno_net::raw::NetworkStream;
+use simien_net::raw::NetworkStream;
 use deno_telemetry::Histogram;
 use deno_telemetry::MeterProvider;
 use deno_telemetry::OTEL_GLOBALS;
 use deno_telemetry::UpDownCounter;
-use deno_websocket::ws_create_server_stream;
+use simien_websocket::ws_create_server_stream;
 use flate2::Compression;
 use flate2::write::GzEncoder;
 use http_body_util::Channel;
@@ -202,7 +202,7 @@ pub struct Options {
 #[cfg(not(feature = "default_property_extractor"))]
 simien_core::extension!(
   simien_http,
-  deps = [simien_web, deno_net, simien_fetch, deno_websocket],
+  deps = [simien_web, simien_net, simien_fetch, simien_websocket],
   parameters = [ HTTP: HttpPropertyExtractor ],
   ops = [
     op_http_accept,
@@ -266,7 +266,7 @@ simien_core::extension!(
 #[cfg(feature = "default_property_extractor")]
 simien_core::extension!(
   simien_http,
-  deps = [simien_web, deno_net, simien_fetch, deno_websocket],
+  deps = [simien_web, simien_net, simien_fetch, simien_websocket],
   ops = [
     op_http_accept,
     op_http_headers,
@@ -1790,7 +1790,7 @@ fn extract_network_stream<U: CanDowncastUpgrade>(
       Err(x) => x,
     };
   let upgraded = match maybe_extract_network_stream::<
-    deno_net::ops_tls::TlsStream<TcpStream>,
+    simien_net::ops_tls::TlsStream<TcpStream>,
     _,
   >(upgraded)
   {
@@ -1811,7 +1811,7 @@ fn extract_network_stream<U: CanDowncastUpgrade>(
       Err(x) => x,
     };
   let upgraded =
-    match maybe_extract_network_stream::<deno_net::tunnel::TunnelStream, _>(
+    match maybe_extract_network_stream::<simien_net::tunnel::TunnelStream, _>(
       upgraded,
     ) {
       Ok(res) => return res,
@@ -1834,7 +1834,7 @@ pub fn op_http_serve_address_override() -> (u8, String, u32, bool) {
     return parse_serve_address(&val);
   };
 
-  if deno_net::tunnel::get_tunnel().is_some() {
+  if simien_net::tunnel::get_tunnel().is_some() {
     return (4, String::new(), 0, true);
   }
 

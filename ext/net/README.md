@@ -1,4 +1,4 @@
-# deno_net
+# simien_net
 
 **This crate implements networking APIs.**
 
@@ -9,15 +9,15 @@ From javascript, include the extension's source:
 ```javascript
 import { core } from "ext:core/mod.js";
 
-const webidl = core.loadExtScript("ext:deno_webidl/00_webidl.js");
-const net = core.loadExtScript("ext:deno_net/01_net.js");
-const tls = core.loadExtScript("ext:deno_net/02_tls.js");
-const loadQuic = core.createLazyLoader("ext:deno_net/03_quic.js");
+const webidl = core.loadExtScript("ext:simien_webidl/00_webidl.js");
+const net = core.loadExtScript("ext:simien_net/01_net.js");
+const tls = core.loadExtScript("ext:simien_net/02_tls.js");
+const loadQuic = core.createLazyLoader("ext:simien_net/03_quic.js");
 const quic = loadQuic();
 ```
 
 Then from rust, provide:
-`deno_net::deno_net::init(root_cert_store_provider, unsafely_ignore_certificate_errors)`
+`simien_net::simien_net::init(root_cert_store_provider, unsafely_ignore_certificate_errors)`
 
 Where:
 
@@ -28,8 +28,8 @@ In the `extensions` field of your `RuntimeOptions`
 
 ## Dependencies
 
-- **deno_web**: Provided by the `deno_web` crate
-- **deno_fetch**: Provided by the `deno_fetch` crate
+- **simien_web**: Provided by the `simien_web` crate
+- **simien_fetch**: Provided by the `simien_fetch` crate
 
 ## Provided ops
 

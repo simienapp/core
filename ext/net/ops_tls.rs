@@ -13,36 +13,36 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::FromV8;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::futures::TryFutureExt;
-use deno_core::op2;
-use deno_core::v8;
-use deno_error::JsErrorBox;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::FromV8;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::futures::TryFutureExt;
+use simien_core::op2;
+use simien_core::v8;
+use simien_error::JsErrorBox;
 use deno_permissions::OpenAccessKind;
 use deno_permissions::PermissionsContainer;
-use deno_tls::ServerConfigProvider;
-use deno_tls::SocketUse;
-use deno_tls::TlsClientConfigOptions;
-use deno_tls::TlsKey;
-use deno_tls::TlsKeyLookup;
-use deno_tls::TlsKeys;
-use deno_tls::TlsKeysHolder;
-use deno_tls::create_client_config;
-use deno_tls::get_ssl_key_log;
-use deno_tls::load_certs;
-use deno_tls::load_private_keys;
-use deno_tls::new_resolver;
-use deno_tls::rustls::ClientConnection;
-use deno_tls::rustls::ServerConfig;
-use deno_tls::rustls::pki_types::ServerName;
+use simien_tls::ServerConfigProvider;
+use simien_tls::SocketUse;
+use simien_tls::TlsClientConfigOptions;
+use simien_tls::TlsKey;
+use simien_tls::TlsKeyLookup;
+use simien_tls::TlsKeys;
+use simien_tls::TlsKeysHolder;
+use simien_tls::create_client_config;
+use simien_tls::get_ssl_key_log;
+use simien_tls::load_certs;
+use simien_tls::load_private_keys;
+use simien_tls::new_resolver;
+use simien_tls::rustls::ClientConnection;
+use simien_tls::rustls::ServerConfig;
+use simien_tls::rustls::pki_types::ServerName;
 pub use rustls_tokio_stream::TlsStream;
 pub use rustls_tokio_stream::TlsStreamRead;
 pub use rustls_tokio_stream::TlsStreamWrite;
@@ -224,8 +224,8 @@ impl TlsStreamResource {
 }
 
 impl Resource for TlsStreamResource {
-  deno_core::impl_readable_byob!();
-  deno_core::impl_writable!();
+  simien_core::impl_readable_byob!();
+  simien_core::impl_writable!();
 
   fn name(&self) -> Cow<'_, str> {
     "tlsStream".into()
@@ -271,7 +271,7 @@ pub fn op_tls_key_null() -> TlsKeysHolder {
 pub fn op_tls_key_static(
   #[string] cert: &str,
   #[string] key: &str,
-) -> Result<TlsKeysHolder, deno_tls::TlsError> {
+) -> Result<TlsKeysHolder, simien_tls::TlsError> {
   let cert = load_certs(&mut BufReader::new(cert.as_bytes()))?;
   let key = load_private_keys(key.as_bytes())?
     .into_iter()
@@ -285,11 +285,11 @@ pub fn op_tls_cert_resolver_create<'s>(
   scope: &mut v8::PinScope<'s, '_>,
 ) -> v8::Local<'s, v8::Array> {
   let (resolver, lookup) = new_resolver();
-  let resolver = deno_core::cppgc::make_cppgc_object(
+  let resolver = simien_core::cppgc::make_cppgc_object(
     scope,
     TlsKeysHolder::from(TlsKeys::Resolver(resolver)),
   );
-  let lookup = deno_core::cppgc::make_cppgc_object(scope, lookup);
+  let lookup = simien_core::cppgc::make_cppgc_object(scope, lookup);
   v8::Array::new_with_elements(scope, &[resolver.into(), lookup.into()])
 }
 

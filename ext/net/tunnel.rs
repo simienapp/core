@@ -5,15 +5,15 @@ use std::sync::OnceLock;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
-use deno_core::AsyncMutFuture;
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::futures::TryFutureExt;
-use deno_error::JsErrorBox;
+use simien_core::AsyncMutFuture;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::futures::TryFutureExt;
+use simien_error::JsErrorBox;
 pub use deno_tunnel::Authentication;
 pub use deno_tunnel::Error;
 pub use deno_tunnel::Event;
@@ -46,15 +46,15 @@ pub fn disable_before_exit() {
 }
 
 pub fn before_exit() {
-  log::trace!("deno_net::tunnel::before_exit >");
+  log::trace!("simien_net::tunnel::before_exit >");
 
   if let Some(tunnel) = get_tunnel() {
     // stay alive long enough to actually send the close frame, since
     // we can't rely on the linux kernel to close this like with tcp.
-    deno_core::futures::executor::block_on(tunnel.close(1u32, b""));
+    simien_core::futures::executor::block_on(tunnel.close(1u32, b""));
   }
 
-  log::trace!("deno_net::tunnel::before_exit <");
+  log::trace!("simien_net::tunnel::before_exit <");
 }
 
 pub fn get_tunnel() -> Option<&'static TunnelConnection> {
@@ -98,7 +98,7 @@ impl TunnelStreamResource {
 }
 
 impl Resource for TunnelStreamResource {
-  fn read(self: Rc<Self>, limit: usize) -> AsyncResult<deno_core::BufView> {
+  fn read(self: Rc<Self>, limit: usize) -> AsyncResult<simien_core::BufView> {
     Box::pin(async move {
       let mut vec = vec![0; limit];
       let nread = self
@@ -117,8 +117,8 @@ impl Resource for TunnelStreamResource {
 
   fn read_byob(
     self: Rc<Self>,
-    mut buf: deno_core::BufMutView,
-  ) -> AsyncResult<(usize, deno_core::BufMutView)> {
+    mut buf: simien_core::BufMutView,
+  ) -> AsyncResult<(usize, simien_core::BufMutView)> {
     Box::pin(async move {
       let nread = self
         .rd_borrow_mut()
@@ -133,8 +133,8 @@ impl Resource for TunnelStreamResource {
 
   fn write(
     self: Rc<Self>,
-    buf: deno_core::BufView,
-  ) -> AsyncResult<deno_core::WriteOutcome> {
+    buf: simien_core::BufView,
+  ) -> AsyncResult<simien_core::WriteOutcome> {
     Box::pin(async move {
       let nwritten = self
         .wr_borrow_mut()
@@ -142,7 +142,7 @@ impl Resource for TunnelStreamResource {
         .write(&buf)
         .await
         .map_err(|e| JsErrorBox::generic(format!("{e}")))?;
-      Ok(deno_core::WriteOutcome::Partial {
+      Ok(simien_core::WriteOutcome::Partial {
         nwritten,
         view: buf,
       })

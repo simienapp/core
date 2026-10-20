@@ -3,13 +3,13 @@
 use std::borrow::Cow;
 use std::rc::Rc;
 
-use deno_core::AsyncRefCell;
-use deno_core::CancelHandle;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::ResourceTable;
-use deno_core::error::ResourceError;
-use deno_error::JsErrorBox;
+use simien_core::AsyncRefCell;
+use simien_core::CancelHandle;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::ResourceTable;
+use simien_core::error::ResourceError;
+use simien_error::JsErrorBox;
 
 use crate::io::TcpStreamResource;
 use crate::ops_tls::TlsStreamResource;
@@ -526,7 +526,7 @@ impl From<crate::win_pipe::WindowsPipeAddr> for NetworkStreamAddress {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum TakeNetworkStreamError {
   #[class("Busy")]
   #[error("TCP stream is currently in use")]
@@ -562,7 +562,7 @@ pub enum TakeNetworkStreamError {
   ReuniteVsock,
   #[class(inherit)]
   #[error(transparent)]
-  Resource(deno_core::error::ResourceError),
+  Resource(simien_core::error::ResourceError),
 }
 
 /// In some cases it may be more efficient to extract the resource from the resource table and use it directly (for example, an HTTP server).

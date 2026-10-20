@@ -114,7 +114,7 @@ pub(crate) enum WsShutdownMode {
 #[derive(Default)]
 pub(crate) struct ActiveWebSockets {
   next_key: Cell<u64>,
-  entries: RefCell<HashMap<u64, Weak<deno_websocket::ServerWebSocket>>>,
+  entries: RefCell<HashMap<u64, Weak<simien_websocket::ServerWebSocket>>>,
   /// Once set, every new websocket registered through
   /// [`Self::register`] is immediately shut down. Set by
   /// [`Self::begin_shutdown`] when `op_http_close` / `op_http_cancel` starts
@@ -138,7 +138,7 @@ impl ActiveWebSockets {
   pub(crate) fn register(
     &self,
     key: u64,
-    ws: &Rc<deno_websocket::ServerWebSocket>,
+    ws: &Rc<simien_websocket::ServerWebSocket>,
   ) {
     self.entries.borrow_mut().insert(key, Rc::downgrade(ws));
     if let Some(mode) = self.shutting_down.get() {
@@ -178,7 +178,7 @@ impl ActiveWebSockets {
     // Bind first: `for ... in self.entries.borrow().values()...collect()`
     // would hold the `Ref` across the loop body, blocking any re-entry into
     // the registry from `apply_shutdown`.
-    let live: Vec<Rc<deno_websocket::ServerWebSocket>> = self
+    let live: Vec<Rc<simien_websocket::ServerWebSocket>> = self
       .entries
       .borrow()
       .values()
@@ -191,7 +191,7 @@ impl ActiveWebSockets {
 }
 
 fn apply_shutdown(
-  ws: &Rc<deno_websocket::ServerWebSocket>,
+  ws: &Rc<simien_websocket::ServerWebSocket>,
   mode: WsShutdownMode,
 ) {
   match mode {
@@ -1351,7 +1351,7 @@ mod tests {
   use std::error::Error as StdError;
 
   use bytes::Buf;
-  use deno_net::raw::NetworkStreamType;
+  use simien_net::raw::NetworkStreamType;
   use hyper::body::Body;
   use hyper::service::HttpService;
   use hyper::service::service_fn;

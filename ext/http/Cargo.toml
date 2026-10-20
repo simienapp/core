@@ -32,9 +32,9 @@ bytes.workspace = true
 simien_core.workspace = true
 simien_error.workspace = true
 simien_http_h1.workspace = true
-deno_net.workspace = true
+simien_net.workspace = true
 deno_telemetry.workspace = true
-deno_websocket.workspace = true
+simien_websocket.workspace = true
 flate2.workspace = true
 http.workspace = true
 http-body-util = { workspace = true, features = ["channel"] }
