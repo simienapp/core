@@ -14,6 +14,13 @@ members = [
   "ext/fetch",
   "ext/crypto",
   "ext/tls",
+  "libs/deno_error",
+  "libs/deno_error/macros",
+  "libs/deno_unsync",
+  "libs/deno_path_util",
+  "libs/boxed_error",
+  "libs/wasm_dep_analyzer",
+  "libs/deno_native_certs",
 ]
 
 [workspace.package]
@@ -440,3 +447,10 @@ deno_web = { path = "./ext/web" }
 deno_fetch = { path = "./ext/fetch" }
 deno_crypto = { path = "./ext/crypto" }
 deno_tls = { path = "./ext/tls" }
+deno_error = { path = "./libs/deno_error" }
+deno_error_macro = { path = "./libs/deno_error/macros" }
+deno_unsync = { path = "./libs/deno_unsync" }
+deno_path_util = { path = "./libs/deno_path_util" }
+boxed_error = { path = "./libs/boxed_error" }
+wasm_dep_analyzer = { path = "./libs/wasm_dep_analyzer" }
+deno_native_certs = { path = "./libs/deno_native_certs" }
