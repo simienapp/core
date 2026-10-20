@@ -19,12 +19,12 @@ const {
   Promise,
   Uint8Array,
 } = primordials;
-const { toInnerRequest } = core.loadExtScript("ext:deno_fetch/23_request.js");
+const { toInnerRequest } = core.loadExtScript("ext:simien_fetch/23_request.js");
 const {
   fromInnerResponse,
   newInnerResponse,
-} = core.loadExtScript("ext:deno_fetch/23_response.js");
-const { setEventTargetData } = core.loadExtScript("ext:deno_web/02_event.js");
+} = core.loadExtScript("ext:simien_fetch/23_response.js");
+const { setEventTargetData } = core.loadExtScript("ext:simien_web/02_event.js");
 
 const loadWebSocket = core.createLazyLoader(
   "ext:deno_websocket/01_websocket.js",

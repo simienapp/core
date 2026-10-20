@@ -1,7 +1,7 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_http"
+name = "simien_http"
 version = "0.257.0"
 authors.workspace = true
 edition.workspace = true
@@ -29,9 +29,9 @@ aws-lc-rs.workspace = true
 base64.workspace = true
 brotli.workspace = true
 bytes.workspace = true
-deno_core.workspace = true
-deno_error.workspace = true
-deno_http_h1.workspace = true
+simien_core.workspace = true
+simien_error.workspace = true
+simien_http_h1.workspace = true
 deno_net.workspace = true
 deno_telemetry.workspace = true
 deno_websocket.workspace = true

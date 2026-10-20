@@ -19,14 +19,14 @@ use std::task::Poll;
 use std::task::Waker;
 use std::task::ready;
 
-use deno_core::BufView;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::ResourceId;
-use deno_core::futures::task::AtomicWaker;
-use deno_core::serde_v8;
-use deno_core::v8;
-use deno_error::JsErrorBox;
+use simien_core::BufView;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::ResourceId;
+use simien_core::futures::task::AtomicWaker;
+use simien_core::simien_serde_v8;
+use simien_core::v8;
+use simien_error::JsErrorBox;
 use http::request::Parts;
 use hyper::body::Body;
 use hyper::body::Frame;
@@ -432,7 +432,7 @@ impl ServerCallback {
         v8_string_to_utf8_bytes(scope, text),
       )))
     } else {
-      let buffer = serde_v8::from_v8::<JsBuffer>(scope, body_value).ok()?;
+      let buffer = simien_serde_v8::from_v8::<JsBuffer>(scope, body_value).ok()?;
       Some(DirectResponseBody::Bytes(BufView::from(buffer)))
     }
   }
@@ -1397,7 +1397,7 @@ mod tests {
   }
 
   #[tokio::test]
-  async fn test_handle_request() -> Result<(), deno_core::error::AnyError> {
+  async fn test_handle_request() -> Result<(), simien_core::error::AnyError> {
     let (tx, mut rx) = tokio::sync::mpsc::channel(10);
     let server_state = HttpServerState::new();
     let server_state_check = server_state.clone();

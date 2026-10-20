@@ -17,27 +17,27 @@ use std::time::Duration;
 use std::time::SystemTime;
 
 use bytes::Bytes;
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::BufMutView;
-use deno_core::BufView;
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::ExternalPointer;
-use deno_core::FromV8;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::convert::ByteString;
-use deno_core::external;
-use deno_core::op2;
-use deno_core::unsync::JoinHandle;
-use deno_core::unsync::spawn;
-use deno_core::v8;
-use deno_http_h1 as h1;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::BufMutView;
+use simien_core::BufView;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::ExternalPointer;
+use simien_core::FromV8;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::convert::ByteString;
+use simien_core::external;
+use simien_core::op2;
+use simien_core::unsync::JoinHandle;
+use simien_core::unsync::spawn;
+use simien_core::v8;
+use simien_http_h1 as h1;
 use deno_net::ops_tls::TlsStream;
 use deno_net::raw::NetworkStream;
 use deno_websocket::ServerWebSocket;
@@ -147,7 +147,7 @@ impl HttpRecordExternal {
     match self {
       Self::Hyper(record) => Ok(record),
       Self::Raw(_) => {
-        Err(HttpNextError::Other(deno_error::JsErrorBox::generic(
+        Err(HttpNextError::Other(simien_error::JsErrorBox::generic(
           format!("{op} unavailable on raw HTTP/1 path"),
         )))
       }
@@ -291,7 +291,7 @@ macro_rules! try_clone_external {
     if ptr.is_null()
       || ptr.align_offset(std::mem::align_of::<usize>()) != 0
       || std::ptr::read::<usize>(ptr as _)
-        != <RcHttpRecord as deno_core::Externalizable>::external_marker()
+        != <RcHttpRecord as simien_core::Externalizable>::external_marker()
     {
       None
     } else {
@@ -301,11 +301,11 @@ macro_rules! try_clone_external {
   }};
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum HttpNextError {
   #[class(inherit)]
   #[error(transparent)]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(inherit)]
   #[error("{0}")]
   Io(#[from] io::Error),
@@ -324,7 +324,7 @@ pub enum HttpNextError {
   Canceled(
     #[from]
     #[inherit]
-    deno_core::Canceled,
+    simien_core::Canceled,
   ),
   #[class(generic)]
   #[error(transparent)]
@@ -334,7 +334,7 @@ pub enum HttpNextError {
   Other(
     #[from]
     #[inherit]
-    deno_error::JsErrorBox,
+    simien_error::JsErrorBox,
   ),
   #[class("Http")]
   #[error("invalid HTTP status line")]
@@ -352,7 +352,7 @@ impl From<h1::Error> for HttpNextError {
   fn from(error: h1::Error) -> Self {
     match error {
       h1::Error::Io(error) => Self::Io(error),
-      _ => Self::Other(deno_error::JsErrorBox::generic(error.to_string())),
+      _ => Self::Other(simien_error::JsErrorBox::generic(error.to_string())),
     }
   }
 }
@@ -1649,7 +1649,7 @@ where
     let mut conn = this.body.conn.borrow_mut();
     let Some(conn) = conn.as_mut() else {
       return Poll::Ready(Err(HttpNextError::Other(
-        deno_error::JsErrorBox::generic("request body is no longer readable"),
+        simien_error::JsErrorBox::generic("request body is no longer readable"),
       )));
     };
     conn.scratch.ensure_read_capacity(this.limit);
@@ -1688,7 +1688,7 @@ where
     let mut conn = this.body.conn.borrow_mut();
     let Some(conn) = conn.as_mut() else {
       return Poll::Ready(Err(HttpNextError::Other(
-        deno_error::JsErrorBox::generic("request body is no longer readable"),
+        simien_error::JsErrorBox::generic("request body is no longer readable"),
       )));
     };
     let buf_len = this.buf.as_ref().unwrap().len();
@@ -2970,7 +2970,7 @@ fn set_static_response_body_from_v8<'s>(
       set_static_empty_response(http, status);
     }
   } else if let Ok(buffer) =
-    deno_core::serde_v8::from_v8::<JsBuffer>(scope, body)
+    simien_core::simien_serde_v8::from_v8::<JsBuffer>(scope, body)
   {
     if !buffer.is_empty() {
       set_static_response_bufview(http, buffer, status);
@@ -2998,7 +2998,7 @@ fn direct_response_body_from_v8<'s>(
       )))
     }
   } else {
-    let buffer = deno_core::serde_v8::from_v8::<JsBuffer>(scope, body).ok()?;
+    let buffer = simien_core::simien_serde_v8::from_v8::<JsBuffer>(scope, body).ok()?;
     if buffer.is_empty() {
       Some(DirectResponseBody::Empty)
     } else {
@@ -3700,22 +3700,22 @@ where
     .await
 }
 
-fn raw_h1_request_body_unavailable() -> deno_error::JsErrorBox {
-  deno_error::JsErrorBox::new(
+fn raw_h1_request_body_unavailable() -> simien_error::JsErrorBox {
+  simien_error::JsErrorBox::new(
     "BadResource",
     "Cannot read request body as underlying resource unavailable",
   )
 }
 
-fn raw_h1_request_body_error(error: HttpNextError) -> deno_error::JsErrorBox {
+fn raw_h1_request_body_error(error: HttpNextError) -> simien_error::JsErrorBox {
   match error {
     HttpNextError::Other(error) => error,
-    _ => deno_error::JsErrorBox::new("Http", error.to_string()),
+    _ => simien_error::JsErrorBox::new("Http", error.to_string()),
   }
 }
 
 fn raw_h1_connection_closed() -> HttpNextError {
-  HttpNextError::Other(deno_error::JsErrorBox::generic(
+  HttpNextError::Other(simien_error::JsErrorBox::generic(
     "HTTP connection closed",
   ))
 }
@@ -3891,7 +3891,7 @@ where
 }
 
 fn raw_upgrade_unavailable() -> HttpNextError {
-  HttpNextError::Other(deno_error::JsErrorBox::generic(
+  HttpNextError::Other(simien_error::JsErrorBox::generic(
     "HTTP upgrade is not available for this request",
   ))
 }
@@ -5636,7 +5636,7 @@ fn is_normal_close(err: &(dyn std::error::Error + 'static)) -> bool {
     return false;
   }
 
-  if let Some(err) = err.downcast_ref::<deno_error::JsErrorBox>() {
+  if let Some(err) = err.downcast_ref::<simien_error::JsErrorBox>() {
     if let Some(err) = err.get_inner_ref() {
       return is_normal_close(err);
     }
@@ -5683,7 +5683,7 @@ pub fn op_http_cancel(
   state: &mut OpState,
   #[smi] rid: ResourceId,
   graceful: bool,
-) -> Result<(), deno_core::error::ResourceError> {
+) -> Result<(), simien_core::error::ResourceError> {
   let join_handle = state.resource_table.get::<HttpJoinHandle>(rid)?;
 
   // `op_http_cancel` is called from the abort-signal path. Treat

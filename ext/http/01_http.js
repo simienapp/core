@@ -31,20 +31,20 @@ const {
   TypedArrayPrototypeGetSymbolToStringTag,
   Uint8Array,
 } = primordials;
-const { _ws } = core.loadExtScript("ext:deno_http/02_websocket.ts");
-const { InnerBody } = core.loadExtScript("ext:deno_fetch/22_body.js");
-const { Event } = core.loadExtScript("ext:deno_web/02_event.js");
-const { BlobPrototype } = core.loadExtScript("ext:deno_web/09_file.js");
+const { _ws } = core.loadExtScript("ext:simien_http/02_websocket.ts");
+const { InnerBody } = core.loadExtScript("ext:simien_fetch/22_body.js");
+const { Event } = core.loadExtScript("ext:simien_web/02_event.js");
+const { BlobPrototype } = core.loadExtScript("ext:simien_web/09_file.js");
 const {
   ResponsePrototype,
   toInnerResponse,
   wireHeaderList,
-} = core.loadExtScript("ext:deno_fetch/23_response.js");
+} = core.loadExtScript("ext:simien_fetch/23_response.js");
 const {
   abortRequest,
   fromInnerRequest,
   newInnerRequest,
-} = core.loadExtScript("ext:deno_fetch/23_request.js");
+} = core.loadExtScript("ext:simien_fetch/23_request.js");
 const loadWebSocket = core.createLazyLoader(
   "ext:deno_websocket/01_websocket.js",
 );
@@ -53,7 +53,7 @@ const {
   readableStreamClose,
   readableStreamForRid,
   ReadableStreamPrototype,
-} = core.loadExtScript("ext:deno_web/06_streams.js");
+} = core.loadExtScript("ext:simien_web/06_streams.js");
 
 const connErrorSymbol = Symbol("connError");
 

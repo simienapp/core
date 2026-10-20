@@ -5,9 +5,9 @@ use std::net::SocketAddr;
 use std::net::SocketAddrV4;
 use std::rc::Rc;
 
-use deno_core::OpState;
-use deno_core::ResourceId;
-use deno_error::JsErrorBox;
+use simien_core::OpState;
+use simien_core::ResourceId;
+use simien_error::JsErrorBox;
 use deno_net::raw::NetworkStream;
 use deno_net::raw::NetworkStreamAddress;
 use deno_net::raw::NetworkStreamListener;

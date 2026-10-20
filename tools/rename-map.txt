@@ -20,3 +20,5 @@ boxed_error simien_boxed_error
 wasm_dep_analyzer simien_wasm_dep_analyzer
 deno_native_certs simien_native_certs
 deno_bench_util simien_bench_util
+deno_http simien_http
+deno_http_h1 simien_http_h1

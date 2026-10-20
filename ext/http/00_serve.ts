@@ -73,7 +73,7 @@ const {
   Number,
 } = primordials;
 
-const { InnerBody } = core.loadExtScript("ext:deno_fetch/22_body.js");
+const { InnerBody } = core.loadExtScript("ext:simien_fetch/22_body.js");
 const {
   dropServeNativeResponse,
   getInnerResponse,
@@ -90,15 +90,15 @@ const {
   SERVE_FAST_HEADER_NONE,
   toInnerResponse,
   wireHeaderList,
-} = core.loadExtScript("ext:deno_fetch/23_response.js");
+} = core.loadExtScript("ext:simien_fetch/23_response.js");
 const {
   abortRequest,
   cacheRequestHeaders,
   fromInnerRequest,
   requestHeadersExposed,
-} = core.loadExtScript("ext:deno_fetch/23_request.js");
+} = core.loadExtScript("ext:simien_fetch/23_request.js");
 const { AbortController } = core.loadExtScript(
-  "ext:deno_web/03_abort_signal.js",
+  "ext:simien_web/03_abort_signal.js",
 );
 const {
   getReadableStreamResourceBacking,
@@ -106,7 +106,7 @@ const {
   readableStreamForRid,
   ReadableStreamPrototype,
   resourceForReadableStream,
-} = core.loadExtScript("ext:deno_web/06_streams.js");
+} = core.loadExtScript("ext:simien_web/06_streams.js");
 const {
   listen,
   listenOptionApiName,

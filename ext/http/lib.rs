@@ -25,31 +25,31 @@ use async_compression::tokio::write::GzipEncoder;
 use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
 use bytes::Bytes;
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::BufView;
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::StringOrBuffer;
-use deno_core::convert::ByteString;
-use deno_core::futures::FutureExt;
-use deno_core::futures::Stream;
-use deno_core::futures::StreamExt;
-use deno_core::futures::TryFutureExt;
-use deno_core::futures::channel::mpsc;
-use deno_core::futures::channel::oneshot;
-use deno_core::futures::future::RemoteHandle;
-use deno_core::futures::future::Shared;
-use deno_core::futures::stream::Peekable;
-use deno_core::op2;
-use deno_core::unsync::spawn;
-use deno_error::JsErrorBox;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::BufView;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::StringOrBuffer;
+use simien_core::convert::ByteString;
+use simien_core::futures::FutureExt;
+use simien_core::futures::Stream;
+use simien_core::futures::StreamExt;
+use simien_core::futures::TryFutureExt;
+use simien_core::futures::channel::mpsc;
+use simien_core::futures::channel::oneshot;
+use simien_core::futures::future::RemoteHandle;
+use simien_core::futures::future::Shared;
+use simien_core::futures::stream::Peekable;
+use simien_core::op2;
+use simien_core::unsync::spawn;
+use simien_error::JsErrorBox;
 use deno_net::raw::NetworkStream;
 use deno_telemetry::Histogram;
 use deno_telemetry::MeterProvider;
@@ -200,9 +200,9 @@ pub struct Options {
 }
 
 #[cfg(not(feature = "default_property_extractor"))]
-deno_core::extension!(
-  deno_http,
-  deps = [deno_web, deno_net, deno_fetch, deno_websocket],
+simien_core::extension!(
+  simien_http,
+  deps = [simien_web, deno_net, simien_fetch, deno_websocket],
   parameters = [ HTTP: HttpPropertyExtractor ],
   ops = [
     op_http_accept,
@@ -264,9 +264,9 @@ deno_core::extension!(
 );
 
 #[cfg(feature = "default_property_extractor")]
-deno_core::extension!(
-  deno_http,
-  deps = [deno_web, deno_net, deno_fetch, deno_websocket],
+simien_core::extension!(
+  simien_http,
+  deps = [simien_web, deno_net, simien_fetch, deno_websocket],
   ops = [
     op_http_accept,
     op_http_headers,
@@ -327,14 +327,14 @@ deno_core::extension!(
   }
 );
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum HttpError {
   #[class(inherit)]
   #[error(transparent)]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(inherit)]
   #[error(transparent)]
-  Canceled(#[from] deno_core::Canceled),
+  Canceled(#[from] simien_core::Canceled),
   #[class("Http")]
   #[error("{0}")]
   Hyper(#[source] Arc<hyper::Error>),
@@ -1150,7 +1150,7 @@ impl Drop for BodyUncompressedSender {
 }
 
 // We use a tuple instead of struct to avoid serialization overhead of the keys.
-#[derive(deno_core::ToV8)]
+#[derive(simien_core::ToV8)]
 struct NextRequestResponse(
   // read_stream_rid:
   ResourceId,
@@ -1711,7 +1711,7 @@ where
   Fut::Output: 'static,
 {
   fn execute(&self, fut: Fut) {
-    deno_core::unsync::spawn(fut);
+    simien_core::unsync::spawn(fut);
   }
 }
 
