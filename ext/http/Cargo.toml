@@ -54,6 +54,9 @@ tokio.workspace = true
 tokio-util = { workspace = true, features = ["io"] }
 
 [dev-dependencies]
+simien_fetch.workspace = true
+simien_web.workspace = true
+simien_webidl.workspace = true
 bencher.workspace = true
 http-body-util.workspace = true
 rand.workspace = true

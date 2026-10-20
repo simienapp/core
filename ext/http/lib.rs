@@ -2,7 +2,8 @@
 
 //! The HTTP server behind `Deno.serve`, forked from Deno's deno_http for the
 //! Simien runtime. The embedder decides where connections come from through
-//! [`HttpPropertyExtractor`].
+//! [`HttpPropertyExtractor`]; the default one serves connections a Rust
+//! embedder accepts and hands over through a [`connection_inbox`].
 
 use std::borrow::Cow;
 use std::future::Future;
@@ -20,6 +21,7 @@ use hyper::server::conn::http2;
 
 mod fly_accept_encoding;
 mod http_next;
+mod inbox;
 mod network_buffered_stream;
 mod otel;
 mod request_body;
@@ -31,6 +33,9 @@ pub mod compressible;
 
 use fly_accept_encoding::Encoding;
 pub use http_next::HttpNextError;
+pub use inbox::ConnectionSender;
+pub use inbox::InboxStream;
+pub use inbox::connection_inbox;
 pub use request_properties::DefaultHttpPropertyExtractor;
 pub use request_properties::HttpConnectionProperties;
 pub use request_properties::HttpListenProperties;
@@ -228,7 +233,7 @@ simien_core::extension!(
     http_next::op_http_cancel,
     http_next::op_http_metric_handle_otel_error,
   ],
-  esm = ["00_serve.js"],
+  lazy_loaded_js = ["00_serve.js", "02_websocket.js"],
   options = {
     options: Options,
   },
@@ -280,7 +285,7 @@ simien_core::extension!(
     http_next::op_http_cancel,
     http_next::op_http_metric_handle_otel_error,
   ],
-  esm = ["00_serve.js"],
+  lazy_loaded_js = ["00_serve.js", "02_websocket.js"],
   options = {
     options: Options,
   },

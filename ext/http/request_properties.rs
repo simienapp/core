@@ -10,11 +10,11 @@ use simien_core::ResourceId;
 use simien_error::JsErrorBox;
 use simien_net::raw::NetworkStream;
 use simien_net::raw::NetworkStreamAddress;
-use simien_net::raw::NetworkStreamListener;
 use simien_net::raw::NetworkStreamType;
-use simien_net::raw::take_network_stream_listener_resource;
 use simien_net::raw::take_network_stream_resource;
 use hyper::HeaderMap;
+
+use crate::inbox::InboxListener;
 use hyper::Uri;
 use hyper::header::HOST;
 
@@ -102,18 +102,15 @@ pub struct DefaultHttpPropertyExtractor {}
 
 #[async_trait::async_trait(?Send)]
 impl HttpPropertyExtractor for DefaultHttpPropertyExtractor {
-  type Listener = NetworkStreamListener;
+  type Listener = InboxListener;
 
   type Connection = NetworkStream;
 
   fn get_listener_for_rid(
     state: &mut OpState,
     listener_rid: ResourceId,
-  ) -> Result<NetworkStreamListener, JsErrorBox> {
-    take_network_stream_listener_resource(
-      &mut state.resource_table,
-      listener_rid,
-    )
+  ) -> Result<InboxListener, JsErrorBox> {
+    InboxListener::take(&mut state.resource_table, listener_rid)
   }
 
   fn get_connection_for_rid(
@@ -125,21 +122,15 @@ impl HttpPropertyExtractor for DefaultHttpPropertyExtractor {
   }
 
   async fn accept_connection_from_listener(
-    listener: &NetworkStreamListener,
+    listener: &InboxListener,
   ) -> Result<NetworkStream, JsErrorBox> {
-    listener
-      .accept()
-      .await
-      .map_err(JsErrorBox::from_err)
-      .map(|(stm, _)| stm)
+    listener.accept().await
   }
 
   fn listen_properties_from_listener(
-    listener: &NetworkStreamListener,
+    listener: &InboxListener,
   ) -> Result<HttpListenProperties, std::io::Error> {
-    let stream_type = listener.stream();
-    let local_address = listener.listen_address()?;
-    listener_properties(stream_type, local_address)
+    listener_properties(listener.stream_type(), listener.local_address())
   }
 
   fn listen_properties_from_connection(

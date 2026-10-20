@@ -12,7 +12,6 @@ const {
   op_http_cancel,
   op_http_close,
   op_http_close_after_finish,
-  op_http_copy_span_to_otel_info,
   op_http_get_request_header,
   op_http_get_request_headers,
   op_http_get_request_method,
@@ -20,12 +19,9 @@ const {
   op_http_get_request_remote_addr,
   op_http_is_raw_request,
   op_http_metric_handle_otel_error,
-  op_http_notify_serving,
   op_http_read_request_body,
   op_http_request_on_cancel,
   op_http_serve,
-  op_http_serve_address_override,
-  op_http_serve_default_compression,
   op_http_serve_on,
   op_http_set_promise_complete,
   op_http_set_response_native,
@@ -107,25 +103,31 @@ const {
   ReadableStreamPrototype,
   resourceForReadableStream,
 } = core.loadExtScript("ext:simien_web/06_streams.js");
-const {
-  listen,
-  listenOptionApiName,
-} = core.loadExtScript("ext:simien_net/01_net.js");
-const { hasTlsKeyPairOptions, listenTls } = core.loadExtScript(
-  "ext:simien_net/02_tls.js",
-);
-const {
-  otelState,
-  builtinTracer,
-  ContextManager,
-  currentSnapshot,
-  enterSpan,
-  restoreSnapshot,
-} = core.loadExtScript("ext:deno_telemetry/telemetry.ts");
-const {
-  updateSpanFromRequest,
-  updateSpanFromServerResponse,
-} = core.loadExtScript("ext:deno_telemetry/util.ts");
+// Simien: tracing and metrics are off; see otel.rs. Every use of the
+// telemetry helpers below sits behind TRACING_ENABLED, METRICS_ENABLED or a
+// span, so they are never reached. The async-context snapshot is what
+// deno_telemetry re-exported from core.
+const otelState = { TRACING_ENABLED: false, METRICS_ENABLED: false };
+const currentSnapshot = core.getAsyncContext;
+const restoreSnapshot = core.setAsyncContext;
+
+// Simien: Deno.errors.Http and internals.log come from Deno's runtime, which
+// isn't here. An embedder can still set internals.log.
+class Http extends Error {
+  constructor(message, options) {
+    super(message, options);
+    this.name = "Http";
+  }
+}
+const log = (level, ...args) => {
+  if (internals.log) {
+    log(level, ...args);
+  } else if (level === "error") {
+    console.error(...args);
+  } else {
+    console.info(...args);
+  }
+};
 
 const _upgraded = Symbol("_upgraded");
 
@@ -236,16 +238,16 @@ class InnerRequest {
 
   _throwIfUpgraded() {
     if (this.#upgraded) {
-      throw new Deno.errors.Http("Already upgraded");
+      throw new Http("Already upgraded");
     }
   }
 
   _wantsUpgrade(upgradeType) {
     if (this.#upgraded) {
-      throw new Deno.errors.Http("Already upgraded");
+      throw new Http("Already upgraded");
     }
     if (this.#external === null) {
-      throw new Deno.errors.Http("Already closed");
+      throw new Http("Already closed");
     }
 
     if (upgradeType == "upgradeWebSocket") {
@@ -562,12 +564,12 @@ function reportResponseStreamError(onError, error) {
   try {
     result = onError(error);
   } catch (e) {
-    internals.log("error", "Exception in onError while handling exception", e);
+    log("error", "Exception in onError while handling exception", e);
     return;
   }
   if (ObjectPrototypeIsPrototypeOf(PromisePrototype, result)) {
     PromisePrototypeThen(result, undefined, (e) => {
-      internals.log(
+      log(
         "error",
         "Exception in onError while handling exception",
         e,
@@ -785,7 +787,7 @@ function mapToCallback(context, callback, onError) {
         if (otelState.METRICS_ENABLED) {
           op_http_metric_handle_otel_error(req);
         }
-        internals.log(
+        log(
           "error",
           "Exception in onError while handling exception",
           error,
@@ -797,17 +799,11 @@ function mapToCallback(context, callback, onError) {
 
     if (span) {
       updateSpanFromServerResponse(span, response);
-      // Copy span attributes (like http.route) to OtelInfo for HTTP metrics.
-      // Must be done here, before the request external is invalidated.
-      const otelSpan = otelState.getOtelSpan?.(span);
-      if (otelSpan) {
-        op_http_copy_span_to_otel_info(req, otelSpan);
-      }
     }
 
     if (innerRequest?.[_upgraded]) {
       if (response.status !== 101) {
-        internals.log(
+        log(
           "error",
           "Upgrade response was not returned from callback",
         );
@@ -959,10 +955,6 @@ function mapToNativeResponseCallback(context, callback, onError) {
 
     if (span) {
       updateSpanFromServerResponse(span, response);
-      const otelSpan = otelState.getOtelSpan?.(span);
-      if (otelSpan) {
-        op_http_copy_span_to_otel_info(req, otelSpan);
-      }
     }
 
     if (context.closed) {
@@ -973,7 +965,7 @@ function mapToNativeResponseCallback(context, callback, onError) {
 
     if (innerRequest?.[_upgraded]) {
       if (response.status !== 101) {
-        internals.log(
+        log(
           "error",
           "Upgrade response was not returned from callback",
         );
@@ -1024,7 +1016,7 @@ function mapToNativeResponseCallback(context, callback, onError) {
     if (otelState.METRICS_ENABLED) {
       op_http_metric_handle_otel_error(req);
     }
-    internals.log(
+    log(
       "error",
       "Exception in onError while handling exception",
       error,
@@ -1136,314 +1128,6 @@ type RawServeOptions = {
   automaticCompression?: boolean;
 };
 
-const kLoadBalanced = Symbol("kLoadBalanced");
-
-function formatHostName(hostname: string): string {
-  // If the hostname is "0.0.0.0", we display "localhost" in console
-  // because browsers in Windows don't resolve "0.0.0.0".
-  // See the discussion in https://github.com/denoland/deno_std/issues/1165
-  if (
-    Deno.build.os === "windows" &&
-    (hostname == "0.0.0.0" || hostname == "::")
-  ) {
-    return "localhost";
-  }
-
-  // Add brackets around ipv6 hostname
-  return StringPrototypeIncludes(hostname, ":") ? `[${hostname}]` : hostname;
-}
-
-// Flag to track if DENO_SERVE_ADDRESS override has been consumed
-let serveAddressOverrideConsumed = false;
-
-function serve(arg1, arg2) {
-  let options: RawServeOptions | undefined;
-  let handler: RawHandler | undefined;
-
-  if (typeof arg1 === "function") {
-    handler = arg1;
-  } else if (typeof arg2 === "function") {
-    handler = arg2;
-    options = arg1;
-  } else {
-    options = arg1;
-  }
-  if (handler === undefined) {
-    if (options === undefined) {
-      throw new TypeError(
-        "Cannot serve HTTP requests: either a `handler` or `options` must be specified",
-      );
-    }
-    handler = options.handler;
-  }
-  if (typeof handler !== "function") {
-    throw new TypeError(
-      `Cannot serve HTTP requests: handler must be a function, received ${typeof handler}`,
-    );
-  }
-  if (options === undefined) {
-    options = { __proto__: null };
-  }
-
-  if (serveAddressOverrideConsumed) {
-    return serveInner(options, handler);
-  }
-
-  const {
-    0: overrideKind,
-    1: overrideHost,
-    2: overridePort,
-    3: duplicateListener,
-  } = op_http_serve_address_override();
-  if (overrideKind) {
-    serveAddressOverrideConsumed = true;
-
-    let envOptions = duplicateListener
-      ? {
-        __proto__: null,
-        signal: options.signal,
-        onError: options.onError,
-        automaticCompression: options.automaticCompression,
-      }
-      : options;
-
-    switch (overrideKind) {
-      case 1: {
-        // TCP
-        envOptions = {
-          ...envOptions,
-          hostname: overrideHost,
-          port: overridePort,
-        };
-        delete envOptions.path;
-        delete envOptions.cid;
-        break;
-      }
-      case 2: {
-        // Unix
-        envOptions = {
-          ...envOptions,
-          path: overrideHost,
-        };
-        delete envOptions.hostname;
-        delete envOptions.cid;
-        delete envOptions.port;
-        break;
-      }
-      case 3: {
-        // Vsock
-        envOptions = {
-          ...envOptions,
-          cid: Number(overrideHost),
-          port: overridePort,
-        };
-        delete envOptions.hostname;
-        delete envOptions.path;
-        break;
-      }
-      case 4: {
-        // Tunnel
-        envOptions = {
-          ...envOptions,
-          tunnel: true,
-        };
-        delete envOptions.hostname;
-        delete envOptions.cid;
-        delete envOptions.port;
-        delete envOptions.path;
-      }
-    }
-
-    if (duplicateListener) {
-      envOptions.onListen = () => {
-        // override default console.log behavior
-      };
-      const envListener = serveInner(envOptions, handler);
-      const userListener = serveInner(options, handler);
-
-      return {
-        addr: userListener.addr,
-        finished: SafePromiseAll([envListener.finished, userListener.finished]),
-        shutdown() {
-          return SafePromiseAll([
-            envListener.shutdown(),
-            userListener.shutdown(),
-          ]);
-        },
-        ref() {
-          envListener.ref();
-          userListener.ref();
-        },
-        unref() {
-          envListener.unref();
-          userListener.unref();
-        },
-        [SymbolAsyncDispose]() {
-          return this.shutdown();
-        },
-      };
-    }
-
-    options = envOptions;
-  }
-
-  return serveInner(options, handler);
-}
-
-function serveInner(options, handler) {
-  const wantsHttps = hasTlsKeyPairOptions(options);
-  const wantsUnix = ObjectHasOwn(options, "path");
-  const wantsVsock = ObjectHasOwn(options, "cid");
-  const wantsTunnel = options.tunnel === true;
-  const automaticCompression = options.automaticCompression ??
-    op_http_serve_default_compression();
-  const signal = options.signal;
-  const onError = options.onError ??
-    function (error) {
-      internals.log("error", error);
-      return internalServerError();
-    };
-
-  if (wantsUnix) {
-    const listener = listen({
-      transport: "unix",
-      path: options.path,
-      [listenOptionApiName]: "Deno.serve",
-    });
-    const path = listener.addr.path;
-    return serveHttpOnListener(
-      listener,
-      signal,
-      handler,
-      onError,
-      () => {
-        if (options.onListen) {
-          options.onListen(listener.addr);
-        } else {
-          internals.log("info", `Listening on ${path}`);
-        }
-      },
-      automaticCompression,
-    );
-  }
-
-  if (wantsVsock) {
-    const listener = listen({
-      transport: "vsock",
-      cid: options.cid,
-      port: options.port,
-      [listenOptionApiName]: "Deno.serve",
-    });
-    const { cid, port } = listener.addr;
-    return serveHttpOnListener(
-      listener,
-      signal,
-      handler,
-      onError,
-      () => {
-        if (options.onListen) {
-          options.onListen(listener.addr);
-        } else {
-          internals.log("info", `Listening on vsock:${cid}:${port}`);
-        }
-      },
-      automaticCompression,
-    );
-  }
-
-  if (wantsTunnel) {
-    const listener = listen({
-      transport: "tunnel",
-      [listenOptionApiName]: "Deno.serve",
-    });
-    return serveHttpOnListener(
-      listener,
-      signal,
-      handler,
-      onError,
-      () => {
-        if (options.onListen) {
-          options.onListen(listener.addr);
-        } else {
-          const additional = listener.addr.port === 443
-            ? ""
-            : `:${listener.addr.port}`;
-          internals.log(
-            "info",
-            `Listening on https://${
-              formatHostName(listener.addr.hostname)
-            }${additional}`,
-          );
-        }
-      },
-      automaticCompression,
-    );
-  }
-
-  const listenOpts = {
-    hostname: options.hostname ?? "0.0.0.0",
-    port: options.port ?? 8000,
-    reusePort: options.reusePort ?? false,
-    loadBalanced: options[kLoadBalanced] ?? false,
-    tcpBacklog: options.tcpBacklog,
-  };
-
-  if (options.certFile || options.keyFile) {
-    throw new TypeError(
-      "Unsupported 'certFile' / 'keyFile' options provided: use 'cert' / 'key' instead.",
-    );
-  }
-  if (options.alpnProtocols) {
-    throw new TypeError(
-      "Unsupported 'alpnProtocols' option provided. 'h2' and 'http/1.1' are automatically supported.",
-    );
-  }
-
-  let listener;
-  if (wantsHttps) {
-    if (!options.cert || !options.key) {
-      throw new TypeError(
-        "Both 'cert' and 'key' must be provided to enable HTTPS",
-      );
-    }
-    listenOpts.cert = options.cert;
-    listenOpts.key = options.key;
-    listenOpts.alpnProtocols = ["h2", "http/1.1"];
-    listener = listenTls(listenOpts);
-    listenOpts.port = listener.addr.port;
-  } else {
-    listener = listen(listenOpts);
-    listenOpts.port = listener.addr.port;
-  }
-
-  const addr = listener.addr;
-
-  const onListen = (scheme) => {
-    if (options.onListen) {
-      options.onListen(addr);
-    } else {
-      const host = formatHostName(addr.hostname);
-
-      const url = `${scheme}${host}:${addr.port}/`;
-      const helper = host !== "localhost" &&
-          (addr.hostname === "0.0.0.0" || addr.hostname === "::")
-        ? ` (${scheme}localhost:${addr.port}/)`
-        : "";
-
-      internals.log("info", `Listening on ${url}${helper}`);
-    }
-  };
-
-  return serveHttpOnListener(
-    listener,
-    signal,
-    handler,
-    onError,
-    onListen,
-    automaticCompression,
-  );
-}
-
 /**
  * Serve HTTP/1.1 and/or HTTP/2 on an arbitrary listener.
  */
@@ -1453,13 +1137,13 @@ function serveHttpOnListener(
   handler,
   onError,
   onListen,
-  automaticCompression = op_http_serve_default_compression(),
+  automaticCompression = false,
 ) {
   let serverContext = undefined;
   let callback = undefined;
   let nativeCallback = undefined;
   const promiseErrorHandler = (error) => {
-    internals.log(
+    log(
       "error",
       "Terminating Deno.serve loop due to unexpected error",
       error,
@@ -1507,12 +1191,19 @@ function serveHttpOnListener(
 /**
  * Serve HTTP/1.1 and/or HTTP/2 on an arbitrary connection.
  */
-function serveHttpOnConnection(connection, signal, handler, onError, onListen) {
+function serveHttpOnConnection(
+  connection,
+  signal,
+  handler,
+  onError,
+  onListen,
+  automaticCompression = false,
+) {
   let serverContext = undefined;
   let callback = undefined;
   let nativeCallback = undefined;
   const promiseErrorHandler = (error) => {
-    internals.log(
+    log(
       "error",
       "Terminating Deno.serve loop due to unexpected error",
       error,
@@ -1532,7 +1223,6 @@ function serveHttpOnConnection(connection, signal, handler, onError, onListen) {
     return nativeCallback(req, undefined);
   };
   const rawNoRequest = handler.length === 0 && nativeFastPath;
-  const automaticCompression = op_http_serve_default_compression();
   serverContext = new CallbackContext(
     signal,
     op_http_serve_on(
@@ -1577,7 +1267,7 @@ function serveHttpOn(context, addr) {
         !ObjectPrototypeIsPrototypeOf(BadResourcePrototype, error) &&
         !ObjectPrototypeIsPrototypeOf(InterruptedPrototype, error)
       ) {
-        throw new Deno.errors.Http(error);
+        throw new Http(error);
       }
     }
 
@@ -1602,9 +1292,6 @@ function serveHttpOn(context, addr) {
       context.closed = true;
     }
   })();
-
-  // 1 = "deno-serve"; must match `serving_server_kind()` in lib.rs.
-  op_http_notify_serving(1);
 
   return {
     addr,
@@ -1656,99 +1343,8 @@ internals.resetLegacyAbortWarning = () => {
   legacyAbortWarned = false;
 };
 
-function registerDeclarativeServer(exports) {
-  if (!ObjectHasOwn(exports, "fetch")) return;
-
-  if (typeof exports.fetch !== "function") {
-    throw new TypeError("Invalid type for fetch: must be a function");
-  }
-
-  if (
-    exports.onListen !== undefined && typeof exports.onListen !== "function"
-  ) {
-    throw new TypeError("Invalid type for onListen: must be a function");
-  }
-
-  return ({
-    servePort,
-    serveHost,
-    workerCountWhenMain,
-  }) => {
-    const server = Deno.serve({
-      port: servePort,
-      hostname: serveHost,
-      [kLoadBalanced]: workerCountWhenMain == null
-        ? true
-        : workerCountWhenMain > 0,
-      onListen: (localAddr) => {
-        if (workerCountWhenMain != null) {
-          if (exports.onListen) {
-            exports.onListen(localAddr);
-            return;
-          }
-
-          let target;
-          switch (localAddr.transport) {
-            case "tcp":
-              target = `http://${
-                formatHostName(localAddr.hostname)
-              }:${localAddr.port}/`;
-              break;
-            case "unix":
-              target = localAddr.path;
-              break;
-            case "vsock":
-              target = `vsock:${localAddr.cid}:${localAddr.port}`;
-              break;
-          }
-
-          const nThreads = workerCountWhenMain > 0
-            ? ` with ${workerCountWhenMain + 1} threads`
-            : "";
-
-          internals.log(
-            "info",
-            `%cdeno serve%c: Listening on %c${target}%c${nThreads}`,
-            "color: green",
-            "color: inherit",
-            "color: yellow",
-            "color: inherit",
-          );
-        }
-      },
-      handler: (req, connInfo) => {
-        return exports.fetch(req, connInfo);
-      },
-    });
-
-    // Wire SIGTERM/SIGINT to a graceful server shutdown so that `deno serve`
-    // drains in-flight requests and exits cleanly (exit code 0) instead of
-    // being terminated by the OS default signal handler (exit code 143/130),
-    // e.g. when a container is redeployed.
-    const shutdownHandler = () => {
-      // Stop listening for the signal so a second SIGTERM/SIGINT falls through
-      // to the default handler and forcibly terminates a server that is slow
-      // to drain.
-      Deno.removeSignalListener("SIGTERM", shutdownHandler);
-      Deno.removeSignalListener("SIGINT", shutdownHandler);
-      // `shutdown()` already swallows the errors from an interrupted server,
-      // but guard against any rejection becoming unhandled.
-      PromisePrototypeCatch(server.shutdown(), () => {});
-    };
-    try {
-      Deno.addSignalListener("SIGTERM", shutdownHandler);
-      Deno.addSignalListener("SIGINT", shutdownHandler);
-    } catch {
-      // Adding signal listeners can fail in restricted environments; fall back
-      // to the default behavior in that case.
-    }
-  };
-}
-
 return {
   addTrailers,
-  registerDeclarativeServer,
-  serve,
   serveHttpOnConnection,
   serveHttpOnListener,
 };

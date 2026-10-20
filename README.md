@@ -29,8 +29,12 @@ Deno's runtime is winding down after Cloudflare's acquisition (October 2026). Si
 | `ext/fetch` | `deno_fetch` | `simien_fetch` |
 | `ext/crypto` | `deno_crypto` | `simien_crypto` |
 | `ext/tls` | `deno_tls` | `simien_tls` |
+| `ext/net` | `deno_net` (its stream layer only) | `simien_net` |
+| `ext/websocket` | `deno_websocket` | `simien_websocket` |
+| `ext/http` | `deno_http` (the `Deno.serve` server) | `simien_http` |
+| `libs/http_h1` | `deno_http_h1` | `simien_http_h1` |
 
-Every crate here is published under its `simien_*` name, and the Rust paths, extension names and `ext:` module specifiers are renamed to match. The rename is mechanical: `tools/rename.py` applies `tools/rename-map.txt`, and the same script translates an upstream Deno patch before it's applied, so fixes still port across. The plan and its progress are in [#1](https://github.com/simienapp/core/issues/1).
+Every crate here is published under its `simien_*` name, and the Rust paths, extension names and `ext:` module specifiers are renamed to match. The rename is mechanical: `tools/rename.py` applies `tools/rename-map.txt`, and the same script translates an upstream Deno patch before it's applied, so fixes still port across. `simien_http`'s JavaScript is generated from upstream's TypeScript by `tools/strip-types.mjs`; edit the `.ts`, and CI checks the `.js` matches. The plan and its progress are in [#1](https://github.com/simienapp/core/issues/1).
 
 ## Build
 
