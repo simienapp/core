@@ -7,9 +7,9 @@ use std::cell::RefCell;
 use std::future::Future;
 use std::rc::Rc;
 
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_error::JsErrorBox;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_error::JsErrorBox;
 
 // Collect a few examples that we'll smoke test when not running on the CI.
 

@@ -3,7 +3,7 @@
 use std::borrow::Cow;
 
 use indexmap::IndexMap;
-use wasm_dep_analyzer::WasmDeps;
+use simien_wasm_dep_analyzer::WasmDeps;
 
 use super::ModuleMap;
 use crate::ModuleSourceCode;
@@ -71,7 +71,7 @@ impl ModuleMap {
     let bytes = source.as_bytes();
     let wasm_module_analysis = WasmDeps::parse(
       bytes,
-      wasm_dep_analyzer::ParseOptions { skip_types: true },
+      simien_wasm_dep_analyzer::ParseOptions { skip_types: true },
     )
     .map_err(ModuleConcreteError::WasmParse)?;
 
@@ -105,15 +105,15 @@ const WASM_GLOBAL_UNWRAP_HELPER: &str = "const unwrapWasmGlobal = (g) => { try {
 /// Whether a Wasm export is a global. The export kind is read directly from the
 /// export section, so this is reliable even though we parse the module with
 /// `skip_types: true` and never resolve the global's value type.
-fn is_wasm_global_export(export_type: &wasm_dep_analyzer::ExportType) -> bool {
-  matches!(export_type, wasm_dep_analyzer::ExportType::Global(_))
+fn is_wasm_global_export(export_type: &simien_wasm_dep_analyzer::ExportType) -> bool {
+  matches!(export_type, simien_wasm_dep_analyzer::ExportType::Global(_))
 }
 
 /// Whether a Wasm import is a global. Like [`is_wasm_global_export`], the import
 /// kind is read directly from the import section, independent of the global's
 /// value type.
-fn is_wasm_global_import(import_type: &wasm_dep_analyzer::ImportType) -> bool {
-  matches!(import_type, wasm_dep_analyzer::ImportType::Global(_))
+fn is_wasm_global_import(import_type: &simien_wasm_dep_analyzer::ImportType) -> bool {
+  matches!(import_type, simien_wasm_dep_analyzer::ImportType::Global(_))
 }
 
 /// Values that [`StringBuilder::append`] knows how to write.
@@ -185,7 +185,7 @@ fn render_js_wasm_module(specifier: &str, wasm_deps: WasmDeps) -> String {
   }
 
   fn aggregate_wasm_module_imports<'a>(
-    imports: &'a [wasm_dep_analyzer::Import],
+    imports: &'a [simien_wasm_dep_analyzer::Import],
   ) -> IndexMap<&'a str, ImportInfo> {
     let mut imports_map = IndexMap::with_capacity(imports.len());
 
@@ -399,78 +399,78 @@ const modInstance = new import.meta.WasmInstance(wasmMod);
 
   let deps = WasmDeps {
     imports: vec![
-      wasm_dep_analyzer::Import {
+      simien_wasm_dep_analyzer::Import {
         name: "foo",
         module: "./import.js",
-        import_type: wasm_dep_analyzer::ImportType::Tag(
-          wasm_dep_analyzer::TagType {
+        import_type: simien_wasm_dep_analyzer::ImportType::Tag(
+          simien_wasm_dep_analyzer::TagType {
             kind: 1,
             type_index: 1,
           },
         ),
       },
-      wasm_dep_analyzer::Import {
+      simien_wasm_dep_analyzer::Import {
         name: "bar",
         module: "./import.js",
-        import_type: wasm_dep_analyzer::ImportType::Function(1),
+        import_type: simien_wasm_dep_analyzer::ImportType::Function(1),
       },
-      wasm_dep_analyzer::Import {
+      simien_wasm_dep_analyzer::Import {
         name: "fizz",
         module: "./import.js",
-        import_type: wasm_dep_analyzer::ImportType::Function(2),
+        import_type: simien_wasm_dep_analyzer::ImportType::Function(2),
       },
-      wasm_dep_analyzer::Import {
+      simien_wasm_dep_analyzer::Import {
         name: "buzz",
         module: "./buzz.js",
-        import_type: wasm_dep_analyzer::ImportType::Function(3),
+        import_type: simien_wasm_dep_analyzer::ImportType::Function(3),
       },
     ],
     exports: vec![
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "export1",
         index: 0,
-        export_type: wasm_dep_analyzer::ExportType::Function(Ok(
-          wasm_dep_analyzer::FunctionSignature {
+        export_type: simien_wasm_dep_analyzer::ExportType::Function(Ok(
+          simien_wasm_dep_analyzer::FunctionSignature {
             params: vec![],
             returns: vec![],
           },
         )),
       },
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "export2",
         index: 1,
-        export_type: wasm_dep_analyzer::ExportType::Table,
+        export_type: simien_wasm_dep_analyzer::ExportType::Table,
       },
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "export3",
         index: 2,
-        export_type: wasm_dep_analyzer::ExportType::Memory,
+        export_type: simien_wasm_dep_analyzer::ExportType::Memory,
       },
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "export4",
         index: 3,
-        export_type: wasm_dep_analyzer::ExportType::Global(Ok(
-          wasm_dep_analyzer::GlobalType {
-            value_type: wasm_dep_analyzer::ValueType::F32,
+        export_type: simien_wasm_dep_analyzer::ExportType::Global(Ok(
+          simien_wasm_dep_analyzer::GlobalType {
+            value_type: simien_wasm_dep_analyzer::ValueType::F32,
             mutability: false,
           },
         )),
       },
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "export5",
         index: 4,
-        export_type: wasm_dep_analyzer::ExportType::Tag,
+        export_type: simien_wasm_dep_analyzer::ExportType::Tag,
       },
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "export6",
         index: 5,
-        export_type: wasm_dep_analyzer::ExportType::Unknown,
+        export_type: simien_wasm_dep_analyzer::ExportType::Unknown,
       },
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "default",
         index: 6,
-        export_type: wasm_dep_analyzer::ExportType::Function(Ok(
-          wasm_dep_analyzer::FunctionSignature {
+        export_type: simien_wasm_dep_analyzer::ExportType::Function(Ok(
+          simien_wasm_dep_analyzer::FunctionSignature {
             params: vec![],
             returns: vec![],
           },
@@ -515,16 +515,16 @@ export default modInstance.exports.default;
   );
 
   let deps = WasmDeps {
-    imports: vec![wasm_dep_analyzer::Import {
+    imports: vec![simien_wasm_dep_analyzer::Import {
       name: "\n",
       module: "\n",
-      import_type: wasm_dep_analyzer::ImportType::Function(1),
+      import_type: simien_wasm_dep_analyzer::ImportType::Function(1),
     }],
-    exports: vec![wasm_dep_analyzer::Export {
+    exports: vec![simien_wasm_dep_analyzer::Export {
       name: "\n",
       index: 0,
-      export_type: wasm_dep_analyzer::ExportType::Function(Ok(
-        wasm_dep_analyzer::FunctionSignature {
+      export_type: simien_wasm_dep_analyzer::ExportType::Function(Ok(
+        simien_wasm_dep_analyzer::FunctionSignature {
           params: vec![],
           returns: vec![],
         },
@@ -551,10 +551,10 @@ export { export0 as "\n" };
 #[test]
 fn test_render_js_wasm_module_global_unwrap() {
   fn global(
-    value_type: wasm_dep_analyzer::ValueType,
+    value_type: simien_wasm_dep_analyzer::ValueType,
     mutability: bool,
-  ) -> wasm_dep_analyzer::ExportType {
-    wasm_dep_analyzer::ExportType::Global(Ok(wasm_dep_analyzer::GlobalType {
+  ) -> simien_wasm_dep_analyzer::ExportType {
+    simien_wasm_dep_analyzer::ExportType::Global(Ok(simien_wasm_dep_analyzer::GlobalType {
       value_type,
       mutability,
     }))
@@ -564,49 +564,49 @@ fn test_render_js_wasm_module_global_unwrap() {
     imports: vec![],
     exports: vec![
       // immutable numeric global -> unwrapped to its value at runtime
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "answer",
         index: 0,
-        export_type: global(wasm_dep_analyzer::ValueType::I32, false),
+        export_type: global(simien_wasm_dep_analyzer::ValueType::I32, false),
       },
       // mutable numeric global -> still unwrapped (snapshot at instantiation)
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "counter",
         index: 1,
-        export_type: global(wasm_dep_analyzer::ValueType::I64, true),
+        export_type: global(simien_wasm_dep_analyzer::ValueType::I64, true),
       },
       // unresolved value type (e.g. v128 / reference type) is still a global
       // by kind, so it is wrapped; the helper falls back to the
       // WebAssembly.Global object if reading `.value` throws (v128).
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "vec",
         index: 2,
-        export_type: global(wasm_dep_analyzer::ValueType::Unknown, false),
+        export_type: global(simien_wasm_dep_analyzer::ValueType::Unknown, false),
       },
       // global whose value type failed to parse -> still wrapped by kind
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "broken",
         index: 3,
-        export_type: wasm_dep_analyzer::ExportType::Global(Err(
-          wasm_dep_analyzer::ParseError::UnresolvedExportType,
+        export_type: simien_wasm_dep_analyzer::ExportType::Global(Err(
+          simien_wasm_dep_analyzer::ParseError::UnresolvedExportType,
         )),
       },
       // non-global export is left untouched
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "fn_export",
         index: 4,
-        export_type: wasm_dep_analyzer::ExportType::Function(Ok(
-          wasm_dep_analyzer::FunctionSignature {
+        export_type: simien_wasm_dep_analyzer::ExportType::Function(Ok(
+          simien_wasm_dep_analyzer::FunctionSignature {
             params: vec![],
             returns: vec![],
           },
         )),
       },
       // default export that is a global -> unwrapped
-      wasm_dep_analyzer::Export {
+      simien_wasm_dep_analyzer::Export {
         name: "default",
         index: 5,
-        export_type: global(wasm_dep_analyzer::ValueType::F64, false),
+        export_type: global(simien_wasm_dep_analyzer::ValueType::F64, false),
       },
     ],
   };
@@ -641,36 +641,36 @@ fn test_render_js_wasm_module_global_import() {
       // `WebAssembly.Global` when the dependency is itself a Wasm module
       // (found in `import.meta.wasmInstances`), falling back to the JS
       // binding otherwise
-      wasm_dep_analyzer::Import {
+      simien_wasm_dep_analyzer::Import {
         name: "counter",
         module: "./dep.wasm",
-        import_type: wasm_dep_analyzer::ImportType::Global(
-          wasm_dep_analyzer::GlobalType {
-            value_type: wasm_dep_analyzer::ValueType::I32,
+        import_type: simien_wasm_dep_analyzer::ImportType::Global(
+          simien_wasm_dep_analyzer::GlobalType {
+            value_type: simien_wasm_dep_analyzer::ValueType::I32,
             mutability: true,
           },
         ),
       },
       // non-global import from the same module is untouched
-      wasm_dep_analyzer::Import {
+      simien_wasm_dep_analyzer::Import {
         name: "bump",
         module: "./dep.wasm",
-        import_type: wasm_dep_analyzer::ImportType::Function(0),
+        import_type: simien_wasm_dep_analyzer::ImportType::Function(0),
       },
       // module with no global imports gets no namespace import or lookup
-      wasm_dep_analyzer::Import {
+      simien_wasm_dep_analyzer::Import {
         name: "log",
         module: "./util.js",
-        import_type: wasm_dep_analyzer::ImportType::Function(1),
+        import_type: simien_wasm_dep_analyzer::ImportType::Function(1),
       },
     ],
-    exports: vec![wasm_dep_analyzer::Export {
+    exports: vec![simien_wasm_dep_analyzer::Export {
       name: "read",
       index: 0,
-      export_type: wasm_dep_analyzer::ExportType::Function(Ok(
-        wasm_dep_analyzer::FunctionSignature {
+      export_type: simien_wasm_dep_analyzer::ExportType::Function(Ok(
+        simien_wasm_dep_analyzer::FunctionSignature {
           params: vec![],
-          returns: vec![wasm_dep_analyzer::ValueType::I32],
+          returns: vec![simien_wasm_dep_analyzer::ValueType::I32],
         },
       )),
     }],

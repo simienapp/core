@@ -29,7 +29,7 @@ pub use resource_table::ResourceTable;
 
 /// Returned by resource shutdown methods
 pub type AsyncResult<T> =
-  Pin<Box<dyn Future<Output = Result<T, deno_error::JsErrorBox>>>>;
+  Pin<Box<dyn Future<Output = Result<T, simien_error::JsErrorBox>>>>;
 
 pub enum WriteOutcome {
   Partial { nwritten: usize, view: BufView },

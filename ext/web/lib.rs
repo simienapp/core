@@ -23,12 +23,12 @@ use std::sync::Arc;
 pub use blob::BlobError;
 pub use compression::CompressionError;
 pub use css_stylesheet::create_css_style_sheet;
-use deno_core::U16String;
-use deno_core::convert::ByteString;
-use deno_core::convert::Uint8Array;
-use deno_core::op2;
-use deno_core::url::Url;
-use deno_core::v8;
+use simien_core::U16String;
+use simien_core::convert::ByteString;
+use simien_core::convert::Uint8Array;
+use simien_core::op2;
+use simien_core::url::Url;
+use simien_core::v8;
 use encoding_rs::CoderResult;
 use encoding_rs::Decoder;
 use encoding_rs::DecoderResult;
@@ -68,8 +68,8 @@ use crate::timers::op_now;
 use crate::timers::op_time_origin;
 pub mod locks;
 
-deno_core::extension!(deno_web,
-  deps = [ deno_webidl ],
+simien_core::extension!(simien_web,
+  deps = [ simien_webidl ],
   ops = [
     op_base64_decode,
     op_base64_decode_into,
@@ -211,7 +211,7 @@ deno_core::extension!(deno_web,
   }
 );
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum WebError {
   #[class("DOMExceptionInvalidCharacterError")]
   #[error("Failed to decode base64")]
@@ -818,8 +818,8 @@ struct TextDecoderResource {
 }
 
 // SAFETY: we're sure `TextDecoderResource` can be GCed
-unsafe impl deno_core::GarbageCollected for TextDecoderResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for TextDecoderResource {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"TextDecoderResource"

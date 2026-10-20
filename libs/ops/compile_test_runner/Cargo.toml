@@ -7,18 +7,18 @@ edition.workspace = true
 license.workspace = true
 publish = false
 repository.workspace = true
-description = "Compile-test runner for deno_ops"
+description = "Compile-test runner for simien_ops"
 
 [lib]
 path = "lib.rs"
 
 [dev-dependencies]
 bytes.workspace = true
-# deno_core's default enables no JS engine backend (the deno_v8 facade requires
+# simien_core's default enables no JS engine backend (the simien_v8 facade requires
 # exactly one of `v8`/`quickjs`); trybuild compiles the op2/webidl test cases as
 # their own crates against these deps, so select v8 or they fail to build.
-deno_core = { workspace = true, features = ["v8"] }
-deno_error.workspace = true
-deno_ops.workspace = true
+simien_core = { workspace = true, features = ["v8"] }
+simien_error.workspace = true
+simien_ops.workspace = true
 serde.workspace = true
 trybuild = "1.0.104"

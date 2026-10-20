@@ -2,8 +2,8 @@
 
 use std::marker::PhantomData;
 
-use deno_error::JsErrorBox;
-use deno_error::JsErrorClass;
+use simien_error::JsErrorBox;
+use simien_error::JsErrorClass;
 
 use super::erased_future::TypeErased;
 use super::future_arena::FutureContextMapper;
@@ -58,7 +58,7 @@ pub type V8RetValMapper<R> =
   for<'r, 'i> fn(
     &mut v8::PinScope<'r, 'i>,
     R,
-  ) -> Result<v8::Local<'r, v8::Value>, serde_v8::Error>;
+  ) -> Result<v8::Local<'r, v8::Value>, simien_serde_v8::Error>;
 
 impl<'s, 'i> OpMappingContextLifetime<'s, 'i> for V8OpMappingContext {
   type Context
@@ -66,7 +66,7 @@ impl<'s, 'i> OpMappingContextLifetime<'s, 'i> for V8OpMappingContext {
   where
     'i: 's;
   type Result = v8::Local<'s, v8::Value>;
-  type MappingError = serde_v8::Error;
+  type MappingError = simien_serde_v8::Error;
 
   #[inline(always)]
   fn map_error(
@@ -97,7 +97,7 @@ impl OpMappingContext for V8OpMappingContext {
     f: *const fn(),
     scope: &mut <Self as OpMappingContextLifetime<'s, 'i>>::Context,
     r: R,
-  ) -> Result<v8::Local<'s, v8::Value>, serde_v8::Error> {
+  ) -> Result<v8::Local<'s, v8::Value>, simien_serde_v8::Error> {
     let f: Self::MappingFn<R> = unsafe { std::mem::transmute(f) };
     f(scope, r)
   }

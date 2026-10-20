@@ -33,12 +33,12 @@ const BASE64_JWK_FORGIVING: base64::engine::general_purpose::GeneralPurpose =
       .with_decode_allow_trailing_bits(true)
       .with_decode_padding_mode(base64::engine::DecodePaddingMode::Indifferent),
   );
-use deno_core::v8;
-use deno_core::webidl::ContextFn;
-use deno_core::webidl::WebIdlConverter;
-use deno_core::webidl::WebIdlError;
-use deno_core::webidl::WebIdlErrorKind;
-use deno_error::JsErrorBox;
+use simien_core::v8;
+use simien_core::webidl::ContextFn;
+use simien_core::webidl::WebIdlConverter;
+use simien_core::webidl::WebIdlError;
+use simien_core::webidl::WebIdlErrorKind;
+use simien_error::JsErrorBox;
 
 use crate::CryptoError;
 use crate::crypto_key::CryptoKeyType;
@@ -400,7 +400,7 @@ fn import_key_rsa<'s>(
     (KeyFormat::Pkcs8, ImportKeyData::Buffer(b)) => {
       check_usages_subset(usages, priv_usages)?;
       let result = op_crypto_import_key_inner(opts, KeyData::Pkcs8(b))
-        .map_err(|e| CryptoError::Other(deno_error::JsErrorBox::from_err(e)))?;
+        .map_err(|e| CryptoError::Other(simien_error::JsErrorBox::from_err(e)))?;
       let ImportKeyResult::Rsa {
         raw_data,
         modulus_length,
@@ -420,7 +420,7 @@ fn import_key_rsa<'s>(
     (KeyFormat::Spki, ImportKeyData::Buffer(b)) => {
       check_usages_subset(usages, pub_usages)?;
       let result = op_crypto_import_key_inner(opts, KeyData::Spki(b))
-        .map_err(|e| CryptoError::Other(deno_error::JsErrorBox::from_err(e)))?;
+        .map_err(|e| CryptoError::Other(simien_error::JsErrorBox::from_err(e)))?;
       let ImportKeyResult::Rsa {
         raw_data,
         modulus_length,
@@ -555,7 +555,7 @@ fn import_key_rsa<'s>(
             qi: qi.unwrap(),
           },
         )
-        .map_err(|e| CryptoError::Other(deno_error::JsErrorBox::from_err(e)))?;
+        .map_err(|e| CryptoError::Other(simien_error::JsErrorBox::from_err(e)))?;
         let ImportKeyResult::Rsa {
           raw_data,
           modulus_length,
@@ -585,7 +585,7 @@ fn import_key_rsa<'s>(
         let result =
           op_crypto_import_key_inner(opts, KeyData::JwkPublicRsa { n, e })
             .map_err(|e| {
-              CryptoError::Other(deno_error::JsErrorBox::from_err(e))
+              CryptoError::Other(simien_error::JsErrorBox::from_err(e))
             })?;
         let ImportKeyResult::Rsa {
           raw_data,
@@ -1128,7 +1128,7 @@ fn import_key_ec<'s>(
     | (KeyFormat::RawPublic, ImportKeyData::Buffer(b)) => {
       check_usages_subset(usages, &pub_usages)?;
       let result = op_crypto_import_key_inner(opts, KeyData::Raw(b))
-        .map_err(|e| CryptoError::Other(deno_error::JsErrorBox::from_err(e)))?;
+        .map_err(|e| CryptoError::Other(simien_error::JsErrorBox::from_err(e)))?;
       let ImportKeyResult::Ec { raw_data } = result else {
         return Err(data_error("Invalid key data".into()));
       };
@@ -1148,7 +1148,7 @@ fn import_key_ec<'s>(
         return Err(syntax_error("Key usage must be empty".into()));
       }
       let result = op_crypto_import_key_inner(opts, KeyData::Spki(b))
-        .map_err(|e| CryptoError::Other(deno_error::JsErrorBox::from_err(e)))?;
+        .map_err(|e| CryptoError::Other(simien_error::JsErrorBox::from_err(e)))?;
       let ImportKeyResult::Ec { raw_data } = result else {
         return Err(data_error("Invalid key data".into()));
       };
@@ -1164,7 +1164,7 @@ fn import_key_ec<'s>(
     (KeyFormat::Pkcs8, ImportKeyData::Buffer(b)) => {
       check_usages_subset(usages, &priv_usages)?;
       let result = op_crypto_import_key_inner(opts, KeyData::Pkcs8(b))
-        .map_err(|e| CryptoError::Other(deno_error::JsErrorBox::from_err(e)))?;
+        .map_err(|e| CryptoError::Other(simien_error::JsErrorBox::from_err(e)))?;
       let ImportKeyResult::Ec { raw_data } = result else {
         return Err(data_error("Invalid key data".into()));
       };
@@ -1247,12 +1247,12 @@ fn import_key_ec<'s>(
         let d = read_string_member(scope, jwk, b"d").unwrap();
         op_crypto_import_key_inner(opts, KeyData::JwkPrivateEc { x, y, d })
           .map_err(|e| {
-            CryptoError::Other(deno_error::JsErrorBox::from_err(e))
+            CryptoError::Other(simien_error::JsErrorBox::from_err(e))
           })?
       } else {
         op_crypto_import_key_inner(opts, KeyData::JwkPublicEc { x, y })
           .map_err(|e| {
-            CryptoError::Other(deno_error::JsErrorBox::from_err(e))
+            CryptoError::Other(simien_error::JsErrorBox::from_err(e))
           })?
       };
       let ImportKeyResult::Ec { raw_data } = result else {

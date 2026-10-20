@@ -5,8 +5,8 @@ use std::mem::MaybeUninit;
 use std::os::raw::c_void;
 use std::path::PathBuf;
 
-use deno_error::JsErrorBox;
-use deno_error::JsErrorClass;
+use simien_error::JsErrorBox;
+use simien_error::JsErrorClass;
 use url::Url;
 use v8::MapFnTo;
 
@@ -1426,7 +1426,7 @@ pub extern "C" fn host_initialize_import_meta_object_callback(
 
   let module_global = v8::Global::new(scope, module);
   let Some(name) = module_map.get_name_by_module(&module_global) else {
-    // The module is not tracked by deno_core's module map. This is the
+    // The module is not tracked by simien_core's module map. This is the
     // happy path for `node:vm` `SourceTextModule`, whose v8::Module is
     // created directly by the `node:vm` op and never registered. Delegate
     // to the external hook (set by `node:vm`) if one is registered; if
@@ -1526,7 +1526,7 @@ fn maybe_add_import_meta_filename_dirname<'s, 'i>(
 
   // If something goes wrong acquiring a filepath, let skip instead of crashing
   // (mostly concerned about file paths on Windows).
-  let Ok(file_path) = deno_path_util::url_to_file_path(&name_url) else {
+  let Ok(file_path) = simien_path_util::url_to_file_path(&name_url) else {
     return;
   };
 
@@ -1591,7 +1591,7 @@ fn import_meta_resolve(
 
   match import_meta_resolve_result {
     Ok(resolved) => {
-      let resolved_val = serde_v8::to_v8(scope, resolved.as_str()).unwrap();
+      let resolved_val = simien_serde_v8::to_v8(scope, resolved.as_str()).unwrap();
       rv.set(resolved_val);
     }
     Err(err) => {
@@ -1627,9 +1627,9 @@ fn catch_dynamic_import_promise_error<'s, 'i>(
   let arg = args.get(0);
   if is_instance_of_error(scope, arg) {
     let e: crate::error::NativeJsError =
-      serde_v8::from_v8(scope, arg).unwrap_or_default();
+      simien_serde_v8::from_v8(scope, arg).unwrap_or_default();
     let name = e.name.unwrap_or_else(|| {
-      deno_error::builtin_classes::GENERIC_ERROR.to_string()
+      simien_error::builtin_classes::GENERIC_ERROR.to_string()
     });
     if !has_call_site(scope, arg) {
       let msg = v8::Exception::create_message(scope, arg);
@@ -1645,16 +1645,16 @@ fn catch_dynamic_import_promise_error<'s, 'i>(
         message = v8::String::new(scope, &str).unwrap();
       }
       let exception = match name.as_str() {
-        deno_error::builtin_classes::RANGE_ERROR => {
+        simien_error::builtin_classes::RANGE_ERROR => {
           v8::Exception::range_error(scope, message)
         }
-        deno_error::builtin_classes::TYPE_ERROR => {
+        simien_error::builtin_classes::TYPE_ERROR => {
           v8::Exception::type_error(scope, message)
         }
-        deno_error::builtin_classes::SYNTAX_ERROR => {
+        simien_error::builtin_classes::SYNTAX_ERROR => {
           v8::Exception::syntax_error(scope, message)
         }
-        deno_error::builtin_classes::REFERENCE_ERROR => {
+        simien_error::builtin_classes::REFERENCE_ERROR => {
           v8::Exception::reference_error(scope, message)
         }
         _ => v8::Exception::error(scope, message),
@@ -1662,7 +1662,7 @@ fn catch_dynamic_import_promise_error<'s, 'i>(
       // V8 module linking errors (e.g. a missing named export) are
       // spec-defined `SyntaxError`s and must not carry a host-defined `code`.
       // Only genuine resolution/loading failures get `ERR_MODULE_NOT_FOUND`.
-      if name.as_str() != deno_error::builtin_classes::SYNTAX_ERROR {
+      if name.as_str() != simien_error::builtin_classes::SYNTAX_ERROR {
         let code_key = CODE.v8_string(scope).unwrap();
         let code_value = ERR_MODULE_NOT_FOUND.v8_string(scope).unwrap();
         let exception_obj = exception.to_object(scope).unwrap();

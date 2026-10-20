@@ -17,13 +17,20 @@ Deno's runtime is winding down after Cloudflare's acquisition (October 2026). Si
 | `libs/serde_v8` | `serde_v8` | `simien_serde_v8` |
 | `libs/deno_v8` | `deno_v8` (the V8/QuickJS facade) | `simien_v8` |
 | `libs/crypto` | `deno_crypto_provider` | `simien_crypto_provider` |
+| `libs/deno_error` | `deno_error`, `deno_error_macro` | `simien_error`, `simien_error_macro` |
+| `libs/deno_unsync` | `deno_unsync` | `simien_unsync` |
+| `libs/deno_path_util` | `deno_path_util` | `simien_path_util` |
+| `libs/boxed_error` | `boxed_error` | `simien_boxed_error` |
+| `libs/wasm_dep_analyzer` | `wasm_dep_analyzer` | `simien_wasm_dep_analyzer` |
+| `libs/deno_native_certs` | `deno_native_certs` | `simien_native_certs` |
+| `tests/bench_util` | `deno_bench_util` | `simien_bench_util` (benchmarks only) |
 | `ext/webidl` | `deno_webidl` | `simien_webidl` |
 | `ext/web` | `deno_web` | `simien_web` |
 | `ext/fetch` | `deno_fetch` | `simien_fetch` |
 | `ext/crypto` | `deno_crypto` | `simien_crypto` |
 | `ext/tls` | `deno_tls` | `simien_tls` |
 
-The renames haven't happened yet: `main` still builds the upstream crate names, unchanged, against upstream's `Cargo.lock`. The plan and its progress are in the tracking issue.
+Every crate here is published under its `simien_*` name, and the Rust paths, extension names and `ext:` module specifiers are renamed to match. The rename is mechanical: `tools/rename.py` applies `tools/rename-map.txt`, and the same script translates an upstream Deno patch before it's applied, so fixes still port across. The plan and its progress are in [#1](https://github.com/simienapp/core/issues/1).
 
 ## Build
 

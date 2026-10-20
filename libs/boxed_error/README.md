@@ -1,4 +1,4 @@
-# boxed_error
+# simien_boxed_error
 
 Experimental opinionated way to provide helper methods for use with boxing errors.
 
@@ -49,7 +49,7 @@ impl DenoResolveErrorKind {
 After:
 
 ```rs
-use boxed_error::Boxed;
+use simien_boxed_error::Boxed;
 use thiserror::Error;
 
 #[derive(Debug, Boxed)]

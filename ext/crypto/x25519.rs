@@ -8,7 +8,7 @@ use rand::rngs::OsRng;
 use spki::der::Encode;
 use spki::der::asn1::BitString;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum X25519Error {
   #[class("DOMExceptionOperationError")]
   #[error("Failed to export key")]

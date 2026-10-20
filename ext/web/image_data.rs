@@ -2,17 +2,17 @@
 
 use std::borrow::Cow;
 
-use deno_core::GarbageCollected;
-use deno_core::WebIDL;
-use deno_core::op2;
-use deno_core::v8;
-use deno_core::webidl::ContextFn;
-use deno_core::webidl::IntOptions;
-use deno_core::webidl::WebIdlConverter;
-use deno_core::webidl::WebIdlError;
-use deno_core::webidl::WebIdlErrorKind;
+use simien_core::GarbageCollected;
+use simien_core::WebIDL;
+use simien_core::op2;
+use simien_core::v8;
+use simien_core::webidl::ContextFn;
+use simien_core::webidl::IntOptions;
+use simien_core::webidl::WebIdlConverter;
+use simien_core::webidl::WebIdlError;
+use simien_core::webidl::WebIdlErrorKind;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ImageDataError {
   #[class(inherit)]
   #[error(transparent)]

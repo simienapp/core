@@ -8,8 +8,8 @@ use brotli::enc::encode::BrotliEncoderOperation;
 use brotli::enc::encode::BrotliEncoderParameter;
 use brotli::enc::encode::BrotliEncoderStateStruct;
 use brotli::writer::StandardAlloc;
-use deno_core::convert::Uint8Array;
-use deno_core::op2;
+use simien_core::convert::Uint8Array;
+use simien_core::op2;
 use flate2::Compression;
 use flate2::write::DeflateDecoder;
 use flate2::write::DeflateEncoder;
@@ -18,7 +18,7 @@ use flate2::write::GzEncoder;
 use flate2::write::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum CompressionError {
   #[class(type)]
   #[error("Unsupported format")]
@@ -144,8 +144,8 @@ impl RawBrotliEncoder {
 struct CompressionResource(RefCell<Option<Inner>>);
 
 // SAFETY: we're sure `CompressionResource` can be GCed
-unsafe impl deno_core::GarbageCollected for CompressionResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for CompressionResource {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"CompressionResource"

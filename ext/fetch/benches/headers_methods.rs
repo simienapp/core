@@ -1,20 +1,20 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_bench_util::bench_js_sync;
-use deno_bench_util::bench_or_profile;
-use deno_bench_util::bencher::Bencher;
-use deno_bench_util::bencher::benchmark_group;
-use deno_core::Extension;
+use simien_bench_util::bench_js_sync;
+use simien_bench_util::bench_or_profile;
+use simien_bench_util::bencher::Bencher;
+use simien_bench_util::bencher::benchmark_group;
+use simien_core::Extension;
 
 fn setup() -> Vec<Extension> {
-  deno_core::extension!(
+  simien_core::extension!(
     bench_setup,
     esm_entry_point = "ext:bench_setup/setup",
     esm = [
-      "ext:deno_fetch/20_headers.js" = "20_headers.js",
+      "ext:simien_fetch/20_headers.js" = "20_headers.js",
       "ext:bench_setup/setup" = {
         source = r#"
-          import { Headers } from "ext:deno_fetch/20_headers.js";
+          import { Headers } from "ext:simien_fetch/20_headers.js";
           globalThis.Headers = Headers;
           globalThis.makeHeaders = () => new Headers({
             "content-type": "application/json",
@@ -32,9 +32,9 @@ fn setup() -> Vec<Extension> {
   );
 
   vec![
-    deno_webidl::deno_webidl::init(),
-    deno_web::deno_web::init(
-      deno_web::BlobStore::default_arc(),
+    simien_webidl::simien_webidl::init(),
+    simien_web::simien_web::init(
+      simien_web::BlobStore::default_arc(),
       None,
       Default::default(),
       Default::default(),

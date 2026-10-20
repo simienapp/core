@@ -4,8 +4,8 @@ use base64::Engine;
 use base64::prelude::BASE64_URL_SAFE_NO_PAD;
 use const_oid::AssociatedOid;
 use const_oid::ObjectIdentifier;
-use deno_core::ToV8;
-use deno_core::convert::Uint8Array;
+use simien_core::ToV8;
+use simien_core::convert::Uint8Array;
 use elliptic_curve::sec1::ToEncodedPoint;
 use p256::pkcs8::DecodePrivateKey;
 use rsa::pkcs1::der::Decode;
@@ -19,7 +19,7 @@ use spki::der::asn1::BitString;
 
 use crate::shared::*;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ExportKeyError {
   #[class(inherit)]
   #[error(transparent)]

@@ -39,17 +39,17 @@ fn convert_or_serde(
 ) -> TokenStream {
   if serde {
     quote_spanned! { span =>
-      ::deno_core::serde_v8::from_v8(
+      ::simien_core::simien_serde_v8::from_v8(
         __scope,
         #value,
-      ).map_err(::deno_error::JsErrorBox::from_err)?
+      ).map_err(::simien_error::JsErrorBox::from_err)?
     }
   } else {
     quote_spanned! { span =>
-      ::deno_core::convert::FromV8::from_v8(
+      ::simien_core::convert::FromV8::from_v8(
         __scope,
         #value,
-      ).map_err(::deno_error::JsErrorBox::from_err)?
+      ).map_err(::simien_error::JsErrorBox::from_err)?
     }
   }
 }
@@ -61,12 +61,12 @@ mod kw {
 
 fn create_impl(ident: impl ToTokens, body: TokenStream) -> TokenStream {
   quote! {
-    impl<'a> ::deno_core::convert::FromV8<'a> for #ident {
-      type Error = ::deno_error::JsErrorBox;
+    impl<'a> ::simien_core::convert::FromV8<'a> for #ident {
+      type Error = ::simien_error::JsErrorBox;
 
       fn from_v8<'i>(
-        __scope: &mut ::deno_core::v8::PinScope<'a, 'i>,
-        __value: ::deno_core::v8::Local<'a, ::deno_core::v8::Value>,
+        __scope: &mut ::simien_core::v8::PinScope<'a, 'i>,
+        __value: ::simien_core::v8::Local<'a, ::simien_core::v8::Value>,
       ) -> Result<Self, Self::Error>
       {
         #body

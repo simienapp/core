@@ -1,5 +1,5 @@
 [package]
-name = "deno_path_util"
+name = "simien_path_util"
 description = "Path utilities used in Deno"
 version = "0.6.4"
 edition = "2024"
@@ -13,7 +13,7 @@ repository = "https://github.com/denoland/deno_path_util"
 percent-encoding = "2.3.0"
 thiserror = "2"
 sys_traits.workspace = true
-deno_error = { version = "0.7.0", features = ["url"] }
+simien_error = { workspace = true, features = ["url"] }
 url = "2.5.1"
 
 [dev-dependencies]

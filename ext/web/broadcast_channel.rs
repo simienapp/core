@@ -5,26 +5,26 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::ResourceId;
-use deno_core::op2;
-use deno_core::parking_lot::Mutex;
-use deno_core::v8;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::ResourceId;
+use simien_core::op2;
+use simien_core::parking_lot::Mutex;
+use simien_core::v8;
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::error::SendError as BroadcastSendError;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::error::SendError as MpscSendError;
 use uuid::Uuid;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum BroadcastChannelError {
   #[class(inherit)]
   #[error(transparent)]
   Resource(
     #[from]
     #[inherit]
-    deno_core::error::ResourceError,
+    simien_core::error::ResourceError,
   ),
   #[class(generic)]
   #[error(transparent)]
@@ -36,7 +36,7 @@ pub enum BroadcastChannelError {
   ),
   #[class(inherit)]
   #[error(transparent)]
-  Serialize(#[inherit] deno_error::JsErrorBox),
+  Serialize(#[inherit] simien_error::JsErrorBox),
 }
 
 impl<T: std::fmt::Debug + Send + Sync + 'static> From<MpscSendError<T>>
@@ -138,7 +138,7 @@ pub fn op_broadcast_serialize<'a>(
   // Must not hold an `OpState` borrow across this call: serializing a host
   // object (e.g. a Blob) re-enters JS and borrows `OpState` again.
   let (data, sabs) =
-    deno_core::serialize_broadcast(scope, value, error_callback)
+    simien_core::serialize_broadcast(scope, value, error_callback)
       .map_err(BroadcastChannelError::Serialize)?;
 
   let sab_id = if sabs.is_empty() {
@@ -185,7 +185,7 @@ pub fn op_broadcast_deserialize<'a>(
       .map(|sabs| sabs.lock().clone())
       .unwrap_or_default()
   };
-  deno_core::deserialize_broadcast(scope, &data, sabs, deserializers)
+  simien_core::deserialize_broadcast(scope, &data, sabs, deserializers)
     .map_err(BroadcastChannelError::Serialize)
 }
 
@@ -265,7 +265,7 @@ pub struct InMemoryBroadcastChannelResource {
   uuid: Uuid,
 }
 
-impl deno_core::Resource for InMemoryBroadcastChannelResource {}
+impl simien_core::Resource for InMemoryBroadcastChannelResource {}
 
 #[derive(Clone)]
 struct InMemoryChannelMessage {

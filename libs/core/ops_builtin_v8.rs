@@ -3,7 +3,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use deno_error::JsErrorBox;
+use simien_error::JsErrorBox;
 use serde::Serialize;
 use v8::ValueDeserializerHelper;
 use v8::ValueSerializerHelper;
@@ -95,7 +95,7 @@ pub fn op_leak_tracing_get_all<'s, 'i>(
   let mut idx = 0;
   context_state.activity_traces.get_all(|kind, id, trace| {
     let val =
-      serde_v8::to_v8(scope, (kind as u8, id.to_string(), trace.to_owned()))
+      simien_serde_v8::to_v8(scope, (kind as u8, id.to_string(), trace.to_owned()))
         .unwrap();
     out.set_index(scope, idx, val);
     idx += 1;
@@ -565,7 +565,7 @@ pub fn op_encode<'s, 'i>(
 ) -> Result<v8::Local<'s, v8::Uint8Array>, JsErrorBox> {
   let text = v8::Local::<v8::String>::try_from(text)
     .map_err(|_| JsErrorBox::type_error("Invalid argument"))?;
-  let text_str = serde_v8::to_utf8(text, scope);
+  let text_str = simien_serde_v8::to_utf8(text, scope);
   let bytes = text_str.into_bytes();
   let len = bytes.len();
   let backing_store =
@@ -1418,7 +1418,7 @@ pub fn wasm_streaming_callback<'a>(
   let Some(cb_handle) = maybe_cb_handle else {
     // The JS handler is registered while the runtime bootstraps, before any
     // user code can trigger wasm streaming. Reaching this without a handler
-    // means deno_core was misconfigured.
+    // means simien_core was misconfigured.
     panic!("wasm streaming callback invoked before the JS handler was set");
   };
 
@@ -1432,7 +1432,7 @@ pub fn wasm_streaming_callback<'a>(
   };
 
   let undefined = v8::undefined(scope);
-  let rid = serde_v8::to_v8(scope, streaming_rid).unwrap();
+  let rid = simien_serde_v8::to_v8(scope, streaming_rid).unwrap();
   cb_handle
     .open(scope)
     .call(scope, undefined.into(), &[arg, rid]);

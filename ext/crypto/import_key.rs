@@ -1,9 +1,9 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
 use base64::Engine;
-use deno_core::JsBuffer;
-use deno_core::ToV8;
-use deno_core::convert::Uint8Array;
+use simien_core::JsBuffer;
+use simien_core::ToV8;
+use simien_core::convert::Uint8Array;
 use elliptic_curve::pkcs8::PrivateKeyInfo;
 use p256::pkcs8::EncodePrivateKey;
 use rsa::pkcs1::UintRef;
@@ -13,7 +13,7 @@ use spki::der::Decode;
 
 use crate::shared::*;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class("DOMExceptionDataError")]
 pub enum ImportKeyError {
   #[class(inherit)]

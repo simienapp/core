@@ -10,10 +10,10 @@ use std::sync::atomic::Ordering::SeqCst;
 
 use bytes::Bytes;
 use crate::permissions::FetchPermissions;
-use deno_core::url::Url;
+use simien_core::url::Url;
 use crate::permissions::PermissionCheckError;
 use crate::permissions::PermissionsContainer;
-use deno_tls::rustls::pki_types::PrivateKeyDer;
+use simien_tls::rustls::pki_types::PrivateKeyDer;
 use fast_socks5::server::Config as Socks5Config;
 use fast_socks5::server::Socks5Socket;
 use http::header::ACCEPT_ENCODING;
@@ -162,7 +162,7 @@ async fn run_test_client_with_resolver(
     CreateHttpClientOptions {
       root_cert_store: None,
       ca_certs: vec![],
-      proxy: prx_addr.map(|p| deno_tls::Proxy::Http {
+      proxy: prx_addr.map(|p| simien_tls::Proxy::Http {
         url: format!("{}://{}", proto, p),
         basic_auth: None,
       }),
@@ -374,7 +374,7 @@ async fn test_http_proxy_denies_destination_resolving_to_denied_ip() {
     CreateHttpClientOptions {
       root_cert_store: None,
       ca_certs: vec![],
-      proxy: Some(deno_tls::Proxy::Http {
+      proxy: Some(simien_tls::Proxy::Http {
         url: format!("http://{}", prx_addr),
         basic_auth: None,
       }),
@@ -820,7 +820,7 @@ async fn create_chunked_gzip_http_server(
 async fn create_https_server(allow_h2: bool, bind_addr: IpAddr) -> SocketAddr {
   install_default_crypto_provider();
 
-  let mut tls_config = deno_tls::rustls::server::ServerConfig::builder()
+  let mut tls_config = simien_tls::rustls::server::ServerConfig::builder()
     .with_no_client_auth()
     .with_single_cert(
       vec![EXAMPLE_CRT.into()],
@@ -893,7 +893,7 @@ async fn create_http_proxy(src_addr: SocketAddr) -> SocketAddr {
 }
 
 async fn create_https_proxy(src_addr: SocketAddr) -> SocketAddr {
-  let mut tls_config = deno_tls::rustls::server::ServerConfig::builder()
+  let mut tls_config = simien_tls::rustls::server::ServerConfig::builder()
     .with_no_client_auth()
     .with_single_cert(
       vec![EXAMPLE_CRT.into()],

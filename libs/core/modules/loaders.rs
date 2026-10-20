@@ -7,7 +7,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 
-use deno_error::JsErrorBox;
+use simien_error::JsErrorBox;
 use futures::future::FutureExt;
 
 use super::SourceCodeCacheInfo;
@@ -519,7 +519,7 @@ impl ModuleLoader for LazyEsmModuleLoader {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(inherit)]
 #[error("Failed to load {specifier}")]
 pub struct LoadFailedError {
@@ -554,7 +554,7 @@ impl ModuleLoader for FsModuleLoader {
   ) -> ModuleLoadResponse {
     let module_specifier = module_specifier.clone();
     let fut = async move {
-      let path = deno_path_util::url_to_file_path(&module_specifier).map_err(JsErrorBox::from_err)?;
+      let path = simien_path_util::url_to_file_path(&module_specifier).map_err(JsErrorBox::from_err)?;
       let module_type = if let Some(extension) = path.extension() {
         let ext = extension.to_string_lossy().to_lowercase();
         // We only return JSON modules if extension was actually `.json`.

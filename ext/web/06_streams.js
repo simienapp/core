@@ -3,7 +3,7 @@
 // @ts-check
 /// <reference path="../webidl/internal.d.ts" />
 /// <reference path="./06_streams_types.d.ts" />
-/// <reference path="../../cli/tsc/dts/lib.deno_web.d.ts" />
+/// <reference path="../../cli/tsc/dts/lib.simien_web.d.ts" />
 /// <reference lib="esnext" />
 
 (function () {
@@ -92,9 +92,9 @@ const {
   queueMicrotask,
 } = primordials;
 
-const webidl = core.loadExtScript("ext:deno_webidl/00_webidl.js");
+const webidl = core.loadExtScript("ext:simien_webidl/00_webidl.js");
 const { structuredClone } = core.loadExtScript(
-  "ext:deno_web/02_structured_clone.js",
+  "ext:simien_web/02_structured_clone.js",
 );
 const {
   AbortSignalPrototype,
@@ -102,13 +102,13 @@ const {
   newSignal,
   remove,
   signalAbort,
-} = core.loadExtScript("ext:deno_web/03_abort_signal.js");
+} = core.loadExtScript("ext:simien_web/03_abort_signal.js");
 
 const { createFilteredInspectProxy } = core.loadExtScript(
-  "ext:deno_web/01_console.js",
+  "ext:simien_web/01_console.js",
 );
 const { assert, AssertionError } = core.loadExtScript(
-  "ext:deno_web/00_infra.js",
+  "ext:simien_web/00_infra.js",
 );
 
 /** @template T */
@@ -3134,12 +3134,12 @@ function readableStreamHasDefaultReader(stream) {
 
 /**
  * Fast path for `readableStreamPipeTo` when both the source and the sink are
- * backed by a `deno_core::Resource`. The entire byte pump happens in Rust via
+ * backed by a `simien_core::Resource`. The entire byte pump happens in Rust via
  * `op_pipe`, avoiding a copy of every chunk into and back out of JavaScript.
  * Close / abort / cancel semantics are handled here to match the generic
  * algorithm.
  *
- * When a `signal` is supplied it is wired to a `deno_core` cancel handle so an
+ * When a `signal` is supplied it is wired to a `simien_core` cancel handle so an
  * abort mid-pump unblocks `op_pipe` promptly; the aborted transfer then tears
  * down both ends with `signal.reason`, honoring the prevent* flags.
  *
@@ -8199,7 +8199,7 @@ internals.writableStreamForRid = writableStreamForRid;
 // keeps message_port snapshot-light.
 {
   const { markNotSerializable } = core.loadExtScript(
-    "ext:deno_web/13_message_port.js",
+    "ext:simien_web/13_message_port.js",
   );
   markNotSerializable(ReadableStream.prototype);
   markNotSerializable(WritableStream.prototype);

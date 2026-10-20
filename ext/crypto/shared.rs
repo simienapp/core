@@ -2,9 +2,9 @@
 
 use std::borrow::Cow;
 
-use deno_core::JsBuffer;
-use deno_core::ToV8;
-use deno_core::convert::Uint8Array;
+use simien_core::JsBuffer;
+use simien_core::ToV8;
+use simien_core::convert::Uint8Array;
 use elliptic_curve::sec1::ToEncodedPoint;
 use p256::pkcs8::DecodePrivateKey;
 use rsa::RsaPrivateKey;
@@ -324,7 +324,7 @@ impl RawKeyData {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum SharedError {
   #[class(type)]
   #[error("expected valid private key")]

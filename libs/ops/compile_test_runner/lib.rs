@@ -4,11 +4,11 @@
 macro_rules! prelude {
   () => {
     #[allow(unused_imports)]
-    use deno_ops::FromV8;
+    use simien_ops::FromV8;
     #[allow(unused_imports)]
-    use deno_ops::WebIDL;
+    use simien_ops::WebIDL;
     #[allow(unused_imports)]
-    use deno_ops::op2;
+    use simien_ops::op2;
 
     pub fn main() {}
   };

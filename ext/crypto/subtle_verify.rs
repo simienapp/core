@@ -9,11 +9,11 @@
 
 use std::borrow::Cow;
 
-use deno_core::v8;
-use deno_core::webidl::ContextFn;
-use deno_core::webidl::WebIdlConverter;
-use deno_core::webidl::WebIdlError;
-use deno_error::JsErrorBox;
+use simien_core::v8;
+use simien_core::webidl::ContextFn;
+use simien_core::webidl::WebIdlConverter;
+use simien_core::webidl::WebIdlError;
+use simien_error::JsErrorBox;
 
 use crate::CryptoError;
 use crate::KeyData;

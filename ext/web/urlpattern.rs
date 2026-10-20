@@ -1,12 +1,12 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_core::op2;
+use simien_core::op2;
 use serde::Serialize;
 use urlpattern::quirks;
 use urlpattern::quirks::StringOrInit;
 use urlpattern::quirks::UrlPatternInit;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 #[error("{0}")]
 pub struct UrlPatternError(String);

@@ -13,10 +13,10 @@ use std::sync::Arc;
 use std::task::Context;
 use std::task::Poll;
 
-use deno_core::futures::TryFutureExt;
+use simien_core::futures::TryFutureExt;
 #[cfg(not(windows))]
 use crate::permissions::PermissionsContainer;
-use deno_tls::rustls::ClientConfig as TlsConfig;
+use simien_tls::rustls::ClientConfig as TlsConfig;
 use http::Uri;
 use http::header::HeaderValue;
 use http::uri::Scheme;

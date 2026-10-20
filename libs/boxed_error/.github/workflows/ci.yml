@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   rust:
-    name: boxed_error-${{ matrix.os }}
+    name: simien_boxed_error-${{ matrix.os }}
     if: |
       (github.event_name == 'push' || !startsWith(github.event.pull_request.head.label, 'denoland:'))
       && !startsWith(github.ref, 'refs/tags/deno/')

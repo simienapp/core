@@ -1,9 +1,9 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
 // @ts-check
-/// <reference path="../../core/lib.deno_core.d.ts" />
+/// <reference path="../../core/lib.simien_core.d.ts" />
 /// <reference path="./internal.d.ts" />
-/// <reference path="../../cli/tsc/dts/lib.deno_web.d.ts" />
+/// <reference path="../../cli/tsc/dts/lib.simien_web.d.ts" />
 
 (function () {
 const { core, primordials } = __bootstrap;
@@ -20,11 +20,11 @@ const {
   TypedArrayPrototypeGetByteLength,
 } = primordials;
 
-const webidl = core.loadExtScript("ext:deno_webidl/00_webidl.js");
+const webidl = core.loadExtScript("ext:simien_webidl/00_webidl.js");
 const { createFilteredInspectProxy } = core.loadExtScript(
-  "ext:deno_web/01_console.js",
+  "ext:simien_web/01_console.js",
 );
-const { TransformStream } = core.loadExtScript("ext:deno_web/06_streams.js");
+const { TransformStream } = core.loadExtScript("ext:simien_web/06_streams.js");
 
 webidl.converters.CompressionFormat = webidl.createEnumConverter(
   "CompressionFormat",

@@ -12,8 +12,8 @@ use std::any::type_name;
 use std::borrow::Cow;
 use std::rc::Rc;
 
-use deno_error::JsErrorBox;
-use deno_error::JsErrorClass;
+use simien_error::JsErrorBox;
+use simien_error::JsErrorClass;
 
 use crate::ResourceHandle;
 use crate::ResourceHandleFd;
@@ -22,7 +22,7 @@ use crate::io::BufMutView;
 use crate::io::BufView;
 use crate::io::WriteOutcome;
 
-/// Resources are Rust objects that are attached to a [deno_core::JsRuntime].
+/// Resources are Rust objects that are attached to a [simien_core::JsRuntime].
 /// They are identified in JS by a numeric ID (the resource ID, or rid).
 /// Resources can be created in ops. Resources can also be retrieved in ops by
 /// their rid. Resources are not thread-safe - they can only be accessed from
@@ -55,7 +55,7 @@ use crate::io::WriteOutcome;
 /// implement `read()` as an operation that allocates a new chunk with
 /// `len == limit`, then calls `read_byob()`, and then returns a chunk sliced to
 /// the number of bytes read. Kernel backed resources can use the
-/// [deno_core::impl_readable_byob] macro to implement optimized `read_byob()`
+/// [simien_core::impl_readable_byob] macro to implement optimized `read_byob()`
 /// and `read()` implementations from a single `Self::read()` method.
 ///
 /// ### Writable
@@ -249,7 +249,7 @@ macro_rules! impl_readable_byob {
     ) -> AsyncResult<$crate::BufView> {
       ::std::boxed::Box::pin(async move {
         let mut vec = ::std::vec![0; limit];
-        let nread = self.read(&mut vec).await.map_err(::deno_error::JsErrorBox::from_err)?;
+        let nread = self.read(&mut vec).await.map_err(::simien_error::JsErrorBox::from_err)?;
         if nread != vec.len() {
           vec.truncate(nread);
         }
@@ -263,7 +263,7 @@ macro_rules! impl_readable_byob {
       mut buf: $crate::BufMutView,
     ) -> AsyncResult<(::core::primitive::usize, $crate::BufMutView)> {
       ::std::boxed::Box::pin(async move {
-        let nread = self.read(buf.as_mut()).await.map_err(::deno_error::JsErrorBox::from_err)?;
+        let nread = self.read(buf.as_mut()).await.map_err(::simien_error::JsErrorBox::from_err)?;
         ::std::result::Result::Ok((nread, buf))
       })
     }
@@ -281,7 +281,7 @@ macro_rules! impl_writable {
         let nwritten = self
           .write(&view)
           .await
-          .map_err(::deno_error::JsErrorBox::from_err)?;
+          .map_err(::simien_error::JsErrorBox::from_err)?;
         ::std::result::Result::Ok($crate::WriteOutcome::Partial {
           nwritten,
           view,
@@ -298,7 +298,7 @@ macro_rules! impl_writable {
         self
           .write_all(&view)
           .await
-          .map_err(::deno_error::JsErrorBox::from_err)?;
+          .map_err(::simien_error::JsErrorBox::from_err)?;
         ::std::result::Result::Ok(())
       })
     }

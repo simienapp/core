@@ -22,7 +22,7 @@ use crate::magic::transl8::MagicType;
 use crate::magic::transl8::visit_magic;
 use crate::payload::ValueType;
 
-// Maximum nesting depth permitted while deserializing a V8 value. serde_v8
+// Maximum nesting depth permitted while deserializing a V8 value. simien_serde_v8
 // recurses on the Rust stack for each nested container, so without a bound a
 // deeply nested object or array (cheaply built from untrusted JS) would
 // overflow the stack and abort the process. We return an error instead once

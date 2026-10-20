@@ -5,13 +5,13 @@
 use std::rc::Rc;
 
 use anyhow::Context;
-use deno_core::*;
+use simien_core::*;
 
 #[op2]
 fn op_use_state(
   state: &mut OpState,
   #[scoped] callback: v8::Global<v8::Function>,
-) -> Result<(), deno_error::JsErrorBox> {
+) -> Result<(), simien_error::JsErrorBox> {
   state.put(callback);
   Ok(())
 }
@@ -33,7 +33,7 @@ fn main() -> Result<(), anyhow::Error> {
   "
   .to_string();
 
-  let mut js_runtime = JsRuntime::new(deno_core::RuntimeOptions {
+  let mut js_runtime = JsRuntime::new(simien_core::RuntimeOptions {
     module_loader: Some(Rc::new(FsModuleLoader)),
     extensions: vec![op2_sample::init()],
     ..Default::default()

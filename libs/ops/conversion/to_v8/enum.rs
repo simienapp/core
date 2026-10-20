@@ -52,11 +52,11 @@ pub fn get_body(
           },
           EnumMode::InternallyTagged { tag } | EnumMode::AdjacentlyTagged { tag, .. }  => {
             quote! {
-              let __null = ::deno_core::v8::null(__scope).into();
+              let __null = ::simien_core::v8::null(__scope).into();
               let __keys = &[#tag];
               let __values = &[#tag_value];
 
-              Ok(::deno_core::v8::Object::with_prototype_and_properties(
+              Ok(::simien_core::v8::Object::with_prototype_and_properties(
                 __scope,
                 __null,
                 __keys,
@@ -66,7 +66,7 @@ pub fn get_body(
           }
           EnumMode::Untagged => {
             quote! {
-              Ok(::deno_core::v8::null(__scope).into())
+              Ok(::simien_core::v8::null(__scope).into())
             }
           }
         };
@@ -95,11 +95,11 @@ pub fn get_body(
         let tag = match &mode {
           EnumMode::ExternallyTagged => {
             quote! {
-              let __null = ::deno_core::v8::null(__scope).into();
+              let __null = ::simien_core::v8::null(__scope).into();
               let __keys = &[#tag_value];
               let __converters = &[__body];
 
-              Ok(::deno_core::v8::Object::with_prototype_and_properties(
+              Ok(::simien_core::v8::Object::with_prototype_and_properties(
                 __scope,
                 __null,
                 __keys,
@@ -109,7 +109,7 @@ pub fn get_body(
           }
           EnumMode::InternallyTagged { tag } => {
             quote! {
-              if Ok(__obj_body) = __body.try_cast::<::deno_core::v8::Object>() {
+              if Ok(__obj_body) = __body.try_cast::<::simien_core::v8::Object>() {
                 let __tag_key = #tag;
                 let __tag_value = #tag_value;
 
@@ -123,11 +123,11 @@ pub fn get_body(
           }
           EnumMode::AdjacentlyTagged { tag, content } => {
             quote! {
-              let __null = ::deno_core::v8::null(__scope).into();
+              let __null = ::simien_core::v8::null(__scope).into();
               let __keys = &[#tag, #content];
               let __converters = &[#tag_value, __body];
 
-              Ok(::deno_core::v8::Object::with_prototype_and_properties(
+              Ok(::simien_core::v8::Object::with_prototype_and_properties(
                 __scope,
                 __null,
                 __keys,
@@ -178,21 +178,21 @@ fn get_serde_variant_conversion(
       }
 
       Ok(quote! {
-        let __obj = ::deno_core::v8::Object::new(__scope);
+        let __obj = ::simien_core::v8::Object::new(__scope);
         #(
-          let __key = ::deno_core::v8::String::new(__scope, stringify!(#field_strs)).unwrap().into();
-          let __val = ::deno_core::serde_v8::to_v8(__scope, #field_names).map_err(::deno_error::JsErrorBox::from_err)?;
+          let __key = ::simien_core::v8::String::new(__scope, stringify!(#field_strs)).unwrap().into();
+          let __val = ::simien_core::simien_serde_v8::to_v8(__scope, #field_names).map_err(::simien_error::JsErrorBox::from_err)?;
           __obj.set(__scope, __key, __val);
         )*
-        Ok::<_, ::deno_error::JsErrorBox>(__obj.into())
+        Ok::<_, ::simien_error::JsErrorBox>(__obj.into())
       })
     }
     Fields::Unnamed(unnamed) => {
       if unnamed.unnamed.len() == 1 {
         Ok(quote! {
-          Ok::<_, ::deno_error::JsErrorBox>(
-            ::deno_core::serde_v8::to_v8(__scope, __0)
-              .map_err(::deno_error::JsErrorBox::from_err)?
+          Ok::<_, ::simien_error::JsErrorBox>(
+            ::simien_core::simien_serde_v8::to_v8(__scope, __0)
+              .map_err(::simien_error::JsErrorBox::from_err)?
           )
         })
       } else {
@@ -206,13 +206,13 @@ fn get_serde_variant_conversion(
         let indices: Vec<_> = (0..len as u32).collect();
 
         Ok(quote! {
-          let __arr = ::deno_core::v8::Array::new(__scope, #len as i32);
+          let __arr = ::simien_core::v8::Array::new(__scope, #len as i32);
           #(
-            let __val = ::deno_core::serde_v8::to_v8(__scope, #field_idents)
-              .map_err(::deno_error::JsErrorBox::from_err)?;
+            let __val = ::simien_core::simien_serde_v8::to_v8(__scope, #field_idents)
+              .map_err(::simien_error::JsErrorBox::from_err)?;
             __arr.set_index(__scope, #indices, __val);
           )*
-          Ok::<_, ::deno_error::JsErrorBox>(__arr.into())
+          Ok::<_, ::simien_error::JsErrorBox>(__arr.into())
         })
       }
     }

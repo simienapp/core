@@ -293,7 +293,7 @@ fn js_error(item: TokenStream) -> Result<TokenStream, Error> {
   let properties = if !additional_properties.is_empty() {
     let additional_properties = additional_properties
       .into_iter()
-      .map(|AdditionalProperty { name, value, .. }| quote!((#name.into(), ::deno_error::PropertyValue::from(#value))));
+      .map(|AdditionalProperty { name, value, .. }| quote!((#name.into(), ::simien_error::PropertyValue::from(#value))));
 
     let additional_properties =
       quote!([#(#additional_properties),*].into_iter());
@@ -312,7 +312,7 @@ fn js_error(item: TokenStream) -> Result<TokenStream, Error> {
 
   Ok(quote! {
     #[allow(unused_qualifications)]
-    impl ::deno_error::JsErrorClass for #ident {
+    impl ::simien_error::JsErrorClass for #ident {
       fn get_class(&self) -> ::std::borrow::Cow<'static, str> {
         #class
       }
@@ -321,7 +321,7 @@ fn js_error(item: TokenStream) -> Result<TokenStream, Error> {
       }
       fn get_additional_properties(
         &self
-      ) -> ::deno_error::AdditionalProperties {
+      ) -> ::simien_error::AdditionalProperties {
         #properties
       }
       fn get_ref(&self) -> &(dyn ::std::error::Error + Send + Sync + 'static) {
@@ -455,7 +455,7 @@ fn handle_variant_or_struct(
   let class = class_attr.to_tokens(&inherit_class_member)?;
 
   let properties = if let Some((_, tokens)) = &inherit_property_member {
-    let inherited_properties = quote!(::deno_error::JsErrorClass::get_additional_properties(
+    let inherited_properties = quote!(::simien_error::JsErrorClass::get_additional_properties(
       #tokens
     ));
 
@@ -475,10 +475,10 @@ fn handle_variant_or_struct(
         // Check if the value is a literal number
         match value {
           syn::Expr::Lit(syn::ExprLit { lit: syn::Lit::Int(int_lit), .. }) => {
-            quote!((#name.into(), ::deno_error::PropertyValue::Number(#int_lit as f64)))
+            quote!((#name.into(), ::simien_error::PropertyValue::Number(#int_lit as f64)))
           }
           syn::Expr::Lit(syn::ExprLit { lit: syn::Lit::Float(float_lit), .. }) => {
-            quote!((#name.into(), ::deno_error::PropertyValue::Number(#float_lit)))
+            quote!((#name.into(), ::simien_error::PropertyValue::Number(#float_lit)))
           }
           _ => {
             quote!((#name.into(), #value.into()))
@@ -573,7 +573,7 @@ impl ClassAttrValue {
       ClassAttrValue::Ident(ident) => {
         let error_name =
           format_ident!("{}_ERROR", ident.to_string().to_uppercase());
-        quote!(::std::borrow::Cow::Borrowed(::deno_error::builtin_classes::#error_name))
+        quote!(::std::borrow::Cow::Borrowed(::simien_error::builtin_classes::#error_name))
       }
       ClassAttrValue::Inherit(inherit) => {
         let (_, tokens) = inherit_member.as_ref().ok_or_else(|| {
@@ -583,7 +583,7 @@ impl ClassAttrValue {
           )
         })?;
 
-        quote!(::deno_error::JsErrorClass::get_class(#tokens))
+        quote!(::simien_error::JsErrorClass::get_class(#tokens))
       }
     };
 

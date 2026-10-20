@@ -353,7 +353,7 @@ pub fn check_support_for_algorithm(
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum GetKeyLengthError {
   #[class("DOMExceptionOperationError")]
   #[error("Length must be 128, 192, or 256: received {0}")]

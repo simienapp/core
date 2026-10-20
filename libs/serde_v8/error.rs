@@ -4,67 +4,67 @@ use std::fmt::Display;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 #[non_exhaustive]
 pub enum Error {
   #[error("{0}")]
   Message(String),
 
-  #[error("serde_v8 error: invalid type; expected: boolean, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: boolean, got: {0}")]
   ExpectedBoolean(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: integer, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: integer, got: {0}")]
   ExpectedInteger(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: number, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: number, got: {0}")]
   ExpectedNumber(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: string, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: string, got: {0}")]
   ExpectedString(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: array, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: array, got: {0}")]
   ExpectedArray(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: map, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: map, got: {0}")]
   ExpectedMap(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: enum, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: enum, got: {0}")]
   ExpectedEnum(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: object, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: object, got: {0}")]
   ExpectedObject(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: buffer, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: buffer, got: {0}")]
   ExpectedBuffer(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: detachable, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: detachable, got: {0}")]
   ExpectedDetachable(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: external, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: external, got: {0}")]
   ExpectedExternal(&'static str),
 
-  #[error("serde_v8 error: invalid type; expected: bigint, got: {0}")]
+  #[error("simien_serde_v8 error: invalid type; expected: bigint, got: {0}")]
   ExpectedBigInt(&'static str),
 
-  #[error("serde_v8 error: invalid type, expected: utf8")]
+  #[error("simien_serde_v8 error: invalid type, expected: utf8")]
   ExpectedUtf8,
-  #[error("serde_v8 error: invalid type, expected: latin1")]
+  #[error("simien_serde_v8 error: invalid type, expected: latin1")]
   ExpectedLatin1,
 
-  #[error("serde_v8 error: unsupported type")]
+  #[error("simien_serde_v8 error: unsupported type")]
   UnsupportedType,
 
-  #[error("serde_v8 error: length mismatch, got: {0}, expected: {1}")]
+  #[error("simien_serde_v8 error: length mismatch, got: {0}, expected: {1}")]
   LengthMismatch(usize, usize),
 
-  #[error("serde_v8 error: recursion limit exceeded")]
+  #[error("simien_serde_v8 error: recursion limit exceeded")]
   RecursionLimitExceeded,
 
-  #[error("serde_v8 error: exception during value conversion")]
+  #[error("simien_serde_v8 error: exception during value conversion")]
   V8Exception,
 
-  #[error("serde_v8 error: can't create slice from resizable ArrayBuffer")]
+  #[error("simien_serde_v8 error: can't create slice from resizable ArrayBuffer")]
   ResizableBackingStoreNotSupported,
 
   #[error("{0}")]

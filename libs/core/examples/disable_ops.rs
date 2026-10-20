@@ -2,9 +2,9 @@
 //!  This example shows you how to define ops in Rust and then call them from
 //!  JavaScript.
 
-use deno_core::Extension;
-use deno_core::JsRuntime;
-use deno_core::RuntimeOptions;
+use simien_core::Extension;
+use simien_core::JsRuntime;
+use simien_core::RuntimeOptions;
 
 fn main() {
   let my_ext = Extension {

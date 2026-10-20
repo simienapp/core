@@ -3,7 +3,7 @@
 use std::future::poll_fn;
 use std::task::Poll;
 
-use deno_error::JsErrorBox;
+use simien_error::JsErrorBox;
 
 use crate::JsRuntime;
 use crate::RuntimeOptions;
@@ -16,7 +16,7 @@ async fn test_error_builder() {
     Err(JsErrorBox::new("DOMExceptionOperationError", "abc"))
   }
 
-  deno_core::extension!(test_ext, ops = [op_err]);
+  simien_core::extension!(test_ext, ops = [op_err]);
   let mut runtime = JsRuntime::new(RuntimeOptions {
     extensions: vec![test_ext::init()],
     ..Default::default()
@@ -55,8 +55,8 @@ fn syntax_error() {
 fn fast_call_error_preserves_class() {
   use std::borrow::Cow;
 
-  use deno_error::JsErrorClass;
-  use deno_error::PropertyValue;
+  use simien_error::JsErrorClass;
+  use simien_error::PropertyValue;
 
   #[derive(Debug)]
   struct CustomError;
@@ -78,7 +78,7 @@ fn fast_call_error_preserves_class() {
       Cow::Borrowed("custom message")
     }
 
-    fn get_additional_properties(&self) -> deno_error::AdditionalProperties {
+    fn get_additional_properties(&self) -> simien_error::AdditionalProperties {
       Box::new(std::iter::once((
         Cow::Borrowed("code"),
         PropertyValue::String(Cow::Borrowed("E_CUSTOM")),
@@ -109,7 +109,7 @@ fn fast_call_error_preserves_class() {
   // Build + throw the exception through the native path, then stash it on the
   // global so JS can inspect it.
   {
-    deno_core::scope!(scope, runtime);
+    simien_core::scope!(scope, runtime);
     let exception = {
       v8::tc_scope!(let tc_scope, scope);
       crate::error::throw_js_error_class(tc_scope, &CustomError);

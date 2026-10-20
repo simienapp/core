@@ -51,7 +51,7 @@ pub type ModuleId = usize;
 pub(crate) type ModuleLoadId = i32;
 
 /// The actual source code returned from the loader. Most embedders should
-/// try to return bytes and let deno_core interpret if the module should be
+/// try to return bytes and let simien_core interpret if the module should be
 /// converted to a string or not.
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub enum ModuleSourceCode {
@@ -277,7 +277,7 @@ pub type CustomModuleEvaluationCb = Box<
     Cow<'_, str>,
     &FastString,
     ModuleSourceCode,
-  ) -> Result<CustomModuleEvaluationKind, deno_error::JsErrorBox>,
+  ) -> Result<CustomModuleEvaluationKind, simien_error::JsErrorBox>,
 >;
 
 /// A callback to get the code cache for a script.
@@ -289,7 +289,7 @@ pub type CustomModuleEvaluationCb = Box<
 /// `Err` degrades to an uncached compile rather than failing the evaluation,
 /// so implementations should log their own errors if they care about them.
 pub type EvalContextGetCodeCacheCb = Box<
-  dyn Fn(&Url, &[u16]) -> Result<SourceCodeCacheInfo, deno_error::JsErrorBox>,
+  dyn Fn(&Url, &[u16]) -> Result<SourceCodeCacheInfo, simien_error::JsErrorBox>,
 >;
 
 /// Callback when the code cache is ready.
@@ -380,7 +380,7 @@ pub(crate) fn get_requested_module_type_from_attributes(
 
 /// A type of module to be executed.
 ///
-/// `deno_core` supports loading and executing JavaScript, Wasm and JSON modules,
+/// `simien_core` supports loading and executing JavaScript, Wasm and JSON modules,
 /// by default, but embedders can customize it further by providing
 /// [`CustomModuleEvaluationCb`].
 #[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
@@ -937,7 +937,7 @@ impl ModuleInfo {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 pub enum ModuleConcreteError {
   #[error(
@@ -951,7 +951,7 @@ pub enum ModuleConcreteError {
   UnboundModuleScriptCodeCache,
   #[class(inherit)]
   #[error("{0}")]
-  WasmParse(wasm_dep_analyzer::ParseError),
+  WasmParse(simien_wasm_dep_analyzer::ParseError),
   #[error("Source code for Wasm module must be provided as bytes")]
   WasmNotBytes,
   #[error("Failed to compile Wasm module '{0}'")]

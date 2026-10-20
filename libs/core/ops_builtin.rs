@@ -7,8 +7,8 @@ use std::io::stdout;
 use std::rc::Rc;
 
 use bytes::BytesMut;
-use deno_error::JsErrorBox;
-use serde_v8::ByteString;
+use simien_error::JsErrorBox;
+use simien_serde_v8::ByteString;
 
 use crate::CancelHandle;
 use crate::CancelTryFuture;
@@ -456,7 +456,7 @@ async fn op_write_all(
 /// Pipe all data from a source resource to a sink resource, entirely in Rust.
 ///
 /// This is the fast path for `ReadableStream#pipeTo` when both the source and
-/// the sink are backed by a `deno_core::Resource` (see
+/// the sink are backed by a `simien_core::Resource` (see
 /// `getReadableStreamResourceBacking` / `getWritableStreamResourceBacking` in
 /// `ext/web/06_streams.js`). It avoids copying every chunk into and back out of
 /// JavaScript. Close / abort / cancel semantics are handled by the JS caller.

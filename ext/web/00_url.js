@@ -2,7 +2,7 @@
 
 // @ts-check
 /// <reference path="../../core/internal.d.ts" />
-/// <reference path="../../core/lib.deno_core.d.ts" />
+/// <reference path="../../core/lib.simien_core.d.ts" />
 /// <reference path="../webidl/internal.d.ts" />
 
 (function () {
@@ -38,12 +38,12 @@ const {
   Uint32Array,
 } = primordials;
 
-const webidl = core.loadExtScript("ext:deno_webidl/00_webidl.js");
+const webidl = core.loadExtScript("ext:simien_webidl/00_webidl.js");
 const { createFilteredInspectProxy } = core.loadExtScript(
-  "ext:deno_web/01_console.js",
+  "ext:simien_web/01_console.js",
 );
 const { markNotSerializable } = core.loadExtScript(
-  "ext:deno_web/13_message_port.js",
+  "ext:simien_web/13_message_port.js",
 );
 
 const _list = Symbol("list");

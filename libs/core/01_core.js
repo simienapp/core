@@ -778,7 +778,7 @@
 
   // Minimal console implementation, that uses `Deno.core.print` under the hood.
   // It's not fully fledged and is meant to make debugging slightly easier when working with
-  // only `deno_core` crate.
+  // only `simien_core` crate.
   class CoreConsole {
     log = (...args) => {
       op_print(`${consoleStringify(...args)}\n`, false);

@@ -8,9 +8,9 @@
 
 #![allow(clippy::print_stdout, reason = "this is fine for example code")]
 
-use deno_core::JsRuntime;
-use deno_core::RuntimeOptions;
-use deno_core::v8;
+use simien_core::JsRuntime;
+use simien_core::RuntimeOptions;
+use simien_core::v8;
 
 fn main() {
   let mut runtime = JsRuntime::new(RuntimeOptions::default());
@@ -33,12 +33,12 @@ fn eval(
   let res = context.execute_script("<anon>", code);
   match res {
     Ok(global) => {
-      deno_core::scope!(scope, context);
+      simien_core::scope!(scope, context);
       let local = v8::Local::new(scope, global);
-      // Deserialize a `v8` object into a Rust type using `serde_v8`,
+      // Deserialize a `v8` object into a Rust type using `simien_serde_v8`,
       // in this case deserialize to a JSON `Value`.
       let deserialized_value =
-        serde_v8::from_v8::<serde_json::Value>(scope, local);
+        simien_serde_v8::from_v8::<serde_json::Value>(scope, local);
 
       match deserialized_value {
         Ok(value) => Ok(value),

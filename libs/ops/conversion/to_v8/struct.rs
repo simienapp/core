@@ -68,15 +68,15 @@ pub fn get_body(span: Span, data: DataStruct) -> Result<TokenStream, Error> {
           .collect::<Result<Vec<_>, Error>>()?;
 
         let body = quote! {
-          let __null = ::deno_core::v8::null(__scope).into();
-          let mut __keys: ::std::vec::Vec<::deno_core::v8::Local<::deno_core::v8::Name>> =
+          let __null = ::simien_core::v8::null(__scope).into();
+          let mut __keys: ::std::vec::Vec<::simien_core::v8::Local<::simien_core::v8::Name>> =
             ::std::vec::Vec::with_capacity(#len);
-          let mut __values: ::std::vec::Vec<::deno_core::v8::Local<::deno_core::v8::Value>> =
+          let mut __values: ::std::vec::Vec<::simien_core::v8::Local<::simien_core::v8::Value>> =
             ::std::vec::Vec::with_capacity(#len);
 
           #(#pushes)*
 
-          Ok::<_, ::deno_error::JsErrorBox>(::deno_core::v8::Object::with_prototype_and_properties(
+          Ok::<_, ::simien_error::JsErrorBox>(::simien_core::v8::Object::with_prototype_and_properties(
             __scope,
             __null,
             &__keys,
@@ -101,13 +101,13 @@ pub fn get_body(span: Span, data: DataStruct) -> Result<TokenStream, Error> {
       }
 
       let body = quote! {
-        let __null = ::deno_core::v8::null(__scope).into();
+        let __null = ::simien_core::v8::null(__scope).into();
         let __keys = &[#
           (#names),
         *];
         let __converters = &[#(#converters),*];
 
-        Ok::<_, ::deno_error::JsErrorBox>(::deno_core::v8::Object::with_prototype_and_properties(
+        Ok::<_, ::simien_error::JsErrorBox>(::simien_core::v8::Object::with_prototype_and_properties(
           __scope,
           __null,
           __keys,
@@ -128,7 +128,7 @@ pub fn get_body(span: Span, data: DataStruct) -> Result<TokenStream, Error> {
       let value = if fields.len() == 1 {
         let field = fields.first().unwrap();
         let converter = convert_or_serde(field.serde, field.span, quote!(__0));
-        quote!(Ok::<_, ::deno_error::JsErrorBox>(#converter))
+        quote!(Ok::<_, ::simien_error::JsErrorBox>(#converter))
       } else {
         let fields = fields
           .into_iter()
@@ -140,7 +140,7 @@ pub fn get_body(span: Span, data: DataStruct) -> Result<TokenStream, Error> {
 
         quote! {
           let __value = &[#(#fields),*];
-          Ok::<_, ::deno_error::JsErrorBox>(::deno_core::v8::Array::new_with_elements(__scope, __value).into())
+          Ok::<_, ::simien_error::JsErrorBox>(::simien_core::v8::Array::new_with_elements(__scope, __value).into())
         }
       };
 

@@ -5,17 +5,17 @@ use std::cell::RefCell;
 use std::future::poll_fn;
 use std::rc::Rc;
 
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::DetachedBuffer;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::TransferredResource;
-use deno_core::op2;
-use deno_error::JsErrorBox;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::DetachedBuffer;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::TransferredResource;
+use simien_core::op2;
+use simien_error::JsErrorBox;
 use serde::Deserialize;
 use serde::Serialize;
 use tokio::sync::mpsc::UnboundedReceiver;
@@ -23,7 +23,7 @@ use tokio::sync::mpsc::UnboundedSender;
 use tokio::sync::mpsc::error::TryRecvError;
 use tokio::sync::mpsc::unbounded_channel;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum MessagePortError {
   #[class(type)]
   #[error("Invalid message port transfer")]
@@ -36,10 +36,10 @@ pub enum MessagePortError {
   TransferSelf,
   #[class(inherit)]
   #[error(transparent)]
-  Canceled(#[from] deno_core::Canceled),
+  Canceled(#[from] simien_core::Canceled),
   #[class(inherit)]
   #[error(transparent)]
-  Resource(deno_core::error::ResourceError),
+  Resource(simien_core::error::ResourceError),
   #[class(inherit)]
   #[error(transparent)]
   Generic(JsErrorBox),
@@ -285,12 +285,12 @@ pub fn serialize_transferables(
 // message, on the hottest worker path. Deriving `ToV8` builds the result object
 // directly (interned `data`/`transferables` keys + a single
 // `Object::with_prototype_and_properties` call) instead of routing the whole
-// struct through serde_v8's `Serializer`, which rebuilt an object per message.
+// struct through simien_serde_v8's `Serializer`, which rebuilt an object per message.
 // The `data` buffer and the (usually empty) transferables list still use the
-// magic serde_v8 conversion via `#[to_v8(serde)]`. `Deserialize` is kept for the
+// magic simien_serde_v8 conversion via `#[to_v8(serde)]`. `Deserialize` is kept for the
 // post-message ops (which take `JsMessageData` as an input argument) and
 // `Serialize` for the one-shot worker-metadata bootstrap in `web_worker.rs`.
-#[derive(Deserialize, Serialize, deno_core::ToV8)]
+#[derive(Deserialize, Serialize, simien_core::ToV8)]
 pub struct JsMessageData {
   #[to_v8(serde)]
   pub data: DetachedBuffer,
@@ -312,18 +312,18 @@ pub enum RecvMessageData {
   Full(JsMessageData),
 }
 
-impl<'a> deno_core::ToV8<'a> for RecvMessageData {
+impl<'a> simien_core::ToV8<'a> for RecvMessageData {
   type Error = JsErrorBox;
 
   fn to_v8<'i>(
     self,
-    scope: &mut deno_core::v8::PinScope<'a, 'i>,
-  ) -> Result<deno_core::v8::Local<'a, deno_core::v8::Value>, Self::Error> {
+    scope: &mut simien_core::v8::PinScope<'a, 'i>,
+  ) -> Result<simien_core::v8::Local<'a, simien_core::v8::Value>, Self::Error> {
     match self {
       RecvMessageData::Raw(buffer) => {
-        // Reuse serde_v8's DetachedBuffer conversion (produces a Uint8Array),
+        // Reuse simien_serde_v8's DetachedBuffer conversion (produces a Uint8Array),
         // matching what `JsMessageData::data` yields via `#[to_v8(serde)]`.
-        deno_core::serde_v8::to_v8(scope, buffer)
+        simien_core::simien_serde_v8::to_v8(scope, buffer)
           .map_err(|e| JsErrorBox::generic(e.to_string()))
       }
       RecvMessageData::Full(data) => data

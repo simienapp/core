@@ -26,7 +26,7 @@ use rsa::pkcs1::DecodeRsaPublicKey;
 
 use crate::shared::*;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum EncryptError {
   #[class(inherit)]
   #[error(transparent)]

@@ -1,4 +1,4 @@
-# `deno_path_util`
+# `simien_path_util`
 
 Common path utilities used across Deno's repos.
 

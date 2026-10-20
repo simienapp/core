@@ -33,26 +33,26 @@ fn main() {
     }
 
     let v = exec(scope, "32");
-    let x32: u64 = serde_v8::from_v8(scope, v).unwrap();
+    let x32: u64 = simien_serde_v8::from_v8(scope, v).unwrap();
     println!("x32 = {x32}");
 
     let v = exec(scope, "({a: 1, b: 3, c: 'ignored'})");
-    let mop: MathOp = serde_v8::from_v8(scope, v).unwrap();
+    let mop: MathOp = simien_serde_v8::from_v8(scope, v).unwrap();
     println!(
       "mop = {{ a: {}, b: {}, operator: {:?} }}",
       mop.a, mop.b, mop.operator
     );
 
     let v = exec(scope, "[1,2,3,4,5]");
-    let arr: Vec<u64> = serde_v8::from_v8(scope, v).unwrap();
+    let arr: Vec<u64> = simien_serde_v8::from_v8(scope, v).unwrap();
     println!("arr = {arr:?}");
 
     let v = exec(scope, "['hello', 'world']");
-    let hi: Vec<String> = serde_v8::from_v8(scope, v).unwrap();
+    let hi: Vec<String> = simien_serde_v8::from_v8(scope, v).unwrap();
     println!("hi = {hi:?}");
 
     let v: v8::Local<v8::Value> = v8::Number::new(scope, 12345.0).into();
-    let x: f64 = serde_v8::from_v8(scope, v).unwrap();
+    let x: f64 = simien_serde_v8::from_v8(scope, v).unwrap();
     println!("x = {x}");
   }
 

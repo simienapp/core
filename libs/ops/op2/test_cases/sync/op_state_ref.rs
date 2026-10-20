@@ -9,8 +9,8 @@ use std::borrow::Borrow;
 #[allow(unused)]
 use std::borrow::BorrowMut;
 
-use deno_core::OpState;
-use deno_core::v8;
+use simien_core::OpState;
+use simien_core::v8;
 
 #[op2(fast)]
 fn op_state_ref(_state: &OpState) {}

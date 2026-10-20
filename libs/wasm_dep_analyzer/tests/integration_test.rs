@@ -2,19 +2,19 @@
 
 use pretty_assertions::assert_eq;
 
-use wasm_dep_analyzer::Export;
-use wasm_dep_analyzer::ExportType;
-use wasm_dep_analyzer::FunctionSignature;
-use wasm_dep_analyzer::GlobalType;
-use wasm_dep_analyzer::Import;
-use wasm_dep_analyzer::ImportType;
-use wasm_dep_analyzer::Limits;
-use wasm_dep_analyzer::ParseError;
-use wasm_dep_analyzer::ParseOptions;
-use wasm_dep_analyzer::TableType;
-use wasm_dep_analyzer::TagType;
-use wasm_dep_analyzer::ValueType;
-use wasm_dep_analyzer::WasmDeps;
+use simien_wasm_dep_analyzer::Export;
+use simien_wasm_dep_analyzer::ExportType;
+use simien_wasm_dep_analyzer::FunctionSignature;
+use simien_wasm_dep_analyzer::GlobalType;
+use simien_wasm_dep_analyzer::Import;
+use simien_wasm_dep_analyzer::ImportType;
+use simien_wasm_dep_analyzer::Limits;
+use simien_wasm_dep_analyzer::ParseError;
+use simien_wasm_dep_analyzer::ParseOptions;
+use simien_wasm_dep_analyzer::TableType;
+use simien_wasm_dep_analyzer::TagType;
+use simien_wasm_dep_analyzer::ValueType;
+use simien_wasm_dep_analyzer::WasmDeps;
 
 #[test]
 fn wasm_export_only() {
