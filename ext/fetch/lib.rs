@@ -161,6 +161,8 @@ simien_core::extension!(simien_fetch,
     op_fetch_send,
     op_utf8_to_byte_string,
     op_fetch_custom_client,
+    op_fetch_tls_key_null,
+    op_fetch_tls_key_static,
     op_fetch_promise_is_settled,
   ],
   lazy_loaded_js = [
@@ -847,6 +849,30 @@ pub struct CreateHttpClientArgs {
   local_address: Option<String>,
   http2_max_header_list_size: Option<u32>,
 }
+
+/// The TLS key pair for `Deno.createHttpClient({ cert, key })`. Upstream took
+/// these two ops from deno_net, which simien_fetch doesn't depend on.
+#[op2]
+#[cppgc]
+pub fn op_fetch_tls_key_null() -> TlsKeysHolder {
+  TlsKeysHolder::from(TlsKeys::Null)
+}
+
+#[op2(reentrant)]
+#[cppgc]
+pub fn op_fetch_tls_key_static(
+  #[string] cert: &str,
+  #[string] key: &str,
+) -> Result<TlsKeysHolder, simien_tls::TlsError> {
+  let cert =
+    simien_tls::load_certs(&mut std::io::BufReader::new(cert.as_bytes()))?;
+  let key = simien_tls::load_private_keys(key.as_bytes())?
+    .into_iter()
+    .next()
+    .ok_or(simien_tls::TlsError::KeysNotFound)?;
+  Ok(TlsKeysHolder::from(TlsKeys::Static(TlsKey(cert, key))))
+}
+
 
 #[op2(stack_trace)]
 #[smi]
