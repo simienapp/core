@@ -600,6 +600,10 @@ pub struct FetchResponse {
   pub error: Option<(String, String)>,
 }
 
+#[allow(
+  clippy::result_large_err,
+  reason = "FetchError is upstream's error type; boxing it changes the API"
+)]
 #[op2]
 pub async fn op_fetch_send(
   state: Rc<RefCell<OpState>>,
@@ -1507,6 +1511,10 @@ impl Client {
     }
   }
 
+  #[allow(
+    clippy::result_large_err,
+    reason = "ClientSendError is upstream's error type; boxing it changes the API"
+  )]
   pub async fn send(
     self,
     mut req: http::Request<ReqBody>,
@@ -1530,6 +1538,10 @@ impl Client {
   /// The response body will contain raw bytes (potentially compressed).
   /// The caller is responsible for checking Content-Encoding and
   /// decompressing if needed.
+  #[allow(
+    clippy::result_large_err,
+    reason = "ClientSendError is upstream's error type; boxing it changes the API"
+  )]
   pub async fn send_no_decompress(
     self,
     mut req: http::Request<ReqBody>,
