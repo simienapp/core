@@ -55,7 +55,14 @@ pub fn get_package_folder_id_from_folder_name(
   })
 }
 
-/// Normalizes a package name for use at `node_modules/.deno/<pkg-name>@<version>[_<copy_index>]`
+/// The folder inside `node_modules` that holds the installed packages, one
+/// folder per package version, which the top-level entries link into.
+pub const NODE_MODULES_STORE_DIR: &str = ".simien";
+
+/// The lock file inside [`NODE_MODULES_STORE_DIR`] that serialises installs.
+pub const NODE_MODULES_STORE_LOCK: &str = ".simien.lock";
+
+/// Normalizes a package name for use at `node_modules/.simien/<pkg-name>@<version>[_<copy_index>]`
 pub fn normalize_pkg_name_for_node_modules_deno_folder(
   name: &str,
 ) -> Cow<'_, str> {

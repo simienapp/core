@@ -4424,7 +4424,7 @@ dependencies = [
 
 [[package]]
 name = "simien_npm_installer"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-once-cell",
@@ -4529,7 +4529,7 @@ dependencies = [
 
 [[package]]
 name = "simien_resolver"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-once-cell",

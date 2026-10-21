@@ -41,6 +41,8 @@ pub use self::byonm::ByonmNpmResolver;
 pub use self::byonm::ByonmNpmResolverCreateOptions;
 pub use self::byonm::ByonmNpmResolverRc;
 pub use self::byonm::ByonmResolvePkgFolderFromDenoReqError;
+pub use self::local::NODE_MODULES_STORE_DIR;
+pub use self::local::NODE_MODULES_STORE_LOCK;
 pub use self::local::get_package_folder_id_folder_name;
 pub use self::local::normalize_pkg_name_for_node_modules_deno_folder;
 use self::managed::ManagedInNpmPackageChecker;
