@@ -4050,7 +4050,7 @@ dependencies = [
 
 [[package]]
 name = "simien_core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -4515,7 +4515,7 @@ dependencies = [
 
 [[package]]
 name = "simien_path_util"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "divan",
  "percent-encoding",
