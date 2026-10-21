@@ -30,6 +30,7 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DRY = "--dry-run" in sys.argv
+CHECK = "--check" in sys.argv
 AGENT = "simienapp-core-publish (https://github.com/simienapp/core)"
 
 
@@ -43,6 +44,42 @@ def on_crates_io(name, version=None):
         if e.code == 404:
             return False
         raise
+
+
+def published_dependencies(name, version):
+    """(dependency, kind) pairs crates.io recorded for a published version."""
+    req = urllib.request.Request(f"https://crates.io/api/v1/crates/{name}/{version}/dependencies", headers={"User-Agent": AGENT})
+    with urllib.request.urlopen(req) as r:
+        deps = json.load(r)["dependencies"]
+    return {(d["crate_id"], d["kind"]) for d in deps}
+
+
+def local_dependencies(name):
+    """(dependency, kind) pairs this checkout would publish for `name`."""
+    meta = json.loads(subprocess.run(["cargo", "metadata", "--no-deps", "--format-version", "1"], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
+    package = next(p for p in meta["packages"] if p["name"] == name)
+    kinds = {None: "normal", "dev": "dev", "build": "build"}
+    # Path-only dev-dependencies aren't published.
+    return {(d["name"], kinds[d["kind"]]) for d in package["dependencies"] if not (d["kind"] == "dev" and d.get("req") == "*" )}
+
+
+def check():
+    """Fail when a crate changed its dependencies but kept a version that's
+    already on crates.io: a publish run skips it, and the published set no
+    longer builds together (simien_path_util 0.1.1, #18)."""
+    stale = []
+    for name, version, _ in plan():
+        if name == "simien" or not on_crates_io(name, version):
+            continue
+        published = {d for d in published_dependencies(name, version) if d[1] != "dev"}
+        local = {d for d in local_dependencies(name) if d[1] != "dev"}
+        if published != local:
+            added = sorted(d[0] for d in local - published)
+            removed = sorted(d[0] for d in published - local)
+            stale.append(f"{name} {version}: dependencies changed (+{added} -{removed}); bump its version")
+    for line in stale:
+        print(line, file=sys.stderr)
+    sys.exit(1 if stale else 0)
 
 
 def plan():
@@ -102,4 +139,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    check() if CHECK else main()
