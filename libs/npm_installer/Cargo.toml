@@ -2,13 +2,13 @@
 
 [package]
 name = "simien_npm_installer"
-version = "0.54.0"
-authors.workspace = true
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Installs npm packages into node_modules for Simien. Forked from deno_npm_installer 0.54.0."
 edition.workspace = true
-license.workspace = true
+license = "MIT"
 readme = "README.md"
-repository.workspace = true
-description = "Installer of npm packages used in Deno"
 
 [lib]
 path = "lib.rs"

@@ -65,6 +65,10 @@ pub enum EsmAnalysisMode {
 }
 
 /// Code analyzer for CJS and ESM files.
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait CjsCodeAnalyzer {
   /// Analyzes CommonJs code for exports and reexports, which is

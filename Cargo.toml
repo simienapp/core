@@ -3,7 +3,7 @@
 
 [workspace]
 resolver = "2"
-exclude = ["placeholders"]
+exclude = ["placeholders", "libs/sys_traits/tests/wasm_test", "libs/npm/fuzz"]
 members = [
   "libs/core",
   "libs/ops",
@@ -27,6 +27,22 @@ members = [
   "libs/wasm_dep_analyzer",
   "libs/deno_native_certs",
   "tests/bench_util",
+  "libs/npm",
+  "libs/npm_cache",
+  "libs/cache_dir",
+  "libs/node_resolver",
+  "libs/lockfile",
+  "libs/package_json",
+  "libs/npmrc",
+  "libs/maybe_sync",
+  "libs/deno_semver",
+  "libs/deno_media_type",
+  "libs/sys_traits",
+  "libs/sys_traits/macros",
+  "libs/capacity_builder",
+  "libs/capacity_builder/macros",
+  "libs/monch",
+  "libs/deno_terminal",
 ]
 
 [workspace.package]
@@ -41,12 +57,12 @@ deno_doc = "0.207.0"
 simien_error = { version = "0.1.1", path = "./libs/deno_error" }
 deno_graph = { version = "0.111.0", default-features = false }
 deno_lint = "0.84.1"
-simien_media_type = { version = "0.4.0", features = ["module_specifier"] }
+simien_media_type = { version = "0.1.1", path = "./libs/deno_media_type", features = ["module_specifier"] }
 simien_native_certs = { version = "0.1.1", path = "./libs/deno_native_certs" }
 simien_path_util = { version = "0.1.1", path = "./libs/deno_path_util" }
-simien_semver = "0.10.1"
+simien_semver = { version = "0.1.1", path = "./libs/deno_semver" }
 deno_task_shell = "0.33.3"
-simien_terminal = "0.2.3"
+simien_terminal = { version = "0.1.1", path = "./libs/deno_terminal" }
 simien_unsync = { version = "0.1.1", path = "./libs/deno_unsync", default-features = false }
 deno_whoami = "0.1.0"
 v8 = { package = "simien_v8", version = "0.1.1", path = "./libs/deno_v8", default-features = false, features = ["v8", "simdutf"] }
@@ -65,12 +81,10 @@ simien_crypto = { version = "0.1.1", path = "./ext/crypto" }
 simien_fetch = { version = "0.1.1", path = "./ext/fetch" }
 deno_ffi = { version = "0.246.0" }
 deno_fs = { version = "0.169.0" }
-simien_http = { version = "0.257.0" }
 deno_image = { version = "0.35.0" }
 deno_io = { version = "0.169.0" }
 deno_kv = { version = "0.167.0" }
 deno_napi = { version = "0.190.0" }
-simien_net = { version = "0.251.0" }
 deno_node = { version = "0.197.0" }
 deno_node_crypto = { version = "0.29.0" }
 deno_node_sqlite = { version = "0.29.0" }
@@ -86,13 +100,12 @@ simien_http_h1 = { version = "0.1.1", path = "./libs/http_h1" }
 simien_web = { version = "0.1.1", path = "./ext/web" }
 deno_webgpu = { version = "0.226.0" }
 simien_webidl = { version = "0.1.1", path = "./ext/webidl" }
-simien_websocket = { version = "0.264.0" }
 deno_webstorage = { version = "0.254.0" }
 denort_helper = { version = "0.57.0" }
 
 # workspace libraries
 simien_bench_util = { version = "0.1.1", path = "./tests/bench_util" }
-simien_cache_dir = { version = "0.51.0" }
+simien_cache_dir = { version = "0.1.1", path = "./libs/cache_dir" }
 deno_cli_parser = { version = "0.9.0" }
 deno_config = { version = "0.109.0", features = ["workspace"] }
 # Workspace binaries select the JavaScript engine at their top level. Keep the
@@ -103,17 +116,16 @@ deno_core_testing = { }
 simien_crypto_provider = { version = "0.1.1", path = "./libs/crypto" }
 deno_dotenv = { version = "0.28.0" }
 deno_features = { version = "0.56.0" }
-simien_http_h1 = { version = "0.10.0" }
 deno_inspector_server = { version = "0.33.0" }
 deno_lib = { version = "0.77.0" }
-simien_lockfile = { version = "0.61.0" }
-simien_maybe_sync = { version = "0.46.0" }
-simien_npm = { version = "0.71.0" }
-simien_npm_cache = { version = "0.78.0" }
-simien_npm_installer = { version = "0.54.0" }
-simien_npmrc = { version = "0.20.0" }
+simien_lockfile = { version = "0.1.1", path = "./libs/lockfile" }
+simien_maybe_sync = { version = "0.1.1", path = "./libs/maybe_sync" }
+simien_npm = { version = "0.1.1", path = "./libs/npm" }
+simien_npm_cache = { version = "0.1.1", path = "./libs/npm_cache" }
+simien_npm_installer = { version = "0.1.1", path = "./libs/npm_installer" }
+simien_npmrc = { version = "0.1.1", path = "./libs/npmrc" }
 simien_ops = { version = "0.1.1", path = "./libs/ops" }
-simien_package_json = { version = "0.61.0", default-features = false }
+simien_package_json = { version = "0.1.1", path = "./libs/package_json", default-features = false }
 deno_permissions = { version = "0.118.0" }
 deno_print = { version = "0.7.0" }
 deno_resolver = { version = "0.90.0" }
@@ -122,7 +134,7 @@ deno_snapshots = { version = "0.74.0" }
 deno_subprocess_windows = { version = "0.54.0" }
 eszip = { version = "0.137.0" }
 napi_sym = { version = "0.189.0" }
-simien_node_resolver = { version = "0.97.0" }
+simien_node_resolver = { version = "0.1.1", path = "./libs/node_resolver" }
 node_shim = { version = "0.34.0" }
 simien_serde_v8 = { version = "0.1.1", path = "./libs/serde_v8", default-features = false }
 test_macro = { }
@@ -154,7 +166,7 @@ bsdiff = "0.2.1"
 bytemuck = "1.17.1"
 bytes = "1.11.1"
 cab = "0.6.0"
-simien_capacity_builder = "0.5.0"
+simien_capacity_builder = { version = "0.1.1", path = "./libs/capacity_builder" }
 cbc = { version = "0.1.2", features = ["alloc"] }
 cfb = "0.14.0"
 # Note: Do not use the "clock" feature of chrono, as it links us to CoreFoundation on macOS.
@@ -209,7 +221,7 @@ log = { version = "0.4.28", features = ["kv"] }
 lsp-types = { package = "ls-types", version = "0.0.3" }
 memchr = "2.7.4"
 mime = "0.3.16"
-simien_monch = "0.6.0"
+simien_monch = { version = "0.1.1", path = "./libs/monch" }
 msi = "0.10.0"
 netif = "0.1.6"
 notify = "8.2.0"
@@ -266,7 +278,9 @@ sourcemap = "9.1.2"
 static_assertions = "1"
 strum = { version = "0.27.1", features = ["derive"] }
 strum_macros = "0.27.1"
-simien_sys_traits = "0.1.28"
+simien_sys_traits = { version = "0.1.1", path = "./libs/sys_traits" }
+simien_sys_traits_macros = { version = "0.1.1", path = "./libs/sys_traits/macros" }
+simien_capacity_builder_macros = { version = "0.1.1", path = "./libs/capacity_builder/macros" }
 tar = "0.4.46"
 tempfile = "3.4.0"
 termcolor = "1.1.3"

@@ -13,6 +13,7 @@ pub mod data_url;
 pub mod encoding;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default)]
 pub enum MediaType {
   JavaScript,
   Jsx,
@@ -34,6 +35,7 @@ pub enum MediaType {
   Sql,
   Wasm,
   SourceMap,
+  #[default]
   Unknown,
 }
 
@@ -379,11 +381,6 @@ impl MediaType {
   }
 }
 
-impl Default for MediaType {
-  fn default() -> Self {
-    Self::Unknown
-  }
-}
 
 impl Serialize for MediaType {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

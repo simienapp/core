@@ -136,6 +136,10 @@ impl Reporter for LogReporter {
 }
 
 /// Part of the resolution that interacts with the file system.
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub(crate) trait NpmPackageFsInstaller:
   std::fmt::Debug + Send + Sync

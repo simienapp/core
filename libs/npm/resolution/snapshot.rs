@@ -1,5 +1,10 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
+#![allow(
+  clippy::redundant_field_names,
+  reason = "thiserror's From impl for SnapshotFromLockfileError writes `source: source`"
+)]
+
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::collections::HashMap;

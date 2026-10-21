@@ -1275,6 +1275,10 @@ pub enum NpmRegistryPackageInfoLoadError {
 ///
 /// An implementer may want to override the default implementation of
 /// [`mark_force_reload`] method if it has a cache mechanism.
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait(?Send)]
 pub trait NpmRegistryApi {
   /// Gets the package information from the npm registry.

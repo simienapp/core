@@ -1,10 +1,11 @@
 [package]
 name = "simien_sys_traits_macros"
-version = "0.1.0"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Macros for simien_sys_traits. Forked from sys_traits_macros 0.1.0."
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/dsherret/sys_traits"
-description = "Procedural macros for simien_sys_traits."
 
 [lib]
 path = "lib.rs"

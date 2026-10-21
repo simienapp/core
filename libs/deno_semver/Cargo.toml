@@ -1,27 +1,25 @@
 [package]
 name = "simien_semver"
-version = "0.10.1"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Semver for npm and JSR specifiers, for Simien. Forked from deno_semver 0.10.1."
 edition = "2024"
-description = "Semver for Deno"
-homepage = "https://deno.land/"
-repository = "https://github.com/denoland/deno_semver"
-documentation = "https://docs.rs/deno_semver"
-authors = ["the Deno authors"]
 license = "MIT"
 
 [dependencies]
-simien_monch = "0.6.0"
+simien_monch.workspace = true
 once_cell = "1.17.0"
 serde = { version = "1.0.130", features = ["derive", "rc"] }
 thiserror = "2"
 url = "2.5.3"
-simien_error = "0.7.0"
-simien_capacity_builder = { version = "0.5.0", features = ["ecow"] }
+simien_error.workspace = true
+simien_capacity_builder = { workspace = true, features = ["ecow"] }
 ecow = { version = "0.2.3", features = ["serde"] }
 
 # todo(dsherret): remove after https://github.com/polazarus/hipstr/pull/39 is released
 [target.'cfg(any(unix, windows))'.dependencies]
-simien_capacity_builder = { version = "0.5.0", features = ["ecow", "hipstr"] }
+simien_capacity_builder = { workspace = true, features = ["ecow", "hipstr"] }
 hipstr = "0.6"
 
 [dev-dependencies]

@@ -1076,7 +1076,7 @@ impl crate::SystemRandom for RealSys {
   #[inline]
   fn sys_random(&self, buf: &mut [u8]) -> Result<()> {
     getrandom::getrandom(buf)
-      .map_err(|err| Error::new(ErrorKind::Other, err.to_string()))
+      .map_err(|err| Error::other(err.to_string()))
   }
 }
 

@@ -73,7 +73,7 @@ pub trait EnvVar: BaseEnvVar {
   fn env_var_path(&self, key: impl AsRef<OsStr>) -> Option<PathBuf> {
     self
       .env_var_os(key)
-      .and_then(|h| if h.is_empty() { None } else { Some(h) })
+      .filter(|h| !h.is_empty())
       .map(|value| {
         #[cfg(all(target_arch = "wasm32", feature = "wasm"))]
         {

@@ -93,6 +93,10 @@ pub struct NpmCacheHttpClientBytesResponse {
   pub etag: Option<String>,
 }
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait NpmCacheHttpClient: std::fmt::Debug + Send + Sync + 'static {
   async fn download_with_retries_on_any_tokio_runtime(

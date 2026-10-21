@@ -1,12 +1,10 @@
 [package]
 name = "simien_media_type"
-version = "0.4.0"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Media types of JavaScript and TypeScript files, for Simien. Forked from deno_media_type 0.4.0."
 edition = "2021"
-description = "Media type used in Deno"
-homepage = "https://deno.land/"
-repository = "https://github.com/denoland/deno_media_type"
-documentation = "https://docs.rs/deno_media_type"
-authors = ["the Deno authors"]
 license = "MIT"
 
 [package.metadata.docs.rs]

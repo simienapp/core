@@ -344,7 +344,7 @@ impl VersionReq {
 
 impl fmt::Display for VersionReq {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{}", &self.raw_text)
+    write!(f, "{}", self.raw_text)
   }
 }
 

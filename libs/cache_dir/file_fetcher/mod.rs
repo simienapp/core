@@ -482,6 +482,10 @@ impl From<FetchCachedNoFollowError> for FetchNoFollowError {
   }
 }
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait HttpClient: std::fmt::Debug + MaybeSend + MaybeSync {
   /// Send a request getting the response.
@@ -513,6 +517,10 @@ impl BlobStore for NullBlobStore {
   }
 }
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait BlobStore: std::fmt::Debug + MaybeSend + MaybeSync {
   async fn get(&self, url: &Url) -> std::io::Result<Option<BlobData>>;
@@ -1187,6 +1195,10 @@ impl<TBlobStore: BlobStore, TSys: FileFetcherSys, THttpClient: HttpClient>
   }
 }
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 trait FetchOrEnsureCacheStrategy {
   type ReturnValue;
@@ -1449,7 +1461,7 @@ pub fn resolve_redirect_from_headers(
         maybe_source: Some(source.into()),
       })
     })?;
-    log::debug!("Redirecting to {:?}...", &location_string);
+    log::debug!("Redirecting to {:?}...", location_string);
     resolve_url_from_location(request_url, location_string).map_err(|source| {
       Box::new(RedirectHeaderParseError {
         request_url: request_url.clone(),

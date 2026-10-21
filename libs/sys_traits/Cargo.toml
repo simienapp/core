@@ -1,19 +1,15 @@
 [package]
 name = "simien_sys_traits"
-version = "0.1.28"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Traits for the system calls Simien's crates make, so they can be swapped for tests. Forked from sys_traits 0.1.28."
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/dsherret/sys_traits"
-description = "Trait per function for system related functionality."
 
 [package.metadata.docs.rs]
 all-features = true
 
-[workspace]
-members = [
-  "macros",
-  "tests/wasm_test",
-]
 
 [features]
 default = []
@@ -33,7 +29,7 @@ filetime = { version = "0.2", optional = true }
 parking_lot = { version = "0.12", optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
-simien_sys_traits_macros = { version = "0.1", path = "./macros" }
+simien_sys_traits_macros.workspace = true
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 getrandom = { version = "0.2", optional = true }

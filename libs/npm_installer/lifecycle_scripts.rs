@@ -110,6 +110,10 @@ impl LifecycleScriptsExecutor for NullLifecycleScriptsExecutor {
   }
 }
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait LifecycleScriptsExecutor: Sync + Send {
   async fn execute(

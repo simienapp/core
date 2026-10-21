@@ -1,10 +1,11 @@
 [package]
 name = "simien_capacity_builder_macros"
-version = "0.3.0"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Macros for simien_capacity_builder. Forked from capacity_builder_macros 0.3.0."
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/dsherret/capacity_builder"
-description = "Macros for simien_capacity_builder"
 
 [lib]
 path = "./lib.rs"

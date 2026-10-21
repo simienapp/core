@@ -1,13 +1,11 @@
 [package]
 name = "simien_monch"
-version = "0.6.0"
-authors = ["the Deno authors"]
-documentation = "https://docs.rs/monch"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Parser combinators, for Simien. Forked from monch 0.6.0."
 edition = "2024"
-homepage = "https://deno.land/"
 license = "MIT"
-repository = "https://github.com/denoland/monch"
-description = "Inspired by nom, but specifically for strings."
 
 [dev-dependencies]
 divan = "0.1"

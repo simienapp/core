@@ -246,8 +246,7 @@ impl InMemorySysInner {
             seen_entries.insert(current_path.clone());
           }
           if !seen_entries.insert(target_path.clone()) {
-            return Err(Error::new(
-              ErrorKind::Other,
+            return Err(Error::other(
               format!("Symlink loop detected resolving '{}'", path.display()),
             ));
           }
@@ -308,8 +307,7 @@ impl InMemorySysInner {
               &entries[pos],
             ));
           } else {
-            return Err(Error::new(
-              ErrorKind::Other,
+            return Err(Error::other(
               "Path leads into a file or symlink",
             ));
           }
@@ -392,8 +390,7 @@ impl InMemorySysInner {
           }
         }
         DirectoryEntry::File(_) | DirectoryEntry::Symlink { .. } => {
-          return Err(Error::new(
-            ErrorKind::Other,
+          return Err(Error::other(
             "Path leads into a file or symlink",
           ));
         }
@@ -534,7 +531,7 @@ impl EnvTempDir for InMemorySys {
       let name = if name.is_empty() { "/" } else { name };
       Ok(PathBuf::from(name).join("tmp"))
     } else {
-      Err(std::io::Error::new(ErrorKind::Other, "Create a root for the InMemorySys file system before getting the temp dir."))
+      Err(std::io::Error::other("Create a root for the InMemorySys file system before getting the temp dir."))
     }
   }
 }
@@ -575,8 +572,7 @@ impl BaseFsChown for InMemorySys {
     _uid: Option<u32>,
     _gid: Option<u32>,
   ) -> Result<()> {
-    Err(Error::new(
-      ErrorKind::Other,
+    Err(Error::other(
       "chown is not supported on this platform",
     ))
   }
@@ -589,8 +585,7 @@ impl BaseFsSymlinkChown for InMemorySys {
     _uid: Option<u32>,
     _gid: Option<u32>,
   ) -> Result<()> {
-    Err(Error::new(
-      ErrorKind::Other,
+    Err(Error::other(
       "lchown is not supported on this platform",
     ))
   }
@@ -641,8 +636,7 @@ impl BaseFsHardLink for InMemorySys {
         self.fs_write(&dst, data)?;
       }
       DirectoryEntry::Directory(_) | DirectoryEntry::Symlink(_) => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot hard link directories or symlinks",
         ));
       }
@@ -811,8 +805,7 @@ impl BaseFsOpen for InMemorySys {
     let parent_path = match path.parent() {
       Some(p) if !p.as_os_str().is_empty() => p,
       _ => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot open root or invalid path",
         ));
       }
@@ -822,7 +815,7 @@ impl BaseFsOpen for InMemorySys {
     let file_name = match path.file_name() {
       Some(n) => n.to_string_lossy(),
       None => {
-        return Err(Error::new(ErrorKind::Other, "No file name found"));
+        return Err(Error::other("No file name found"));
       }
     };
 
@@ -854,7 +847,7 @@ impl BaseFsOpen for InMemorySys {
             },
           })
         }
-        _ => Err(Error::new(ErrorKind::Other, "Path is not a file")),
+        _ => Err(Error::other("Path is not a file")),
       },
       Err(insert_pos) => {
         if !options.create {
@@ -920,8 +913,7 @@ impl BaseFsReadDir for InMemorySys {
           .collect::<Vec<_>>()
           .into_iter(),
       )),
-      _ => Err(std::io::Error::new(
-        std::io::ErrorKind::Other,
+      _ => Err(std::io::Error::other(
         "Path is not a directory",
       )),
     }
@@ -1010,8 +1002,7 @@ impl BaseFsRemoveDir for InMemorySys {
     let parent_path = match abs_path.parent() {
       Some(p) if !p.as_os_str().is_empty() => p,
       _ => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot remove root or invalid path",
         ));
       }
@@ -1020,7 +1011,7 @@ impl BaseFsRemoveDir for InMemorySys {
     let dir_name = match abs_path.file_name() {
       Some(n) => n.to_string_lossy(),
       None => {
-        return Err(Error::new(ErrorKind::Other, "Directory not found"));
+        return Err(Error::other("Directory not found"));
       }
     };
 
@@ -1028,12 +1019,12 @@ impl BaseFsRemoveDir for InMemorySys {
       Ok(pos) => match &parent.entries[pos] {
         DirectoryEntry::Directory(dir) => {
           if !dir.entries.is_empty() {
-            return Err(Error::new(ErrorKind::Other, "Directory is not empty"));
+            return Err(Error::other("Directory is not empty"));
           }
           parent.entries.remove(pos);
           Ok(())
         }
-        _ => Err(Error::new(ErrorKind::Other, "Not a directory")),
+        _ => Err(Error::other("Not a directory")),
       },
       Err(_) => Err(Error::new(ErrorKind::NotFound, "Directory not found")),
     }
@@ -1047,8 +1038,7 @@ impl BaseFsRemoveDirAll for InMemorySys {
     let parent_path = match abs_path.parent() {
       Some(p) if !p.as_os_str().is_empty() => p,
       _ => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot remove root or invalid path",
         ));
       }
@@ -1067,7 +1057,7 @@ impl BaseFsRemoveDirAll for InMemorySys {
           parent.entries.remove(pos);
           Ok(())
         }
-        _ => Err(Error::new(ErrorKind::Other, "Not a directory")),
+        _ => Err(Error::other("Not a directory")),
       },
       Err(_) => Ok(()), // previously deleted
     }
@@ -1081,8 +1071,7 @@ impl BaseFsRemoveFile for InMemorySys {
     let parent_path = match path.parent() {
       Some(p) if !p.as_os_str().is_empty() => p,
       _ => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot remove root or invalid path",
         ));
       }
@@ -1091,7 +1080,7 @@ impl BaseFsRemoveFile for InMemorySys {
     let file_name = match path.file_name() {
       Some(n) => n.to_string_lossy(),
       None => {
-        return Err(Error::new(ErrorKind::Other, "No file name found"));
+        return Err(Error::other("No file name found"));
       }
     };
 
@@ -1104,7 +1093,7 @@ impl BaseFsRemoveFile for InMemorySys {
           parent.entries.remove(pos);
           Ok(())
         }
-        _ => Err(Error::new(ErrorKind::Other, "Not a file")),
+        _ => Err(Error::other("Not a file")),
       },
       Err(_) => Err(Error::new(ErrorKind::NotFound, "File not found")),
     }
@@ -1124,8 +1113,7 @@ impl BaseFsRename for InMemorySys {
     let from_parent_path = match from.parent() {
       Some(p) if !p.as_os_str().is_empty() => p,
       _ => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot rename root or invalid path",
         ));
       }
@@ -1133,14 +1121,13 @@ impl BaseFsRename for InMemorySys {
     let from_file_name = match from.file_name() {
       Some(n) => n.to_string_lossy(),
       None => {
-        return Err(Error::new(ErrorKind::Other, "No source file name found"));
+        return Err(Error::other("No source file name found"));
       }
     };
     let to_parent_path = match to.parent() {
       Some(p) if !p.as_os_str().is_empty() => p,
       _ => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot rename to root or invalid path",
         ));
       }
@@ -1148,8 +1135,7 @@ impl BaseFsRename for InMemorySys {
     let to_file_name = match to.file_name() {
       Some(n) => n.to_string_lossy(),
       None => {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "No destination file name found",
         ));
       }
@@ -1168,8 +1154,7 @@ impl BaseFsRename for InMemorySys {
 
     // prevent moving a directory into itself or one of its descendants
     if source_is_dir && to.starts_with(&from) {
-      return Err(Error::new(
-        ErrorKind::Other,
+      return Err(Error::other(
         "Cannot rename a directory into itself or a subdirectory",
       ));
     }
@@ -1188,14 +1173,12 @@ impl BaseFsRename for InMemorySys {
 
     if let Some((dest_is_dir, dest_dir_empty)) = dest_state {
       if source_is_dir && !dest_is_dir {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot overwrite a non-directory with a directory",
         ));
       }
       if !source_is_dir && dest_is_dir {
-        return Err(Error::new(
-          ErrorKind::Other,
+        return Err(Error::other(
           "Cannot overwrite a directory with a non-directory",
         ));
       }
@@ -1595,7 +1578,7 @@ impl SystemRandom for InMemorySys {
         #[cfg(feature = "getrandom")]
         {
           getrandom::getrandom(buf)
-            .map_err(|err| Error::new(ErrorKind::Other, err.to_string()))
+            .map_err(|err| Error::other(err.to_string()))
         }
         #[cfg(not(feature = "getrandom"))]
         {

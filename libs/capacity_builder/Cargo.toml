@@ -1,10 +1,11 @@
 [package]
 name = "simien_capacity_builder"
-version = "0.5.0"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Builders that compute capacity before allocating, for Simien. Forked from capacity_builder 0.5.0."
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/dsherret/capacity_builder"
-description = "Builders where the code to calculate the capacity is the same as the code to write what's being built."
 
 [features]
 ecow = ["dep:ecow"]
@@ -14,7 +15,7 @@ hipstr = ["dep:hipstr"]
 all-features = true
 
 [dependencies]
-simien_capacity_builder_macros = { version = "0.3.0", path = "./macros" }
+simien_capacity_builder_macros.workspace = true
 ecow = { version = "0.2", optional = true }
 hipstr = { version = "0.6", optional = true }
 itoa = "1.0.14"
@@ -26,7 +27,3 @@ divan = "0.1.17"
 name = "bench"
 harness = false
 
-[workspace]
-members = [
-  "macros",
-]

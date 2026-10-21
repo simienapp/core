@@ -29,7 +29,7 @@ static FORCE_COLOR: Lazy<bool> = Lazy::new(|| {
 });
 
 static USE_COLOR: Lazy<AtomicBool> = Lazy::new(|| {
-  #[cfg(wasm)]
+  #[cfg(target_arch = "wasm32")]
   {
     // Don't use color by default on Wasm targets because
     // it's not always possible to read the `NO_COLOR` env var.
@@ -37,7 +37,7 @@ static USE_COLOR: Lazy<AtomicBool> = Lazy::new(|| {
     // Instead the user can opt-in via `set_use_color`.
     AtomicBool::new(false)
   }
-  #[cfg(not(wasm))]
+  #[cfg(not(target_arch = "wasm32"))]
   {
     if *FORCE_COLOR {
       return AtomicBool::new(true);
@@ -59,13 +59,13 @@ pub enum ColorLevel {
 }
 
 static COLOR_LEVEL: Lazy<ColorLevel> = Lazy::new(|| {
-  #[cfg(wasm)]
+  #[cfg(target_arch = "wasm32")]
   {
     // Don't use color by default on Wasm targets because
     // it's not always possible to read env vars.
     ColorLevel::None
   }
-  #[cfg(not(wasm))]
+  #[cfg(not(target_arch = "wasm32"))]
   {
     // If FORCE_COLOR is not set, check for NO_COLOR
     if !*FORCE_COLOR {
@@ -90,7 +90,7 @@ static COLOR_LEVEL: Lazy<ColorLevel> = Lazy::new(|| {
       }
     }
 
-    #[cfg(platform = "windows")]
+    #[cfg(windows)]
     {
       // TODO: Older versions of windows only support ansi colors,
       // starting with Windows 10 build 10586 ansi256 is supported
@@ -181,17 +181,11 @@ struct StdFmtStdIoWriter<'a>(&'a mut dyn fmt::Write);
 impl std::io::Write for StdFmtStdIoWriter<'_> {
   fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
     let str = std::str::from_utf8(buf).map_err(|_| {
-      std::io::Error::new(
-        std::io::ErrorKind::Other,
-        "failed to convert bytes to str",
-      )
+      std::io::Error::other("failed to convert bytes to str")
     })?;
     match self.0.write_str(str) {
       Ok(_) => Ok(buf.len()),
-      Err(_) => Err(std::io::Error::new(
-        std::io::ErrorKind::Other,
-        "failed to write to fmt::Write",
-      )),
+      Err(_) => Err(std::io::Error::other("failed to write to fmt::Write")),
     }
   }
 
