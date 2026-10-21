@@ -5,10 +5,10 @@ use std::io::ErrorKind;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_path_util::normalize_path;
-use deno_path_util::url_from_directory_path;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsCreateDirAll;
+use simien_path_util::normalize_path;
+use simien_path_util::url_from_directory_path;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsCreateDirAll;
 use url::Url;
 
 pub struct NpmCacheFolderId {
@@ -317,7 +317,7 @@ fn is_banned_path_char(c: char) -> bool {
 mod test {
   use std::path::PathBuf;
 
-  use sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsCreateDirAll;
   use url::Url;
 
   use super::NpmCacheDir;
@@ -326,7 +326,7 @@ mod test {
 
   #[test]
   fn should_get_package_folder() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     let root_dir = if cfg!(windows) {
       PathBuf::from("C:\\cache")
     } else {

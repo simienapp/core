@@ -6,8 +6,8 @@ use std::collections::HashSet;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_error::JsErrorBox;
-use deno_path_util::url_to_file_path;
+use simien_error::JsErrorBox;
+use simien_path_util::url_to_file_path;
 use futures::FutureExt;
 use futures::StreamExt;
 use futures::future::LocalBoxFuture;
@@ -106,7 +106,7 @@ pub enum ResolvedCjsAnalysis<'a> {
   Cjs(BTreeSet<String>),
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait CjsModuleExportAnalyzerSys: NodeResolverSys {}
 
 #[allow(clippy::disallowed_types, reason = "definition")]
@@ -116,7 +116,7 @@ pub type CjsModuleExportAnalyzerRc<
   TIsBuiltInNodeModuleChecker,
   TNpmPackageFolderResolver,
   TSys,
-> = deno_maybe_sync::MaybeArc<
+> = simien_maybe_sync::MaybeArc<
   CjsModuleExportAnalyzer<
     TCjsCodeAnalyzer,
     TInNpmPackageChecker,
@@ -135,7 +135,7 @@ pub struct CjsModuleExportAnalyzer<
 > {
   cjs_code_analyzer: TCjsCodeAnalyzer,
   in_npm_pkg_checker: TInNpmPackageChecker,
-  node_resolver: NodeResolverRc<
+  simien_node_resolver: NodeResolverRc<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
     TNpmPackageFolderResolver,
@@ -164,7 +164,7 @@ impl<
   pub fn new(
     cjs_code_analyzer: TCjsCodeAnalyzer,
     in_npm_pkg_checker: TInNpmPackageChecker,
-    node_resolver: NodeResolverRc<
+    simien_node_resolver: NodeResolverRc<
       TInNpmPackageChecker,
       TIsBuiltInNodeModuleChecker,
       TNpmPackageFolderResolver,
@@ -177,7 +177,7 @@ impl<
     Self {
       cjs_code_analyzer,
       in_npm_pkg_checker,
-      node_resolver,
+      simien_node_resolver,
       npm_resolver,
       pkg_json_resolver,
       sys,
@@ -570,7 +570,7 @@ impl<
       if let Some(exports) = &package_json.exports {
         return Some(
           self
-            .node_resolver
+            .simien_node_resolver
             .package_exports_resolve(
               &package_json_path,
               &package_subpath,
@@ -597,7 +597,7 @@ impl<
             .map_err(JsErrorBox::from_err)?;
           if let Some(package_json) = maybe_package_json
             && let Some(main) =
-              self.node_resolver.legacy_fallback_resolve(&package_json)
+              self.simien_node_resolver.legacy_fallback_resolve(&package_json)
           {
             return Ok(Some(UrlOrPath::Path(d.join(main).clean())));
           }
@@ -608,7 +608,7 @@ impl<
           .file_extension_probe(d, referrer_path)
           .map(|p| Some(UrlOrPath::Path(p)));
       } else if let Some(main) =
-        self.node_resolver.legacy_fallback_resolve(&package_json)
+        self.simien_node_resolver.legacy_fallback_resolve(&package_json)
       {
         return self
           .file_extension_probe(module_dir.join(main), referrer_path)
@@ -685,7 +685,7 @@ fn with_file_name_suffix(path: &Path, suffix: &str) -> Option<PathBuf> {
   Some(path.with_file_name(file_name))
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum TranslateCjsToEsmError {
   #[class(inherit)]
   #[error(transparent)]
@@ -695,13 +695,13 @@ pub enum TranslateCjsToEsmError {
   ExportAnalysis(JsErrorBox),
   #[class(inherit)]
   #[error(transparent)]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
   #[class("InvalidData")]
   #[error("CommonJS module path {0:?} is not valid UTF-8")]
   InvalidUtf8Path(std::ffi::OsString),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 #[error(
   "Could not load '{reexport}' ({reexport_specifier}) referenced from {referrer}"
@@ -714,7 +714,7 @@ pub struct CjsAnalysisCouldNotLoadError {
   source: JsErrorBox,
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NodeCodeTranslatorSys: CjsModuleExportAnalyzerSys {}
 
 #[allow(clippy::disallowed_types, reason = "definition")]
@@ -724,7 +724,7 @@ pub type NodeCodeTranslatorRc<
   TIsBuiltInNodeModuleChecker,
   TNpmPackageFolderResolver,
   TSys,
-> = deno_maybe_sync::MaybeArc<
+> = simien_maybe_sync::MaybeArc<
   NodeCodeTranslator<
     TCjsCodeAnalyzer,
     TInNpmPackageChecker,
@@ -915,7 +915,7 @@ fn exports_to_wrapper_module(
     .iter()
     .map(|export| (export.as_str(), to_double_quote_string(export)))
     .collect::<Vec<_>>();
-  Ok(capacity_builder::StringBuilder::<String>::build(|builder| {
+  Ok(simien_capacity_builder::StringBuilder::<String>::build(|builder| {
       let mut temp_var_count = 0;
       builder.append(
         r#"import { createRequire as __internalCreateRequire, Module as __internalModule } from "node:module";
@@ -963,10 +963,10 @@ if (import.meta.main) {
 }
 
 fn add_export<'a>(
-  builder: &mut capacity_builder::StringBuilder<'a, String>,
+  builder: &mut simien_capacity_builder::StringBuilder<'a, String>,
   name: &'a str,
   quoted_name: &'a str,
-  build_initializer: impl FnOnce(&mut capacity_builder::StringBuilder<'a, String>),
+  build_initializer: impl FnOnce(&mut simien_capacity_builder::StringBuilder<'a, String>),
   temp_var_count: &mut usize,
 ) {
   fn is_valid_var_decl(name: &str) -> bool {

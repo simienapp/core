@@ -1,12 +1,12 @@
-# `sys_traits`
+# `simien_sys_traits`
 
 Trait per function for system related functionality.
 
 Write functions that specify only the system functions they need.
 
 ```rs
-use sys_traits::FsWriteFile;
-use sys_traits::SystemRandom;
+use simien_sys_traits::FsWriteFile;
+use simien_sys_traits::SystemRandom;
 
 pub fn write_random_data<TSys: FsWriteFile + SystemRandom>(
   sys: &TSys,
@@ -20,15 +20,15 @@ pub fn write_random_data<TSys: FsWriteFile + SystemRandom>(
 
 Now a caller only needs to provide a type that implements those two functions.
 
-## `#[sys_traits::auto_impl]`
+## `#[simien_sys_traits::auto_impl]`
 
-Use the `#[sys_traits::auto_impl]` macro to reduce boilerplate when wanting to
+Use the `#[simien_sys_traits::auto_impl]` macro to reduce boilerplate when wanting to
 automatically implement a trait for `T` when `T` implements the required traits.
 
 This is useful for aliasing and reducing verbosity when using this crate.
 
 ```diff
-+#[sys_traits::auto_impl]
++#[simien_sys_traits::auto_impl]
 pub trait WriteRandomDataSys: FsWriteFile + SystemRandom
 {
 }
@@ -42,11 +42,11 @@ pub trait WriteRandomDataSys: FsWriteFile + SystemRandom
 
 Comes with two implementations that implement all the traits.
 
-- `sys_traits::impl::RealSys` - A real implementation of the current system.
+- `simien_sys_traits::impl::RealSys` - A real implementation of the current system.
   - Automatically works with Wasm in Deno
   - Will implement Node.js support once I need it
     (https://github.com/dsherret/sys_traits/issues/4)
-- `sys_traits::impl::InMemorySys` - An in-memory system useful for testing.
+- `simien_sys_traits::impl::InMemorySys` - An in-memory system useful for testing.
 
 ## Creating an implementation
 
@@ -57,14 +57,14 @@ implementing `FsWrite`, you must implement `BaseFsWrite`:
 ```rs
 pub struct MyCustomFileSystem;
 
-impl sys_traits::BaseFsWrite for MyCustomFileSystem {
+impl simien_sys_traits::BaseFsWrite for MyCustomFileSystem {
   fn base_fs_write(&self, path: &Path, data: &[u8]) -> std::io::Result<()> {
     // ...
   }
 }
 ```
 
-The `sys_traits::FsWrite` trait gets automatically implemented for this as its
+The `simien_sys_traits::FsWrite` trait gets automatically implemented for this as its
 definition is:
 
 ```rs
@@ -100,8 +100,8 @@ Use `.with_paths_in_errors()` to wrap operations with context that includes the
 operation name and path:
 
 ```rs
-use sys_traits::PathsInErrorsExt;
-use sys_traits::impls::RealSys;
+use simien_sys_traits::PathsInErrorsExt;
+use simien_sys_traits::impls::RealSys;
 
 let sys = RealSys;
 
@@ -113,8 +113,8 @@ The returned `io::Error` preserves the original error kind and can be downcast
 to `OperationError` for programmatic access:
 
 ```rs
-use sys_traits::OperationError;
-use sys_traits::OperationErrorKind;
+use simien_sys_traits::OperationError;
+use simien_sys_traits::OperationErrorKind;
 
 let err = sys.with_paths_in_errors().fs_read("/nonexistent").unwrap_err();
 

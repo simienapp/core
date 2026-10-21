@@ -4,11 +4,11 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use deno_package_json::parse_jsr_dep_value;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::VersionReq;
-use deno_semver::package::PackageName;
+use simien_package_json::parse_jsr_dep_value;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::VersionReq;
+use simien_semver::package::PackageName;
 use indexmap::IndexMap;
 use thiserror::Error;
 
@@ -20,7 +20,7 @@ pub enum NpmOverridesError {
   #[error("Failed to parse override key \"{key}\": {source}")]
   KeyParse {
     key: String,
-    source: deno_semver::npm::NpmVersionReqParseError,
+    source: simien_semver::npm::NpmVersionReqParseError,
   },
   #[error(
     "Failed to parse override value \"{value}\" for key \"{key}\": {source}"
@@ -28,7 +28,7 @@ pub enum NpmOverridesError {
   ValueParse {
     key: String,
     value: String,
-    source: deno_semver::npm::NpmVersionReqParseError,
+    source: simien_semver::npm::NpmVersionReqParseError,
   },
   #[error(
     "Override uses dollar reference \"${reference}\" but \"{reference}\" is not a direct dependency of the root package"

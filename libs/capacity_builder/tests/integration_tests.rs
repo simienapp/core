@@ -1,12 +1,12 @@
-use capacity_builder::BytesAppendable;
-use capacity_builder::BytesBuilder;
-use capacity_builder::BytesType;
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
-use capacity_builder::StringAppendableValue;
-use capacity_builder::StringBuilder;
-use capacity_builder::StringType;
-use capacity_builder::StringTypeMut;
+use simien_capacity_builder::BytesAppendable;
+use simien_capacity_builder::BytesBuilder;
+use simien_capacity_builder::BytesType;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringAppendableValue;
+use simien_capacity_builder::StringBuilder;
+use simien_capacity_builder::StringType;
+use simien_capacity_builder::StringTypeMut;
 
 #[derive(CapacityDisplay)]
 struct MyStruct;
@@ -194,7 +194,7 @@ fn box_slice() {
 fn to_string_helpers_ecow() {
   let text: ecow::EcoString = MyStruct.to_custom_string();
   assert_eq!(text, "Hello there!");
-  let text: ecow::EcoString = capacity_builder::appendable_to_string(&MyStruct);
+  let text: ecow::EcoString = simien_capacity_builder::appendable_to_string(&MyStruct);
   assert_eq!(text, "Hello there!");
 }
 
@@ -204,6 +204,6 @@ fn to_string_helpers_hipstr() {
   let text: hipstr::HipStr<'static> = MyStruct.to_custom_string();
   assert_eq!(text, "Hello there!");
   let text: hipstr::HipStr<'static> =
-    capacity_builder::appendable_to_string(&MyStruct);
+    simien_capacity_builder::appendable_to_string(&MyStruct);
   assert_eq!(text, "Hello there!");
 }

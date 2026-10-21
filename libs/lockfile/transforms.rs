@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 
-use deno_semver::Version;
-use deno_semver::package::PackageNv;
+use simien_semver::Version;
+use simien_semver::package::PackageNv;
 use serde_json::Value;
 use thiserror::Error;
 

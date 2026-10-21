@@ -2,10 +2,10 @@
 
 use std::cmp::Ordering;
 
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
-use capacity_builder::StringBuilder;
-use capacity_builder::StringType;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringBuilder;
+use simien_capacity_builder::StringType;
 use serde::Deserialize;
 use serde::Serialize;
 

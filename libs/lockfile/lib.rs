@@ -14,12 +14,12 @@ use std::collections::btree_map::Entry as BTreeMapEntry;
 use std::collections::hash_map::Entry as HashMapEntry;
 use std::path::PathBuf;
 
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::jsr::JsrDepPackageReq;
-use deno_semver::package::PackageKind;
-use deno_semver::package::PackageNv;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::jsr::JsrDepPackageReq;
+use simien_semver::package::PackageKind;
+use simien_semver::package::PackageNv;
 use serde::Deserialize;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -1325,7 +1325,7 @@ fn specifier_version_is_higher(candidate: &str, current: &str) -> bool {
 mod tests {
   use std::path::Path;
 
-  use deno_semver::package::PackageReq;
+  use simien_semver::package::PackageReq;
   use futures::FutureExt;
   use pretty_assertions::assert_eq;
 

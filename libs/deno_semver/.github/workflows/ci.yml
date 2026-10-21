@@ -11,7 +11,7 @@ on:
 
 jobs:
   rust:
-    name: deno_semver-ubuntu-latest-release
+    name: simien_semver-ubuntu-latest-release
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

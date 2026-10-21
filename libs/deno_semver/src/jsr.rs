@@ -2,9 +2,9 @@
 
 use std::borrow::Cow;
 
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
-use capacity_builder::StringType;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringType;
 use serde::Deserialize;
 use serde::Serialize;
 use thiserror::Error;
@@ -30,7 +30,7 @@ pub struct JsrPackageReqReference(PackageReqReference);
 impl<'a> StringAppendable<'a> for &'a JsrPackageReqReference {
   fn append_to_builder<TString: StringType>(
     self,
-    builder: &mut capacity_builder::StringBuilder<'a, TString>,
+    builder: &mut simien_capacity_builder::StringBuilder<'a, TString>,
   ) {
     builder.append("jsr:");
     builder.append(&self.0);
@@ -123,7 +123,7 @@ impl JsrPackageNvReference {
 impl<'a> StringAppendable<'a> for &'a JsrPackageNvReference {
   fn append_to_builder<TString: StringType>(
     self,
-    builder: &mut capacity_builder::StringBuilder<'a, TString>,
+    builder: &mut simien_capacity_builder::StringBuilder<'a, TString>,
   ) {
     builder.append("jsr:");
     builder.append(&self.0);
@@ -169,7 +169,7 @@ pub fn normalized_export_name(sub_path: Option<&str>) -> Cow<'_, str> {
   }
 }
 
-#[derive(Error, Debug, Clone, deno_error::JsError)]
+#[derive(Error, Debug, Clone, simien_error::JsError)]
 pub enum JsrDepPackageReqParseError {
   #[class(type)]
   #[error("Unexpected JSR dependency scheme '{}'. Expected 'npm:' or 'jsr:'", .0)]
@@ -191,7 +191,7 @@ pub struct JsrDepPackageReq {
 impl<'a> StringAppendable<'a> for &'a JsrDepPackageReq {
   fn append_to_builder<TString: StringType>(
     self,
-    builder: &mut capacity_builder::StringBuilder<'a, TString>,
+    builder: &mut simien_capacity_builder::StringBuilder<'a, TString>,
   ) {
     builder.append(self.kind.scheme_with_colon());
     builder.append(&self.req);
@@ -275,7 +275,7 @@ impl JsrDepPackageReq {
   ///
   /// Note: The normalized string is not safe for a URL. It's best used for serialization.
   pub fn to_string_normalized(&self) -> crate::StackString {
-    capacity_builder::StringBuilder::build(|builder| {
+    simien_capacity_builder::StringBuilder::build(|builder| {
       builder.append(self.kind.scheme_with_colon());
       builder.append(&self.req.name);
       builder.append('@');

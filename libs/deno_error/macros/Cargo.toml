@@ -3,7 +3,7 @@
 [package]
 name = "simien_error_macro"
 version = "0.1.1"
-description = "Macro for writing simien_error errors. Forked from Deno's deno_error_macro 0.7.1."
+description = "Macro for writing simien_error errors. Forked from Deno's simien_error_macro 0.7.1."
 repository = "https://github.com/simienapp/core"
 documentation = "https://docs.rs/deno_error"
 authors = ["the Deno authors", "the Simien authors"]

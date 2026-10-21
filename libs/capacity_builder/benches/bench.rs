@@ -1,4 +1,4 @@
-use capacity_builder::StringBuilder;
+use simien_capacity_builder::StringBuilder;
 
 fn main() {
   // Run registered benchmarks.
@@ -55,7 +55,7 @@ mod numbers {
 }
 
 mod small_string_types {
-  use capacity_builder::StringType;
+  use simien_capacity_builder::StringType;
 
   use super::*;
 
@@ -86,7 +86,7 @@ mod small_string_types {
 }
 
 mod string {
-  use capacity_builder::StringBuilder;
+  use simien_capacity_builder::StringBuilder;
 
   #[divan::bench(sample_count = 1000)]
   fn small_string_many_writes() -> usize {
@@ -126,7 +126,7 @@ mod string {
 
 #[cfg(feature = "ecow")]
 mod ecow_bench {
-  use capacity_builder::StringBuilder;
+  use simien_capacity_builder::StringBuilder;
 
   #[divan::bench(sample_count = 1000)]
   fn small_string_many_writes() -> usize {

@@ -3,9 +3,9 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_path_util::url_from_directory_path;
-use deno_path_util::url_from_file_path;
-use deno_semver::Version;
+use simien_path_util::url_from_directory_path;
+use simien_path_util::url_from_file_path;
+use simien_semver::Version;
 use url::Url;
 
 use crate::errors;

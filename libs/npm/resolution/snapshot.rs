@@ -8,13 +8,13 @@ use std::collections::VecDeque;
 use std::collections::hash_map;
 use std::sync::Arc;
 
-use deno_error::JsError;
-use deno_lockfile::Lockfile;
-use deno_semver::StackString;
-use deno_semver::VersionReq;
-use deno_semver::package::PackageName;
-use deno_semver::package::PackageNv;
-use deno_semver::package::PackageReq;
+use simien_error::JsError;
+use simien_lockfile::Lockfile;
+use simien_semver::StackString;
+use simien_semver::VersionReq;
+use simien_semver::package::PackageName;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
 use futures::StreamExt;
 use futures::stream::FuturesOrdered;
 use rustc_hash::FxHashMap;
@@ -1092,7 +1092,7 @@ pub struct NpmRegistryDefaultTarballUrlProvider;
 impl DefaultTarballUrlProvider for NpmRegistryDefaultTarballUrlProvider {
   fn default_tarball_url(
     &self,
-    nv: &deno_semver::package::PackageNv,
+    nv: &simien_semver::package::PackageNv,
   ) -> String {
     let scope = nv.scope();
     let package_name = if let Some(scope) = scope {
@@ -1214,14 +1214,14 @@ pub fn snapshot_from_lockfile(
   // collect the specifiers to version mappings
   for (key, value) in &lockfile.content.packages.specifiers {
     match key.kind {
-      deno_semver::package::PackageKind::Npm => {
+      simien_semver::package::PackageKind::Npm => {
         let package_id = NpmPackageId::from_serialized(&format!(
           "{}@{}",
           key.req.name, value
         ))?;
         root_packages.insert(key.req.clone(), package_id);
       }
-      deno_semver::package::PackageKind::Jsr => {}
+      simien_semver::package::PackageKind::Jsr => {}
     }
   }
 
@@ -1305,8 +1305,8 @@ pub fn snapshot_from_lockfile(
 mod tests {
   use std::path::PathBuf;
 
-  use deno_lockfile::NewLockfileOptions;
-  use deno_semver::Version;
+  use simien_lockfile::NewLockfileOptions;
+  use simien_semver::Version;
   use pretty_assertions::assert_eq;
 
   use super::*;

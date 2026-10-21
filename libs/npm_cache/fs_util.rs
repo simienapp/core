@@ -4,17 +4,17 @@ use std::io::ErrorKind;
 use std::path::Path;
 use std::time::Duration;
 
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsDirEntry;
-use sys_traits::FsHardLink;
-use sys_traits::FsMetadata;
-use sys_traits::FsMetadataValue;
-use sys_traits::FsReadDir;
-use sys_traits::FsRemoveFile;
-use sys_traits::PathsInErrorsExt;
-use sys_traits::ThreadSleep;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsDirEntry;
+use simien_sys_traits::FsHardLink;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsMetadataValue;
+use simien_sys_traits::FsReadDir;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::PathsInErrorsExt;
+use simien_sys_traits::ThreadSleep;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait HardLinkDirRecursiveSys:
   HardLinkFileSys + FsCreateDirAll + FsMetadata + FsReadDir
 {
@@ -82,7 +82,7 @@ where
   }
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait HardLinkFileSys: FsHardLink + FsRemoveFile + ThreadSleep {}
 
 /// Hardlinks a file from one location to another.
@@ -136,16 +136,16 @@ pub fn hard_link_file<TSys: HardLinkFileSys>(
 mod tests {
   use std::path::Path;
 
-  use sys_traits::FsCreateDirAll;
-  use sys_traits::FsRead;
-  use sys_traits::FsSymlinkDir;
-  use sys_traits::FsWrite;
+  use simien_sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsRead;
+  use simien_sys_traits::FsSymlinkDir;
+  use simien_sys_traits::FsWrite;
 
   use super::*;
 
   #[test]
   fn hard_link_dir_recursive_rejects_symlink_destination_directory() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     let from = Path::new("/from");
     let to = Path::new("/to");
     let target = Path::new("/target");

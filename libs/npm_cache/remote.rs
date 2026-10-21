@@ -2,9 +2,9 @@
 
 use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
-use deno_npmrc::RegistryConfig;
+use simien_npmrc::RegistryConfig;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum AuthHeaderForNpmRegistryError {
   #[class(type)]
   #[error(

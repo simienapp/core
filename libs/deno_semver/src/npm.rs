@@ -2,11 +2,11 @@
 
 use std::borrow::Cow;
 
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
-use capacity_builder::StringType;
-use deno_error::JsError;
-use monch::*;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringType;
+use simien_error::JsError;
+use simien_monch::*;
 use thiserror::Error;
 
 use serde::Deserialize;
@@ -350,7 +350,7 @@ pub struct NpmPackageReqReference(PackageReqReference);
 impl<'a> StringAppendable<'a> for &'a NpmPackageReqReference {
   fn append_to_builder<TString: StringType>(
     self,
-    builder: &mut capacity_builder::StringBuilder<'a, TString>,
+    builder: &mut simien_capacity_builder::StringBuilder<'a, TString>,
   ) {
     builder.append("npm:");
     builder.append(&self.0);
@@ -433,7 +433,7 @@ impl NpmPackageNvReference {
 impl<'a> StringAppendable<'a> for &'a NpmPackageNvReference {
   fn append_to_builder<TString: StringType>(
     self,
-    builder: &mut capacity_builder::StringBuilder<'a, TString>,
+    builder: &mut simien_capacity_builder::StringBuilder<'a, TString>,
   ) {
     builder.append("npm:");
     builder.append(&self.0);

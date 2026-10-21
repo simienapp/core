@@ -30,17 +30,17 @@ impl UrlOrPath {
 
   pub fn into_path(
     self,
-  ) -> Result<PathBuf, deno_path_util::UrlToFilePathError> {
+  ) -> Result<PathBuf, simien_path_util::UrlToFilePathError> {
     match self {
-      UrlOrPath::Url(url) => deno_path_util::url_to_file_path(&url),
+      UrlOrPath::Url(url) => simien_path_util::url_to_file_path(&url),
       UrlOrPath::Path(path) => Ok(path),
     }
   }
 
-  pub fn into_url(self) -> Result<Url, deno_path_util::PathToUrlError> {
+  pub fn into_url(self) -> Result<Url, simien_path_util::PathToUrlError> {
     match self {
       UrlOrPath::Url(url) => Ok(url),
-      UrlOrPath::Path(path) => deno_path_util::url_from_file_path(&path),
+      UrlOrPath::Path(path) => simien_path_util::url_from_file_path(&path),
     }
   }
 
@@ -58,7 +58,7 @@ impl std::fmt::Display for UrlOrPath {
       UrlOrPath::Url(url) => url.fmt(f),
       UrlOrPath::Path(path) => {
         // prefer displaying a url
-        match deno_path_util::url_from_file_path(path) {
+        match simien_path_util::url_from_file_path(path) {
           Ok(url) => url.fmt(f),
           Err(_) => {
             write!(f, "{}", path.display())
@@ -89,21 +89,21 @@ impl<'a> UrlOrPathRef<'a> {
     }
   }
 
-  pub fn url(&self) -> Result<&Url, deno_path_util::PathToUrlError> {
+  pub fn url(&self) -> Result<&Url, simien_path_util::PathToUrlError> {
     self
       .url
       .get_or_try_init(|| {
-        deno_path_util::url_from_file_path(self.path.get().unwrap())
+        simien_path_util::url_from_file_path(self.path.get().unwrap())
           .map(Cow::Owned)
       })
       .map(|v| v.as_ref())
   }
 
-  pub fn path(&self) -> Result<&Path, deno_path_util::UrlToFilePathError> {
+  pub fn path(&self) -> Result<&Path, simien_path_util::UrlToFilePathError> {
     self
       .path
       .get_or_try_init(|| {
-        deno_path_util::url_to_file_path(self.url.get().unwrap())
+        simien_path_util::url_to_file_path(self.url.get().unwrap())
           .map(Cow::Owned)
       })
       .map(|v| v.as_ref())

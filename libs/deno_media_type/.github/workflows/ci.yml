@@ -11,7 +11,7 @@ on:
 
 jobs:
   rust:
-    name: deno_media_type-ubuntu-latest-release
+    name: simien_media_type-ubuntu-latest-release
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

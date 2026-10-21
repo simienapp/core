@@ -1,7 +1,7 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_lockfile"
+name = "simien_lockfile"
 version = "0.61.0"
 authors.workspace = true
 edition.workspace = true
@@ -19,7 +19,7 @@ harness = false
 
 [dependencies]
 async-trait.workspace = true
-deno_semver.workspace = true
+simien_semver.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror.workspace = true

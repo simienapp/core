@@ -1,5 +1,5 @@
 [package]
-name = "deno_terminal"
+name = "simien_terminal"
 version = "0.2.3"
 edition = "2021"
 description = "Terminal styling and other functionality used across Deno"

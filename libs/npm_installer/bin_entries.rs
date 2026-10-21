@@ -10,22 +10,22 @@ use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_npm::NpmPackageExtraInfo;
-use deno_npm::NpmPackageId;
-use deno_npm::NpmResolutionPackage;
-use deno_npm::resolution::NpmResolutionSnapshot;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsFileMetadata;
-use sys_traits::FsFileSetPermissions;
-use sys_traits::FsMetadata;
-use sys_traits::FsMetadataValue;
-use sys_traits::FsOpen;
-use sys_traits::FsReadLink;
-use sys_traits::FsRemoveFile;
-use sys_traits::FsSymlinkFile;
-use sys_traits::FsWrite;
-use sys_traits::PathsInErrorsExt;
-use sys_traits::SysWithPathsInErrors;
+use simien_npm::NpmPackageExtraInfo;
+use simien_npm::NpmPackageId;
+use simien_npm::NpmResolutionPackage;
+use simien_npm::resolution::NpmResolutionSnapshot;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsFileMetadata;
+use simien_sys_traits::FsFileSetPermissions;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsMetadataValue;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsReadLink;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::FsSymlinkFile;
+use simien_sys_traits::FsWrite;
+use simien_sys_traits::PathsInErrorsExt;
+use simien_sys_traits::SysWithPathsInErrors;
 
 /// Returns the name of the default binary for the given package.
 /// This is the package name without the organization (`@org/`), if any.
@@ -88,7 +88,7 @@ pub fn warn_missing_entrypoint(
 ) {
   log::warn!(
     "{} Trying to set up '{}' bin for \"{}\", but the entry point \"{}\" doesn't exist.",
-    deno_terminal::colors::yellow("Warning"),
+    simien_terminal::colors::yellow("Warning"),
     bin_name,
     package_path.display(),
     entrypoint.display()
@@ -131,7 +131,7 @@ impl<'a, TSys: SetupBinEntrySys> BinEntries<'a, TSys> {
     // check for a new collision, if we haven't already
     // found one
     let has_valid_bin = match bin {
-      deno_npm::registry::NpmPackageVersionBinEntry::String(script) => {
+      simien_npm::registry::NpmPackageVersionBinEntry::String(script) => {
         if !bin_script_stays_in_package(script) {
           return;
         }
@@ -145,7 +145,7 @@ impl<'a, TSys: SetupBinEntrySys> BinEntries<'a, TSys> {
         }
         true
       }
-      deno_npm::registry::NpmPackageVersionBinEntry::Map(entries) => {
+      simien_npm::registry::NpmPackageVersionBinEntry::Map(entries) => {
         let mut has_valid_bin = false;
         for (name, script) in entries {
           if !bin_script_stays_in_package(script) {
@@ -203,7 +203,7 @@ impl<'a, TSys: SetupBinEntrySys> BinEntries<'a, TSys> {
       }
       if let Some(bin_entries) = &extra.bin {
         match bin_entries {
-          deno_npm::registry::NpmPackageVersionBinEntry::String(script) => {
+          simien_npm::registry::NpmPackageVersionBinEntry::String(script) => {
             if !bin_script_stays_in_package(script) {
               continue;
             }
@@ -215,7 +215,7 @@ impl<'a, TSys: SetupBinEntrySys> BinEntries<'a, TSys> {
             }
             new(self.sys, package, extra, package_path, name, script)?;
           }
-          deno_npm::registry::NpmPackageVersionBinEntry::Map(entries) => {
+          simien_npm::registry::NpmPackageVersionBinEntry::Map(entries) => {
             for (name, script) in entries {
               if !bin_script_stays_in_package(script) {
                 continue;
@@ -275,7 +275,7 @@ impl<'a, TSys: SetupBinEntrySys> BinEntries<'a, TSys> {
     self.for_each_entry(
       snapshot,
       |sys, _package_path, _script| {
-        if !sys_traits::impls::is_windows() {
+        if !simien_sys_traits::impls::is_windows() {
           let path = _package_path.join(_script);
           make_executable_if_exists(sys.as_ref(), &path)?;
         }
@@ -393,7 +393,7 @@ fn sort_by_depth(
   });
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait SetupBinEntrySys:
   FsOpen
   + FsWrite
@@ -424,7 +424,7 @@ pub fn set_up_bin_entry<'a>(
       extra,
     });
   }
-  if sys_traits::impls::is_windows() {
+  if simien_sys_traits::impls::is_windows() {
     windows_shim::set_up_bin_shim(
       sys,
       package,
@@ -458,7 +458,7 @@ fn make_executable_if_exists(
   // Open read-only first to check existing permissions. Some npm tarballs
   // ship bin files as read+execute without write (e.g. mode 555), so opening
   // with O_RDWR would fail with EACCES.
-  let mut read_options = sys_traits::OpenOptions::new();
+  let mut read_options = simien_sys_traits::OpenOptions::new();
   read_options.read = true;
   let file = match sys.fs_open(path, &read_options) {
     Ok(file) => file,
@@ -473,7 +473,7 @@ fn make_executable_if_exists(
 
   if mode & 0o111 == 0 {
     // The file is not executable — reopen with write to set permissions.
-    let mut write_options = sys_traits::OpenOptions::new();
+    let mut write_options = simien_sys_traits::OpenOptions::new();
     write_options.read = true;
     write_options.write = true;
     write_options.truncate = false;
@@ -573,15 +573,15 @@ fn symlink_bin_entry<'a>(
 mod test {
   use std::path::PathBuf;
 
-  use deno_npm::NpmPackageId;
-  use deno_npm::NpmPackageIdPeerDependencies;
-  use deno_npm::resolution::SerializedNpmResolutionSnapshot;
-  use deno_semver::package::PackageNv;
-  use sys_traits::FsCreateDirAll;
-  use sys_traits::FsRead;
-  use sys_traits::FsRemoveDirAll;
-  use sys_traits::FsWrite;
-  use sys_traits::PathsInErrorsExt;
+  use simien_npm::NpmPackageId;
+  use simien_npm::NpmPackageIdPeerDependencies;
+  use simien_npm::resolution::SerializedNpmResolutionSnapshot;
+  use simien_semver::package::PackageNv;
+  use simien_sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsRead;
+  use simien_sys_traits::FsRemoveDirAll;
+  use simien_sys_traits::FsWrite;
+  use simien_sys_traits::PathsInErrorsExt;
 
   use super::*;
 
@@ -619,15 +619,15 @@ mod test {
     static COUNTER: std::sync::atomic::AtomicU64 =
       std::sync::atomic::AtomicU64::new(0);
     let id = COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let sys = sys_traits::impls::RealSys;
-    let dir = sys_traits::EnvTempDir::env_temp_dir(&sys)
+    let sys = simien_sys_traits::impls::RealSys;
+    let dir = simien_sys_traits::EnvTempDir::env_temp_dir(&sys)
       .unwrap()
       .join(format!("deno_test_bin_entries_{name}_{id}"));
     sys.fs_create_dir_all(&dir).unwrap();
     struct Cleanup(PathBuf);
     impl Drop for Cleanup {
       fn drop(&mut self) {
-        let _ = sys_traits::impls::RealSys.fs_remove_dir_all(&self.0);
+        let _ = simien_sys_traits::impls::RealSys.fs_remove_dir_all(&self.0);
       }
     }
     let cleanup = Cleanup(dir.clone());
@@ -671,10 +671,10 @@ mod test {
 
   #[test]
   fn collect_bin_files_uses_normalized_bin_names() {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let package = test_package("@eslint/config-inspector");
     let extra = NpmPackageExtraInfo {
-      bin: Some(deno_npm::registry::NpmPackageVersionBinEntry::Map(
+      bin: Some(simien_npm::registry::NpmPackageVersionBinEntry::Map(
         [(
           "@eslint/config-inspector".to_string(),
           "bin/config-inspector.js".to_string(),
@@ -698,10 +698,10 @@ mod test {
 
   #[test]
   fn collect_bin_files_skips_invalid_bin_scripts() {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let package = test_package("invalid-bin-targets");
     let extra = NpmPackageExtraInfo {
-      bin: Some(deno_npm::registry::NpmPackageVersionBinEntry::Map(
+      bin: Some(simien_npm::registry::NpmPackageVersionBinEntry::Map(
         [
           ("valid-bin".to_string(), "bin/cli.js".to_string()),
           ("absolute-bin".to_string(), "/tmp/outside.js".to_string()),
@@ -728,7 +728,7 @@ mod test {
   #[cfg(unix)]
   #[test]
   fn set_up_bin_entry_uses_normalized_bin_name() {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let (dir, _cleanup) = test_dir("normalized_bin_name");
     let package_path = dir.join("package");
     let bin_dir = dir.join(".bin");
@@ -760,7 +760,7 @@ mod test {
 
   #[test]
   fn set_up_bin_entry_rejects_invalid_bin_scripts() {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let (dir, _cleanup) = test_dir("invalid_bin_script");
     let package_path = dir.join("package");
     let bin_dir = dir.join(".bin");
@@ -837,15 +837,15 @@ mod test {
 
   #[cfg(unix)]
   fn write_and_chmod(path: &Path, contents: &[u8], mode: u32) {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     sys.fs_write(path, contents).unwrap();
     set_file_mode(path, mode);
   }
 
   #[cfg(unix)]
   fn set_file_mode(path: &Path, mode: u32) {
-    let sys = sys_traits::impls::RealSys;
-    let mut open_options = sys_traits::OpenOptions::new();
+    let sys = simien_sys_traits::impls::RealSys;
+    let mut open_options = simien_sys_traits::OpenOptions::new();
     open_options.read = true;
     open_options.write = true;
     let mut file = sys.fs_open(path, &open_options).unwrap();
@@ -854,8 +854,8 @@ mod test {
 
   #[cfg(unix)]
   fn file_mode(path: &Path) -> u32 {
-    let sys = sys_traits::impls::RealSys;
-    let mut open_options = sys_traits::OpenOptions::new();
+    let sys = simien_sys_traits::impls::RealSys;
+    let mut open_options = simien_sys_traits::OpenOptions::new();
     open_options.read = true;
     let file = sys.fs_open(path, &open_options).unwrap();
     let metadata = file.fs_file_metadata().unwrap();
@@ -868,7 +868,7 @@ mod test {
   #[cfg(unix)]
   #[test]
   fn make_executable_readonly_bin_file() {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let (dir, _cleanup) = test_dir("readonly");
 
     // Create a file with mode 555 (r-xr-xr-x) — executable but not writable
@@ -888,7 +888,7 @@ mod test {
   #[cfg(unix)]
   #[test]
   fn make_executable_non_executable_file() {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let (dir, _cleanup) = test_dir("non_exec");
 
     // Create a file with mode 644 (rw-r--r--) — no execute bit
@@ -905,7 +905,7 @@ mod test {
 
   #[test]
   fn make_executable_nonexistent_file() {
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let (dir, _cleanup) = test_dir("nonexistent");
     let bin_path = dir.join("does-not-exist");
 

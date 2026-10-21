@@ -1,4 +1,4 @@
-# `capacity_builder`
+# `simien_capacity_builder`
 
 Builders where the code to calculate the capacity is the same as the code to
 write what's being built.
@@ -13,7 +13,7 @@ code.
 ### `StringBuilder`
 
 ```rs
-use capacity_builder::StringBuilder;
+use simien_capacity_builder::StringBuilder;
 
 let text = StringBuilder::<String>::build(|builder| {
   for (i, import_module) in import_modules.iter().enumerate() {
@@ -54,7 +54,7 @@ let text = StringBuilder::<String>::build(|builder| {
 The bytes builder is similar to the `StringBuilder`:
 
 ```rs
-use capacity_builder::BytesBuilder;
+use simien_capacity_builder::BytesBuilder;
 
 let bytes = BytesBuilder::<Vec<u8>>::build(|builder| {
   builder.append_le(123);
@@ -71,9 +71,9 @@ or `StringAppendable` trait.
 For example:
 
 ```rs
-use capacity_builder::BytesAppendable;
-use capacity_builder::BytesBuilder;
-use capacity_builder::BytesType;
+use simien_capacity_builder::BytesAppendable;
+use simien_capacity_builder::BytesBuilder;
+use simien_capacity_builder::BytesType;
 
 struct MyStruct;
 
@@ -94,9 +94,9 @@ assert_eq!(bytes, b"Hello there!");
 Or with a string:
 
 ```rs
-use capacity_builder::StringAppendable;
-use capacity_builder::StringBuilder;
-use capacity_builder::StringType;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringBuilder;
+use simien_capacity_builder::StringType;
 
 #[derive(Debug)]
 pub struct Version {
@@ -145,8 +145,8 @@ This crate provides a `#[derive(CapacityDisplay)]` macro for implementing
 `StringAppendable`.
 
 ```rs
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
 
 #[derive(CapacityDisplay)] // <-- add this
 pub struct Version {
@@ -177,7 +177,7 @@ Example:
 
 ```toml
 # Cargo.toml
-capacity_builder = { version = "...", features = ["ecow"] }
+simien_capacity_builder = { version = "...", features = ["ecow"] }
 ```
 
 ```rs

@@ -4,12 +4,12 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 
-use deno_error::JsErrorBox;
-use deno_npm::NpmPackageExtraInfo;
-use deno_npm::NpmResolutionPackage;
-use deno_npm::registry::NpmRegistryApi;
+use simien_error::JsErrorBox;
+use simien_npm::NpmPackageExtraInfo;
+use simien_npm::NpmResolutionPackage;
+use simien_npm::registry::NpmRegistryApi;
 use deno_resolver::workspace::WorkspaceNpmLinkPackagesRc;
-use deno_semver::package::PackageNv;
+use simien_semver::package::PackageNv;
 use parking_lot::RwLock;
 
 pub struct CachedNpmPackageExtraInfoProvider {
@@ -64,9 +64,9 @@ impl ExpectedExtraInfo {
   }
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NpmPackageExtraInfoProviderSys:
-  sys_traits::BaseFsRead + Send + Sync
+  simien_sys_traits::BaseFsRead + Send + Sync
 {
 }
 
@@ -184,7 +184,7 @@ impl NpmPackageExtraInfoProvider {
       .version_info(package_nv, &self.workspace_link_packages.0)
     {
       Ok(version_info) => version_info,
-      Err(deno_npm::resolution::NpmPackageVersionNotFound { .. }) => {
+      Err(simien_npm::resolution::NpmPackageVersionNotFound { .. }) => {
         // Don't bother checking the return value of mark_force_reload to tell
         // whether to reload because we could race here with another task within
         // this method. That said, ideally this code would only reload the

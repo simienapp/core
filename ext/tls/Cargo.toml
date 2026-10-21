@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "TLS for the Simien runtime. Forked from Deno's deno_tls 0.246.0."
+description = "TLS for the Simien runtime. Forked from Deno's simien_tls 0.246.0."
 
 [lib]
 path = "lib.rs"

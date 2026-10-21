@@ -28,7 +28,7 @@ jobs:
       - run: cargo check --workspace --all-targets --locked
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       # simien_path_util's in-memory canonicalize test is stale upstream:
-      # sys_traits 0.1.28's in-memory fs no longer treats "" as the current
+      # simien_sys_traits 0.1.28's in-memory fs no longer treats "" as the current
       # directory (simienapp/core#2). Deno ships the same pairing.
       # --tests runs each crate's tests/ directory too (an embedder's view:
       # fetch's lazy modules, the op metrics total, http's connection inbox).

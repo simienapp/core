@@ -8,7 +8,7 @@ on:
 
 jobs:
   rust:
-    name: monch
+    name: simien_monch
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

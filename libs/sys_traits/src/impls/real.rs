@@ -306,7 +306,7 @@ impl BaseFsCloneFile for RealSys {
   fn base_fs_clone_file(&self, _from: &Path, _to: &Path) -> io::Result<()> {
     Err(std::io::Error::new(
       ErrorKind::Unsupported,
-      "clonefile is not supported on this platform or the libc feature in sys_traits is not enabled",
+      "clonefile is not supported on this platform or the libc feature in simien_sys_traits is not enabled",
     ))
   }
 }
@@ -359,7 +359,7 @@ impl BaseFsCreateJunction for RealSys {
       _ = (original, junction);
       Err(Error::new(
         ErrorKind::Unsupported,
-        "Enable the 'winapi' feature in sys_traits for junction support.",
+        "Enable the 'winapi' feature in simien_sys_traits for junction support.",
       ))
     }
     #[cfg(unix)]
@@ -414,7 +414,7 @@ macro_rules! unix_metadata_file_type_prop {
 }
 
 /// A wrapper type is used in order to force usages to
-/// `use sys_traits::FsMetadataValue` so that the code
+/// `use simien_sys_traits::FsMetadataValue` so that the code
 /// compiles under Wasm.
 #[derive(Debug, Clone)]
 pub struct RealFsMetadata(fs::Metadata);
@@ -810,7 +810,7 @@ impl BaseFsWrite for RealSys {
 // ==== File System File ====
 
 /// A wrapper type is used in order to force usages to
-/// `use sys_traits::FsFile` so that the code
+/// `use simien_sys_traits::FsFile` so that the code
 /// compiles under Wasm.
 #[derive(Debug)]
 pub struct RealFsFile(fs::File);

@@ -1,11 +1,11 @@
 // Copyright 2018-2025 the Deno authors. All rights reserved. MIT license.
 
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
-use capacity_builder::StringBuilder;
-use capacity_builder::StringType;
-use deno_error::JsError;
-use monch::ParseErrorFailure;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringBuilder;
+use simien_capacity_builder::StringType;
+use simien_error::JsError;
+use simien_monch::ParseErrorFailure;
 use serde::Deserialize;
 use serde::Serialize;
 use std::borrow::Cow;
@@ -519,7 +519,7 @@ impl PackageNvReference {
     nv: &str,
     kind: PackageKind,
   ) -> Result<Self, PackageNvReferenceParseError> {
-    use monch::*;
+    use simien_monch::*;
 
     fn sub_path(input: &str) -> ParseResult<'_, &str> {
       let (input, _) = ch('/')(input)?;
@@ -639,7 +639,7 @@ impl<'de> Deserialize<'de> for PackageNv {
 impl PackageNv {
   #[allow(clippy::should_implement_trait)]
   pub fn from_str(nv: &str) -> Result<Self, PackageNvParseError> {
-    monch::with_failure_handling(parse_nv)(nv).map_err(|err| {
+    simien_monch::with_failure_handling(parse_nv)(nv).map_err(|err| {
       PackageNvParseError {
         message: format!("{err:#}"),
         text: nv.to_string(),
@@ -664,8 +664,8 @@ impl PackageNv {
   }
 }
 
-fn parse_nv(input: &str) -> monch::ParseResult<'_, PackageNv> {
-  use monch::*;
+fn parse_nv(input: &str) -> simien_monch::ParseResult<'_, PackageNv> {
+  use simien_monch::*;
 
   fn parse_name(input: &str) -> ParseResult<'_, &str> {
     if_not_empty(substring(move |input| {

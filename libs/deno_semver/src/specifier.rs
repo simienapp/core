@@ -1,6 +1,6 @@
 // Copyright 2018-2025 the Deno authors. All rights reserved. MIT license.
 
-use monch::*;
+use simien_monch::*;
 use thiserror::Error;
 
 use crate::CowVec;
@@ -15,7 +15,7 @@ use crate::range::XRange;
 
 use crate::is_valid_tag;
 
-#[derive(Error, Debug, Clone, deno_error::JsError, PartialEq, Eq)]
+#[derive(Error, Debug, Clone, simien_error::JsError, PartialEq, Eq)]
 #[class(type)]
 #[error("Invalid specifier version requirement")]
 pub struct VersionReqSpecifierParseError {

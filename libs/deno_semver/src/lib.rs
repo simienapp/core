@@ -8,10 +8,10 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::hash::Hash;
 
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
-use capacity_builder::StringBuilder;
-use capacity_builder::StringType;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringBuilder;
+use simien_capacity_builder::StringType;
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use serde::Serialize;
@@ -47,12 +47,12 @@ pub use self::range_set_or_tag::RangeSetOrTag;
 pub static WILDCARD_VERSION_REQ: Lazy<VersionReq> =
   Lazy::new(|| VersionReq::parse_from_specifier("*").unwrap());
 
-#[derive(Error, Debug, Clone, deno_error::JsError)]
+#[derive(Error, Debug, Clone, simien_error::JsError)]
 #[class(type)]
 #[error("Invalid version")]
 pub struct VersionParseError {
   #[source]
-  source: monch::ParseErrorFailureError,
+  source: simien_monch::ParseErrorFailureError,
 }
 
 pub type VersionPreOrBuild = SmallStackString;
@@ -232,12 +232,12 @@ pub(crate) fn is_valid_tag(value: &str) -> bool {
   npm::is_valid_npm_tag(value)
 }
 
-#[derive(Error, Debug, Clone, deno_error::JsError, PartialEq, Eq)]
+#[derive(Error, Debug, Clone, simien_error::JsError, PartialEq, Eq)]
 #[class(type)]
 #[error("Invalid normalized version requirement")]
 pub struct VersionReqNormalizedParseError {
   #[source]
-  source: monch::ParseErrorFailureError,
+  source: simien_monch::ParseErrorFailureError,
 }
 
 /// A version constraint.
@@ -273,7 +273,7 @@ impl VersionReq {
   pub fn parse_from_normalized(
     text: &str,
   ) -> Result<Self, VersionReqNormalizedParseError> {
-    use monch::*;
+    use simien_monch::*;
 
     with_failure_handling(|input| {
       map(RangeSetOrTag::parse, |inner| {

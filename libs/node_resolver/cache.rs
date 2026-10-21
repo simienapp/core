@@ -6,20 +6,20 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use rustc_hash::FxHashMap;
-use sys_traits::BaseFsCanonicalize;
-use sys_traits::BaseFsOpen;
-use sys_traits::BaseFsRead;
-use sys_traits::BaseFsReadDir;
-use sys_traits::FileType;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsMetadata;
-use sys_traits::FsMetadataValue;
-use sys_traits::FsOpen;
-use sys_traits::FsRead;
-use sys_traits::FsReadDir;
+use simien_sys_traits::BaseFsCanonicalize;
+use simien_sys_traits::BaseFsOpen;
+use simien_sys_traits::BaseFsRead;
+use simien_sys_traits::BaseFsReadDir;
+use simien_sys_traits::FileType;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsMetadataValue;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRead;
+use simien_sys_traits::FsReadDir;
 
 pub trait NodeResolutionCache:
-  std::fmt::Debug + deno_maybe_sync::MaybeSend + deno_maybe_sync::MaybeSync
+  std::fmt::Debug + simien_maybe_sync::MaybeSend + simien_maybe_sync::MaybeSync
 {
   fn get_canonicalized(
     &self,
@@ -90,7 +90,7 @@ impl NodeResolutionCache for NodeResolutionThreadLocalCache {
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type NodeResolutionCacheRc =
-  deno_maybe_sync::MaybeArc<dyn NodeResolutionCache>;
+  simien_maybe_sync::MaybeArc<dyn NodeResolutionCache>;
 
 #[derive(Debug, Default)]
 pub struct NodeResolutionSys<TSys> {
@@ -213,7 +213,7 @@ impl<TSys: FsOpen> BaseFsOpen for NodeResolutionSys<TSys> {
   fn base_fs_open(
     &self,
     path: &Path,
-    flags: &sys_traits::OpenOptions,
+    flags: &simien_sys_traits::OpenOptions,
   ) -> std::io::Result<Self::File> {
     self.sys.base_fs_open(path, flags)
   }

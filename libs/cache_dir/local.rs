@@ -9,22 +9,22 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
-use deno_media_type::MediaType;
-use deno_path_util::fs::atomic_write_file_with_retries;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
+use simien_media_type::MediaType;
+use simien_path_util::fs::atomic_write_file_with_retries;
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsMetadata;
-use sys_traits::FsMetadataValue;
-use sys_traits::FsOpen;
-use sys_traits::FsRead;
-use sys_traits::FsRemoveFile;
-use sys_traits::FsRename;
-use sys_traits::SystemRandom;
-use sys_traits::SystemTimeNow;
-use sys_traits::ThreadSleep;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsMetadataValue;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRead;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::FsRename;
+use simien_sys_traits::SystemRandom;
+use simien_sys_traits::SystemTimeNow;
+use simien_sys_traits::ThreadSleep;
 use url::Url;
 
 use super::Checksum;
@@ -42,7 +42,7 @@ use crate::cache::GlobalToLocalCopy;
 use crate::cache::NOT_FOUND_CACHE_HEADER;
 use crate::global::GlobalHttpCacheRc;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait LocalHttpCacheSys:
   FsCreateDirAll
   + FsMetadata
@@ -102,7 +102,7 @@ impl<TSys: LocalHttpCacheSys> LocalLspHttpCache<TSys> {
     };
     let path = sub_path.as_path_from_root(&self.cache.path);
     if self.cache.env().fs_is_file_no_err(&path) {
-      deno_path_util::url_from_file_path(&path).ok()
+      simien_path_util::url_from_file_path(&path).ok()
     } else {
       None
     }
@@ -223,7 +223,7 @@ impl<TSys: LocalHttpCacheSys> HttpCache for LocalLspHttpCache<TSys> {
 
 #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
 pub type LocalHttpCacheRc<TSys> =
-  deno_maybe_sync::MaybeArc<LocalHttpCache<TSys>>;
+  simien_maybe_sync::MaybeArc<LocalHttpCache<TSys>>;
 
 #[derive(Debug)]
 pub struct LocalHttpCache<TSys: LocalHttpCacheSys> {
@@ -1113,9 +1113,9 @@ fn url_path_segments(url: &Url) -> impl Iterator<Item = &str> {
 
 #[cfg(test)]
 mod test {
-  use deno_maybe_sync::new_rc;
+  use simien_maybe_sync::new_rc;
   use pretty_assertions::assert_eq;
-  use sys_traits::impls::RealSys;
+  use simien_sys_traits::impls::RealSys;
   use tempfile::TempDir;
   use tempfile::tempdir;
 

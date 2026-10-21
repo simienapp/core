@@ -5,12 +5,12 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use deno_error::JsErrorBox;
-use deno_npm::registry::NpmPackageInfo;
-use deno_npm::registry::NpmRegistryApi;
-use deno_npm::registry::NpmRegistryPackageInfoLoadError;
-use deno_npmrc::ResolvedNpmRc;
-use deno_unsync::sync::AtomicFlag;
+use simien_error::JsErrorBox;
+use simien_npm::registry::NpmPackageInfo;
+use simien_npm::registry::NpmRegistryApi;
+use simien_npm::registry::NpmRegistryPackageInfoLoadError;
+use simien_npmrc::ResolvedNpmRc;
+use simien_unsync::sync::AtomicFlag;
 use futures::FutureExt;
 use futures::future::LocalBoxFuture;
 use parking_lot::Mutex;
@@ -145,7 +145,7 @@ impl MemoryCache {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(inherit)]
 #[error("Failed loading {url} for package \"{name}\"")]
 pub struct LoadPackageInfoError {
@@ -156,7 +156,7 @@ pub struct LoadPackageInfoError {
   inner: LoadPackageInfoInnerError,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(inherit)]
 #[error("{0}")]
 pub struct LoadPackageInfoInnerError(pub Arc<JsErrorBox>);

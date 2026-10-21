@@ -7,31 +7,31 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use deno_cache_dir::file_fetcher::CacheSetting;
-use deno_cache_dir::npm::NpmCacheDir;
-use deno_error::JsErrorBox;
-use deno_npm::NpmPackageCacheFolderId;
-use deno_npm::fast_registry_json;
-use deno_npmrc::RegistryConfig;
-use deno_npmrc::ResolvedNpmRc;
-use deno_path_util::fs::atomic_write_file_with_retries;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::package::PackageNv;
+use simien_cache_dir::file_fetcher::CacheSetting;
+use simien_cache_dir::npm::NpmCacheDir;
+use simien_error::JsErrorBox;
+use simien_npm::NpmPackageCacheFolderId;
+use simien_npm::fast_registry_json;
+use simien_npmrc::RegistryConfig;
+use simien_npmrc::ResolvedNpmRc;
+use simien_path_util::fs::atomic_write_file_with_retries;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::package::PackageNv;
 use parking_lot::Mutex;
 use serde_json::value::RawValue;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsHardLink;
-use sys_traits::FsMetadata;
-use sys_traits::FsOpen;
-use sys_traits::FsRead;
-use sys_traits::FsReadDir;
-use sys_traits::FsRemoveDirAll;
-use sys_traits::FsRemoveFile;
-use sys_traits::FsRename;
-use sys_traits::SystemRandom;
-use sys_traits::ThreadSleep;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsHardLink;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRead;
+use simien_sys_traits::FsReadDir;
+use simien_sys_traits::FsRemoveDirAll;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::FsRename;
+use simien_sys_traits::SystemRandom;
+use simien_sys_traits::ThreadSleep;
 use url::Url;
 
 mod fs_util;
@@ -55,7 +55,7 @@ pub use tarball::TarballCacheReporter;
 
 use self::rt::spawn_blocking;
 
-#[derive(Debug, deno_error::JsError)]
+#[derive(Debug, simien_error::JsError)]
 #[class(generic)]
 pub struct DownloadError {
   pub status_code: Option<u16>,
@@ -154,7 +154,7 @@ impl NpmCacheSetting {
   }
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NpmCacheSys:
   FsCanonicalize
   + FsCreateDirAll
@@ -339,7 +339,7 @@ impl<TSys: NpmCacheSys> NpmCache<TSys> {
 
     spawn_blocking(move || {
       let (info, cache_metadata) =
-        deno_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
+        simien_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
           file_bytes.into_owned(),
         )
         .map_err(|err| serde_json::Error::io(std::io::Error::other(err)))?;
@@ -669,7 +669,7 @@ fn write_json_property_name(
 
 const NPM_PACKAGE_SYNC_LOCK_FILENAME: &str = ".deno_sync_lock";
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum WithFolderSyncLockError {
   #[class(inherit)]
   #[error("Error creating '{path}'")]
@@ -731,7 +731,7 @@ fn with_folder_sync_lock(
     // then wait until the other process finishes with a timeout), but
     // for now this is good enough.
     let sync_lock_path = output_folder.join(NPM_PACKAGE_SYNC_LOCK_FILENAME);
-    let mut open_options = sys_traits::OpenOptions::new();
+    let mut open_options = simien_sys_traits::OpenOptions::new();
     open_options.write = true;
     open_options.create = true;
     open_options.truncate = false;
@@ -806,10 +806,10 @@ mod tests {
     }"#;
 
     let original =
-      deno_npm::registry::NpmPackageInfo::from_packument_slice(input).unwrap();
+      simien_npm::registry::NpmPackageInfo::from_packument_slice(input).unwrap();
     let output = slim_package_info_bytes(input, Some("etag"), true).unwrap();
     let reparsed =
-      deno_npm::registry::NpmPackageInfo::from_packument_slice(&output)
+      simien_npm::registry::NpmPackageInfo::from_packument_slice(&output)
         .unwrap();
     let version = Version::parse_from_npm("1.0.0").unwrap();
     let mut expected = original.versions.get(&version).unwrap().clone();
@@ -849,7 +849,7 @@ mod tests {
     let value: serde_json::Value = serde_json::from_slice(&output).unwrap();
     assert!(value.get("_deno.packumentFormat").is_none());
     let (_, cache_metadata) =
-      deno_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
+      simien_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
         output,
       )
       .unwrap();
@@ -862,7 +862,7 @@ mod tests {
     let value: serde_json::Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(value["_deno.packumentFormat"], "full");
     let (info, cache_metadata) =
-      deno_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
+      simien_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
         output,
       )
       .unwrap();
@@ -876,7 +876,7 @@ mod tests {
       "versions":{"1.0.0":{"version":"1.0.0","_deno.packumentFormat":"full"}}
     }"#;
     let (_, cache_metadata) =
-      deno_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
+      simien_npm::registry::NpmPackageInfo::from_packument_bytes_with_cache_info(
         nested.to_vec(),
       )
       .unwrap();
@@ -908,6 +908,6 @@ mod tests {
     assert_eq!(value["versions"]["1.0.2"]["hasInstallScript"], true);
 
     // the whole packument still parses back into an NpmPackageInfo
-    deno_npm::registry::NpmPackageInfo::from_packument_bytes(output).unwrap();
+    simien_npm::registry::NpmPackageInfo::from_packument_bytes(output).unwrap();
   }
 }

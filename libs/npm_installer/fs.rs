@@ -4,17 +4,17 @@ use std::io::Error;
 use std::io::ErrorKind;
 use std::path::Path;
 
-use sys_traits::FsDirEntry;
-use sys_traits::FsSymlinkDir;
-use sys_traits::PathsInErrorsExt;
+use simien_sys_traits::FsDirEntry;
+use simien_sys_traits::FsSymlinkDir;
+use simien_sys_traits::PathsInErrorsExt;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait CloneDirRecursiveSys:
   CopyDirRecursiveSys
-  + sys_traits::FsCreateDirAll
-  + sys_traits::FsRemoveFile
-  + sys_traits::FsRemoveDirAll
-  + sys_traits::ThreadSleep
+  + simien_sys_traits::FsCreateDirAll
+  + simien_sys_traits::FsRemoveFile
+  + simien_sys_traits::FsRemoveDirAll
+  + simien_sys_traits::ThreadSleep
 {
 }
 
@@ -29,7 +29,7 @@ pub fn clone_dir_recursive<TSys: CloneDirRecursiveSys>(
   to: &Path,
 ) -> Result<(), std::io::Error> {
   let sys = sys.with_paths_in_errors();
-  deno_npm_cache::ensure_not_symlink(sys.as_ref(), to)?;
+  simien_npm_cache::ensure_not_symlink(sys.as_ref(), to)?;
   if cfg!(target_vendor = "apple") {
     if let Some(parent) = to.parent() {
       sys.fs_create_dir_all(parent)?;
@@ -52,7 +52,7 @@ pub fn clone_dir_recursive<TSys: CloneDirRecursiveSys>(
       copy_dir_recursive(sys.as_ref(), from, to)?;
     }
   } else if let Err(e) =
-    deno_npm_cache::hard_link_dir_recursive(sys.as_ref(), from, to)
+    simien_npm_cache::hard_link_dir_recursive(sys.as_ref(), from, to)
   {
     log::debug!("Failed to hard link dir {:?} to {:?}: {}", from, to, e);
     copy_dir_recursive(sys.as_ref(), from, to)?;
@@ -61,15 +61,15 @@ pub fn clone_dir_recursive<TSys: CloneDirRecursiveSys>(
   Ok(())
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait CopyDirRecursiveSys:
-  sys_traits::FsCopy
-  + sys_traits::FsCloneFile
-  + sys_traits::FsCreateDir
-  + sys_traits::FsHardLink
-  + sys_traits::FsMetadata
-  + sys_traits::FsReadDir
-  + sys_traits::FsRemoveFile
+  simien_sys_traits::FsCopy
+  + simien_sys_traits::FsCloneFile
+  + simien_sys_traits::FsCreateDir
+  + simien_sys_traits::FsHardLink
+  + simien_sys_traits::FsMetadata
+  + simien_sys_traits::FsReadDir
+  + simien_sys_traits::FsRemoveFile
 {
 }
 
@@ -82,7 +82,7 @@ pub fn copy_dir_recursive<TSys: CopyDirRecursiveSys>(
   to: &Path,
 ) -> Result<(), std::io::Error> {
   let sys = sys.with_paths_in_errors();
-  deno_npm_cache::create_dir_all_no_symlink(sys.as_ref(), to)?;
+  simien_npm_cache::create_dir_all_no_symlink(sys.as_ref(), to)?;
   let read_dir = sys.fs_read_dir(from)?;
 
   for entry in read_dir {
@@ -108,7 +108,7 @@ pub fn copy_dir_recursive<TSys: CopyDirRecursiveSys>(
   Ok(())
 }
 
-pub fn symlink_dir<TSys: sys_traits::BaseFsSymlinkDir>(
+pub fn symlink_dir<TSys: simien_sys_traits::BaseFsSymlinkDir>(
   sys: &TSys,
   oldpath: &Path,
   newpath: &Path,
@@ -141,11 +141,11 @@ pub fn symlink_dir<TSys: sys_traits::BaseFsSymlinkDir>(
 
 #[cfg(test)]
 mod test {
-  use sys_traits::FsCreateDirAll;
-  use sys_traits::FsHardLink;
-  use sys_traits::FsRead;
-  use sys_traits::FsSymlinkDir;
-  use sys_traits::FsWrite;
+  use simien_sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsHardLink;
+  use simien_sys_traits::FsRead;
+  use simien_sys_traits::FsSymlinkDir;
+  use simien_sys_traits::FsWrite;
   use test_util::TempDir;
 
   use super::*;
@@ -153,7 +153,7 @@ mod test {
   #[test]
   fn copy_dir_recursive_replaces_hardlinked_files() {
     let temp_dir = TempDir::new();
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let root = temp_dir.path().to_path_buf();
     let from = root.join("from");
     let to = root.join("to");
@@ -180,7 +180,7 @@ mod test {
 
   #[test]
   fn copy_dir_recursive_rejects_symlink_destination_directory() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     let from = Path::new("/from");
     let to = Path::new("/to");
     let target = Path::new("/target");

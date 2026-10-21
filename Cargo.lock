@@ -3534,7 +3534,7 @@ dependencies = [
  "smallvec",
  "sourcemap",
  "static_assertions",
- "sys_traits",
+ "simien_sys_traits",
  "thiserror 2.0.12",
  "tokio",
  "twox-hash",
@@ -3760,7 +3760,7 @@ dependencies = [
  "percent-encoding",
  "pretty_assertions",
  "simien_error",
- "sys_traits",
+ "simien_sys_traits",
  "tempfile",
  "thiserror 2.0.12",
  "url",
@@ -4064,18 +4064,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "sys_traits"
+name = "simien_sys_traits"
 version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "88826d6169418c98e8bc52a43f79d50907dfa3e87ba5161930d42c6f980b35ee"
 dependencies = [
  "getrandom 0.2.14",
  "parking_lot",
- "sys_traits_macros",
+ "simien_sys_traits_macros",
 ]
 
 [[package]]
-name = "sys_traits_macros"
+name = "simien_sys_traits_macros"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "181f22127402abcf8ee5c83ccd5b408933fec36a6095cf82cda545634692657e"

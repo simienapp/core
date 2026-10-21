@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "Simien's JavaScript engine core: isolates, modules, ops, the event loop and snapshots, on V8. Forked from Deno's deno_core 0.412.0."
+description = "Simien's JavaScript engine core: isolates, modules, ops, the event loop and snapshots, on V8. Forked from Deno's simien_core 0.412.0."
 
 [lib]
 path = "lib.rs"
@@ -54,7 +54,7 @@ simien_serde_v8 = { workspace = true, default-features = false }
 smallvec.workspace = true
 sourcemap.workspace = true
 static_assertions.workspace = true
-sys_traits = { workspace = true, features = ["real"] }
+simien_sys_traits = { workspace = true, features = ["real"] }
 thiserror.workspace = true
 tokio.workspace = true
 url.workspace = true

@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["the Deno authors", "the Simien authors"]
 license = "MIT"
 repository = "https://github.com/simienapp/core"
-description = "Adapters for working with Tokio on a single thread. Forked from Deno's deno_unsync 0.4.4."
+description = "Adapters for working with Tokio on a single thread. Forked from Deno's simien_unsync 0.4.4."
 readme = "README.md"
 
 [features]

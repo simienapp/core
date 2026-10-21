@@ -14,12 +14,12 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::VersionReq;
-use deno_semver::package::PackageName;
-use deno_semver::package::PackageNv;
-use deno_semver::package::PackageReq;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::VersionReq;
+use simien_semver::package::PackageName;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;
 use indexmap::IndexMap;
@@ -67,7 +67,7 @@ pub struct UnmetPeerDepDiagnostic {
   pub resolved: Version,
 }
 
-#[derive(Debug, Clone, Error, deno_error::JsError)]
+#[derive(Debug, Clone, Error, simien_error::JsError)]
 pub enum NpmResolutionError {
   #[class(inherit)]
   #[error(transparent)]
@@ -8289,8 +8289,8 @@ mod test {
   fn make_overrides_with_root_deps(
     json: serde_json::Value,
     root_deps: std::collections::HashMap<
-      deno_semver::StackString,
-      deno_semver::StackString,
+      simien_semver::StackString,
+      simien_semver::StackString,
     >,
   ) -> crate::resolution::NpmOverrides {
     crate::resolution::NpmOverrides::from_value(
@@ -8504,8 +8504,8 @@ mod test {
 
     let mut root_deps = std::collections::HashMap::new();
     root_deps.insert(
-      deno_semver::StackString::from("bar"),
-      deno_semver::StackString::from("^1.0.0"),
+      simien_semver::StackString::from("bar"),
+      simien_semver::StackString::from("^1.0.0"),
     );
 
     let (packages, _) = run_resolver_with_options_and_get_output(

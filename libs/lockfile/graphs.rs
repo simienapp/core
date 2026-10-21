@@ -5,13 +5,13 @@ use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::jsr::JsrDepPackageReq;
-use deno_semver::package::PackageKind;
-use deno_semver::package::PackageNv;
-use deno_semver::package::PackageReq;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::jsr::JsrDepPackageReq;
+use simien_semver::package::PackageKind;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
 
 use crate::NpmPackageInfo;
 use crate::PackagesContent;
@@ -37,8 +37,8 @@ enum LockfilePkgReq {
 impl LockfilePkgReq {
   pub fn from_jsr_dep(dep: JsrDepPackageReq) -> Self {
     match dep.kind {
-      deno_semver::package::PackageKind::Jsr => LockfilePkgReq::Jsr(dep.req),
-      deno_semver::package::PackageKind::Npm => LockfilePkgReq::Npm(dep.req),
+      simien_semver::package::PackageKind::Jsr => LockfilePkgReq::Jsr(dep.req),
+      simien_semver::package::PackageKind::Npm => LockfilePkgReq::Npm(dep.req),
     }
   }
 
@@ -127,7 +127,7 @@ impl LockfilePackageGraph {
     let mut packages = HashMap::with_capacity(package_count);
     for (dep, value) in content.specifiers {
       match dep.kind {
-        deno_semver::package::PackageKind::Jsr => {
+        simien_semver::package::PackageKind::Jsr => {
           let Ok(version) = Version::parse_standard(&value) else {
             continue;
           };
@@ -137,7 +137,7 @@ impl LockfilePackageGraph {
           }));
           root_packages.insert(LockfilePkgReq::Jsr(dep.req), nv);
         }
-        deno_semver::package::PackageKind::Npm => {
+        simien_semver::package::PackageKind::Npm => {
           let id = LockfileNpmPackageId({
             let mut text =
               StackString::with_capacity(dep.req.name.len() + 1 + value.len());
@@ -278,7 +278,7 @@ impl LockfilePackageGraph {
     // The ideal goal here is to only disassociate the package
     // from the root so that the current dependencies can be
     // reused in the new dependency resolution thereby causing
-    // minimal changes in the lockfile. After we let deno_npm or
+    // minimal changes in the lockfile. After we let simien_npm or
     // deno_graph clean up any stragglers.
     //
     // We're currently achieving this goal with npm packages, but

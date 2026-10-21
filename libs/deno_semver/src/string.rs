@@ -3,8 +3,8 @@
 use std::borrow::Borrow;
 use std::ops::Deref;
 
-use capacity_builder::StringAppendable;
-use capacity_builder::StringType;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringType;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -127,9 +127,9 @@ macro_rules! shared {
 
     impl<'a> StringAppendable<'a> for &'a $ident {
       #[inline(always)]
-      fn append_to_builder<TString: capacity_builder::StringType>(
+      fn append_to_builder<TString: simien_capacity_builder::StringType>(
         self,
-        builder: &mut capacity_builder::StringBuilder<'a, TString>,
+        builder: &mut simien_capacity_builder::StringBuilder<'a, TString>,
       ) {
         builder.append(self.0.as_str())
       }

@@ -5,16 +5,16 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use deno_cache_dir::CacheReadFileError;
-use deno_cache_dir::Checksum;
-use deno_cache_dir::GlobalHttpCache;
-use deno_cache_dir::GlobalToLocalCopy;
-use deno_cache_dir::HttpCache;
-use deno_cache_dir::LocalHttpCache;
-use deno_cache_dir::LocalLspHttpCache;
-use deno_maybe_sync::new_rc;
+use simien_cache_dir::CacheReadFileError;
+use simien_cache_dir::Checksum;
+use simien_cache_dir::GlobalHttpCache;
+use simien_cache_dir::GlobalToLocalCopy;
+use simien_cache_dir::HttpCache;
+use simien_cache_dir::LocalHttpCache;
+use simien_cache_dir::LocalLspHttpCache;
+use simien_maybe_sync::new_rc;
 use serde_json::json;
-use sys_traits::impls::RealSys;
+use simien_sys_traits::impls::RealSys;
 use tempfile::TempDir;
 use url::Url;
 

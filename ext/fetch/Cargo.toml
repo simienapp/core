@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "Fetch API for the Simien runtime (WinterTC). Forked from Deno's deno_fetch 0.283.0."
+description = "Fetch API for the Simien runtime (WinterTC). Forked from Deno's simien_fetch 0.283.0."
 
 [lib]
 path = "lib.rs"

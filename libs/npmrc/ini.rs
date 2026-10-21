@@ -4,7 +4,7 @@
 
 use std::borrow::Cow;
 
-use monch::*;
+use simien_monch::*;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum KeyValueOrSection<'a> {

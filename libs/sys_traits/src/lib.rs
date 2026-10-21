@@ -14,7 +14,7 @@ pub mod boxed;
 pub mod ctx;
 pub mod impls;
 
-pub use sys_traits_macros::auto_impl;
+pub use simien_sys_traits_macros::auto_impl;
 
 pub use self::ctx::FsFileWithPathsInErrors;
 pub use self::ctx::OperationError;

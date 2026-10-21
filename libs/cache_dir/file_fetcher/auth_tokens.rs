@@ -12,7 +12,7 @@ use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
 use log::debug;
 use log::error;
-use sys_traits::EnvVar;
+use simien_sys_traits::EnvVar;
 use url::Url;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

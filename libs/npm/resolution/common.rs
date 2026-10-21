@@ -4,18 +4,18 @@ use std::collections::BTreeSet;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use deno_semver::CowVec;
-use deno_semver::RangeBound;
-use deno_semver::RangeSetOrTag;
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::VersionRange;
-use deno_semver::VersionRangeSet;
-use deno_semver::VersionReq;
-use deno_semver::WILDCARD_VERSION_REQ;
-use deno_semver::package::PackageName;
-use deno_semver::package::PackageNv;
+use simien_semver::CowVec;
+use simien_semver::RangeBound;
+use simien_semver::RangeSetOrTag;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::VersionRange;
+use simien_semver::VersionRangeSet;
+use simien_semver::VersionReq;
+use simien_semver::WILDCARD_VERSION_REQ;
+use simien_semver::package::PackageName;
+use simien_semver::package::PackageNv;
 use thiserror::Error;
 
 use crate::registry::NpmPackageInfo;
@@ -57,12 +57,12 @@ pub struct TrustPolicyOptions {
 }
 
 /// Error that occurs when the version is not found in the package information.
-#[derive(Debug, Error, Clone, deno_error::JsError)]
+#[derive(Debug, Error, Clone, simien_error::JsError)]
 #[class(type)]
 #[error("Could not find version '{}' for npm package '{}'.", .0.version, .0.name)]
 pub struct NpmPackageVersionNotFound(pub PackageNv);
 
-#[derive(Debug, Error, Clone, deno_error::JsError)]
+#[derive(Debug, Error, Clone, simien_error::JsError)]
 pub enum NpmPackageVersionResolutionError {
   #[class(type)]
   #[error(
@@ -762,7 +762,7 @@ pub async fn package_info_or_link_fallback(
 mod test {
   use std::collections::HashMap;
 
-  use deno_semver::package::PackageReq;
+  use simien_semver::package::PackageReq;
 
   use super::*;
 

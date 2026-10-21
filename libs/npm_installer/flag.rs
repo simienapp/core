@@ -12,8 +12,8 @@ mod inner {
   use std::time::Duration;
 
   use parking_lot::Mutex;
-  use sys_traits::FsFileLock;
-  use sys_traits::FsMetadataValue;
+  use simien_sys_traits::FsFileLock;
+  use simien_sys_traits::FsMetadataValue;
 
   use crate::Reporter;
 
@@ -33,13 +33,13 @@ mod inner {
   /// mutate `node_modules` concurrently — corrupting the tree (see #35804).
   const POLL_FILE_STALE_THRESHOLD_MS: u128 = 5_000;
 
-  #[sys_traits::auto_impl]
+  #[simien_sys_traits::auto_impl]
   pub trait LaxSingleProcessFsFlagSys:
-    sys_traits::FsOpen
-    + sys_traits::FsMetadata
-    + sys_traits::FsRemoveFile
-    + sys_traits::ThreadSleep
-    + sys_traits::SystemTimeNow
+    simien_sys_traits::FsOpen
+    + simien_sys_traits::FsMetadata
+    + simien_sys_traits::FsRemoveFile
+    + simien_sys_traits::ThreadSleep
+    + simien_sys_traits::SystemTimeNow
     + Clone
     + Send
     + Sync
@@ -91,7 +91,7 @@ mod inner {
         Err(err) => return Err(err),
       }
 
-      let mut open_options = sys_traits::OpenOptions::new();
+      let mut open_options = simien_sys_traits::OpenOptions::new();
       open_options.create = true;
       open_options.write = true;
       open_options.truncate = true;
@@ -149,7 +149,7 @@ mod inner {
       log::debug!("Acquiring file lock at {}", file_path.display());
       let last_updated_path = file_path.with_extension("lock.poll");
       let start_instant = std::time::Instant::now();
-      let mut open_options = sys_traits::OpenOptions::new();
+      let mut open_options = simien_sys_traits::OpenOptions::new();
       open_options.create = true;
       open_options.read = true;
       open_options.write = true;
@@ -161,7 +161,7 @@ mod inner {
           let mut error_count = 0;
           while error_count < 10 {
             let lock_result =
-              fs_file.fs_file_try_lock(sys_traits::FsFileLockMode::Exclusive);
+              fs_file.fs_file_try_lock(simien_sys_traits::FsFileLockMode::Exclusive);
             match lock_result {
               Ok(_) => {
                 log::debug!("Acquired file lock at {}", file_path.display());
@@ -180,7 +180,7 @@ mod inner {
                 // runtime and this is time sensitive so we don't want it to update
                 // at the whims of whatever is occurring on the runtime thread.
                 let sys = sys.clone();
-                deno_unsync::spawn_blocking({
+                simien_unsync::spawn_blocking({
                   let poll_file = poll_file.clone();
                   move || loop {
                     sys.thread_sleep(Duration::from_millis(
@@ -270,7 +270,7 @@ mod inner {
   // Don't bother locking the folder when installing via Wasm for now.
   // In the future, what we'd need is a way to spawn a thread (worker)
   // and have it reliably do the update of the .poll file
-  #[sys_traits::auto_impl]
+  #[simien_sys_traits::auto_impl]
   pub trait LaxSingleProcessFsFlagSys: Clone + Send + Sync + 'static {}
 
   pub struct LaxSingleProcessFsFlag<TSys: LaxSingleProcessFsFlagSys> {
@@ -321,7 +321,7 @@ mod test {
       let temp_dir = temp_dir.clone();
       async move {
         let flag = LaxSingleProcessFsFlag::lock(
-          &sys_traits::impls::RealSys,
+          &simien_sys_traits::impls::RealSys,
           lock_path.to_path_buf(),
           &LogReporter,
           "waiting",
@@ -345,7 +345,7 @@ mod test {
         signal1.notified().await;
         signal2.notify_one();
         let flag = LaxSingleProcessFsFlag::lock(
-          &sys_traits::impls::RealSys,
+          &simien_sys_traits::impls::RealSys,
           lock_path.to_path_buf(),
           &LogReporter,
           "waiting",
@@ -379,7 +379,7 @@ mod test {
     std::os::unix::fs::symlink(&target_path, &poll_path).unwrap();
 
     let flag = LaxSingleProcessFsFlag::lock(
-      &sys_traits::impls::RealSys,
+      &simien_sys_traits::impls::RealSys,
       lock_path.to_path_buf(),
       &LogReporter,
       "waiting",
@@ -420,7 +420,7 @@ mod test {
       let expected_order = expected_order.clone();
       tasks.push(tokio::spawn(async move {
         let flag = LaxSingleProcessFsFlag::lock(
-          &sys_traits::impls::RealSys,
+          &simien_sys_traits::impls::RealSys,
           lock_path.to_path_buf(),
           &LogReporter,
           "waiting",

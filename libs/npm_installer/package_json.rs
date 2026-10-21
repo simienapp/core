@@ -4,17 +4,17 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use deno_config::workspace::Workspace;
-use deno_package_json::PackageJsonDepValue;
-use deno_package_json::PackageJsonDepValueParseError;
-use deno_package_json::PackageJsonDepWorkspaceReq;
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::VersionReq;
-use deno_semver::npm::NpmPackageReqReference;
-use deno_semver::package::PackageName;
-use deno_semver::package::PackageNv;
-use deno_semver::package::PackageReq;
+use simien_package_json::PackageJsonDepValue;
+use simien_package_json::PackageJsonDepValueParseError;
+use simien_package_json::PackageJsonDepWorkspaceReq;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::VersionReq;
+use simien_semver::npm::NpmPackageReqReference;
+use simien_semver::package::PackageName;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
 use serde_json;
 use thiserror::Error;
 use url::Url;
@@ -130,7 +130,7 @@ pub struct NpmInstallDepsProvider {
 }
 
 fn package_json_to_lifecycle_nv(
-  pkg_json: &deno_package_json::PackageJson,
+  pkg_json: &simien_package_json::PackageJson,
 ) -> PackageNv {
   let name = pkg_json
     .name

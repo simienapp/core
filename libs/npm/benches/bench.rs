@@ -7,14 +7,14 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use deno_npm::registry::NpmPackageInfo;
-use deno_npm::registry::NpmRegistryApi;
-use deno_npm::registry::NpmRegistryPackageInfoLoadError;
-use deno_npm::registry::TestNpmRegistryApi;
-use deno_npm::resolution::AddPkgReqsOptions;
-use deno_npm::resolution::NpmResolutionSnapshot;
-use deno_npm::resolution::NpmVersionResolver;
-use deno_semver::package::PackageReq;
+use simien_npm::registry::NpmPackageInfo;
+use simien_npm::registry::NpmRegistryApi;
+use simien_npm::registry::NpmRegistryPackageInfoLoadError;
+use simien_npm::registry::TestNpmRegistryApi;
+use simien_npm::resolution::AddPkgReqsOptions;
+use simien_npm::resolution::NpmResolutionSnapshot;
+use simien_npm::resolution::NpmVersionResolver;
+use simien_semver::package::PackageReq;
 use reqwest::StatusCode;
 
 fn main() {
@@ -120,7 +120,7 @@ struct TargetFolderCachedRegistryApi {
 
 impl Default for TargetFolderCachedRegistryApi {
   fn default() -> Self {
-    std::fs::create_dir_all("target/.deno_npm").unwrap();
+    std::fs::create_dir_all("target/.simien_npm").unwrap();
     Self {
       data: Default::default(),
     }
@@ -166,7 +166,7 @@ impl NpmRegistryApi for TargetFolderCachedRegistryApi {
 }
 
 fn packument_cache_filepath(name: &str) -> String {
-  format!("target/.deno_npm/{}", encode_package_name(name))
+  format!("target/.simien_npm/{}", encode_package_name(name))
 }
 
 fn packument_url(name: &str) -> String {

@@ -4,16 +4,16 @@ use std::borrow::Cow;
 use std::io::ErrorKind;
 use std::path::Path;
 
-use deno_path_util::fs::atomic_write_file_with_retries;
+use simien_path_util::fs::atomic_write_file_with_retries;
 use serde::de::DeserializeOwned;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsMetadata;
-use sys_traits::FsOpen;
-use sys_traits::FsRead;
-use sys_traits::FsRemoveFile;
-use sys_traits::FsRename;
-use sys_traits::SystemRandom;
-use sys_traits::ThreadSleep;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRead;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::FsRename;
+use simien_sys_traits::SystemRandom;
+use simien_sys_traits::ThreadSleep;
 
 use crate::CACHE_PERM;
 use crate::SerializedCachedUrlMetadata;

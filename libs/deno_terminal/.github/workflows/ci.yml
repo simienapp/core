@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   rust:
-    name: deno_terminal-${{ matrix.os}}
+    name: simien_terminal-${{ matrix.os}}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:

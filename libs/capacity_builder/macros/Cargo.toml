@@ -1,10 +1,10 @@
 [package]
-name = "capacity_builder_macros"
+name = "simien_capacity_builder_macros"
 version = "0.3.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/dsherret/capacity_builder"
-description = "Macros for capacity_builder"
+description = "Macros for simien_capacity_builder"
 
 [lib]
 path = "./lib.rs"

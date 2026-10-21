@@ -11,13 +11,13 @@ use std::sync::Arc;
 use std::sync::OnceLock;
 
 use async_trait::async_trait;
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::VersionReq;
-use deno_semver::npm::NpmVersionReqParseError;
-use deno_semver::package::PackageName;
-use deno_semver::package::PackageNv;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::VersionReq;
+use simien_semver::npm::NpmVersionReqParseError;
+use simien_semver::package::PackageName;
+use simien_semver::package::PackageNv;
 use serde::Deserialize;
 use serde::Deserializer;
 use serde::Serialize;
@@ -612,7 +612,7 @@ impl<'a> Iterator for NpmPackageVersionInfosIterator<'a> {
   }
 }
 
-#[derive(Debug, Clone, Error, deno_error::JsError)]
+#[derive(Debug, Clone, Error, simien_error::JsError)]
 #[class(type)]
 #[error(
   "Error in {parent_nv} parsing version requirement for dependency \"{key}\": \"{value}\""
@@ -1261,14 +1261,14 @@ impl NpmPackageVersionDistInfo {
 }
 
 /// Error that occurs when loading the package info from the npm registry fails.
-#[derive(Debug, Error, Clone, deno_error::JsError)]
+#[derive(Debug, Error, Clone, simien_error::JsError)]
 pub enum NpmRegistryPackageInfoLoadError {
   #[class(type)]
   #[error("npm package '{package_name}' does not exist.")]
   PackageNotExists { package_name: String },
   #[class(inherit)]
   #[error(transparent)]
-  LoadError(Arc<dyn deno_error::JsErrorClass>),
+  LoadError(Arc<dyn simien_error::JsErrorClass>),
 }
 
 /// A trait for getting package information from the npm registry.
@@ -1310,12 +1310,12 @@ pub struct TestNpmRegistryApi {
 }
 
 #[async_trait::async_trait(?Send)]
-impl deno_lockfile::NpmPackageInfoProvider for TestNpmRegistryApi {
+impl simien_lockfile::NpmPackageInfoProvider for TestNpmRegistryApi {
   async fn get_npm_package_info(
     &self,
     values: &[PackageNv],
   ) -> Result<
-    Vec<deno_lockfile::Lockfile5NpmInfo>,
+    Vec<simien_lockfile::Lockfile5NpmInfo>,
     Box<dyn std::error::Error + Send + Sync>,
   > {
     let mut infos = Vec::new();
@@ -1326,7 +1326,7 @@ impl deno_lockfile::NpmPackageInfoProvider for TestNpmRegistryApi {
         .await
         .map_err(|e| Box::new(e) as Box<dyn std::error::Error + Send + Sync>)?;
       let version_info = info.version_info(nv, &linked_packages).unwrap();
-      let lockfile_info = deno_lockfile::Lockfile5NpmInfo {
+      let lockfile_info = simien_lockfile::Lockfile5NpmInfo {
         tarball_url: version_info
           .dist
           .as_ref()
@@ -1880,7 +1880,7 @@ mod deserializers {
 mod test {
   use std::collections::HashMap;
 
-  use deno_semver::Version;
+  use simien_semver::Version;
   use pretty_assertions::assert_eq;
   use serde_json;
 

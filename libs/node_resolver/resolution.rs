@@ -12,25 +12,25 @@ use std::sync::atomic::Ordering;
 
 use anyhow::Error as AnyError;
 use anyhow::bail;
-use deno_media_type::MediaType;
-use deno_package_json::BrowserMapEntry;
-use deno_package_json::PackageJson;
-use deno_package_json::PackageJsonRc;
-use deno_path_util::url_to_file_path;
-use deno_semver::Version;
-use deno_semver::VersionReq;
+use simien_media_type::MediaType;
+use simien_package_json::BrowserMapEntry;
+use simien_package_json::PackageJson;
+use simien_package_json::PackageJsonRc;
+use simien_path_util::url_to_file_path;
+use simien_semver::Version;
+use simien_semver::VersionReq;
 use lazy_regex::Lazy;
 use regex::Regex;
 use serde_json::Map;
 use serde_json::Value;
-use sys_traits::FileType;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsDirEntry;
-use sys_traits::FsMetadata;
-use sys_traits::FsOpen;
-use sys_traits::FsRead;
-use sys_traits::FsReadDir;
-use sys_traits::OpenOptions;
+use simien_sys_traits::FileType;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsDirEntry;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRead;
+use simien_sys_traits::FsReadDir;
+use simien_sys_traits::OpenOptions;
 use url::Url;
 
 use crate::InNpmPackageChecker;
@@ -309,7 +309,7 @@ struct ResolutionConfig {
   pub typescript_version: Option<Version>,
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NodeResolverSys:
   FsCanonicalize + FsMetadata + FsRead + FsReadDir + FsOpen
 {
@@ -321,7 +321,7 @@ pub type NodeResolverRc<
   TIsBuiltInNodeModuleChecker,
   TNpmPackageFolderResolver,
   TSys,
-> = deno_maybe_sync::MaybeArc<
+> = simien_maybe_sync::MaybeArc<
   NodeResolver<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
@@ -634,7 +634,7 @@ impl<
       _ => return None,
     };
     let resolved_clean =
-      deno_path_util::normalize_path(Cow::Borrowed(resolved_path.as_path()));
+      simien_path_util::normalize_path(Cow::Borrowed(resolved_path.as_path()));
     let pkg_json = self
       .pkg_json_resolver
       .get_closest_package_json(&resolved_path)
@@ -648,7 +648,7 @@ impl<
       }
       let joined = pkg_dir.join(key);
       let key_path =
-        deno_path_util::normalize_path(Cow::Borrowed(joined.as_path()));
+        simien_path_util::normalize_path(Cow::Borrowed(joined.as_path()));
       // Per the proposal, relative-path keys are matched after node-style
       // probing — `"./foo": false` should disable `./foo.js`, `./foo/index.js`,
       // etc. Compare the resolved file against the key plus the same extension
@@ -687,7 +687,7 @@ impl<
             .path
             .parent()
             .unwrap_or_else(|| std::path::Path::new("/"));
-          let abs = deno_path_util::normalize_path(Cow::Owned(
+          let abs = simien_path_util::normalize_path(Cow::Owned(
             pkg_dir.join(&replacement),
           ));
           Ok(NodeResolution::Module(UrlOrPath::Path(abs.into_owned())))
@@ -727,7 +727,7 @@ impl<
           .path
           .parent()
           .unwrap_or_else(|| std::path::Path::new("/"));
-        let abs = deno_path_util::normalize_path(Cow::Owned(
+        let abs = simien_path_util::normalize_path(Cow::Owned(
           pkg_dir.join(&replacement),
         ));
         Ok(Some(NodeResolution::Module(UrlOrPath::Path(
@@ -993,7 +993,7 @@ impl<
         })
         .flatten(),
       )
-      .map(|p| deno_path_util::normalize_path(Cow::Owned(p)))
+      .map(|p| simien_path_util::normalize_path(Cow::Owned(p)))
       .find(|p| self.sys.is_file(Cow::Borrowed(p.as_ref())))
       .and_then(|suggested_file_path| {
         let pkg_json = self
@@ -1060,7 +1060,7 @@ impl<
           let pkg_dir = pkg_json_path
             .parent()
             .unwrap_or_else(|| std::path::Path::new("/"));
-          let abs = deno_path_util::normalize_path(Cow::Owned(
+          let abs = simien_path_util::normalize_path(Cow::Owned(
             pkg_dir.join(&replacement),
           ));
           return Ok(UrlOrPath::Path(abs.into_owned()));
@@ -1114,10 +1114,10 @@ impl<
     // TODO(bartlomieju): skipped checking errors for commonJS resolution and
     // "preserveSymlinksMain"/"preserveSymlinks" options.
     let items = match bins {
-      deno_package_json::PackageJsonBins::Directory(path_buf) => {
+      simien_package_json::PackageJsonBins::Directory(path_buf) => {
         self.resolve_npm_commands_from_bin_dir(&path_buf)
       }
-      deno_package_json::PackageJsonBins::Bins(items) => items
+      simien_package_json::PackageJsonBins::Bins(items) => items
         .into_iter()
         .filter_map(|(command, path)| {
           let bin_value = read_bin_value(&path, &self.sys)?;
@@ -1196,7 +1196,7 @@ impl<
     if resolution_kind.is_types() {
       let file_path = match url {
         LocalUrlOrPath::Url(url) => {
-          match deno_path_util::url_to_file_path(&url) {
+          match simien_path_util::url_to_file_path(&url) {
             Ok(path) => LocalPath {
               path,
               known_exists: false,
@@ -2724,7 +2724,7 @@ fn should_be_treated_as_relative_or_absolute_path(specifier: &str) -> bool {
     return true;
   }
 
-  deno_path_util::is_relative_specifier(specifier)
+  simien_path_util::is_relative_specifier(specifier)
 }
 
 /// Alternate `PathBuf::with_extension` that will handle known extensions
@@ -2874,14 +2874,14 @@ pub fn resolve_specifier_into_node_modules(
   sys: &impl FsCanonicalize,
   specifier: &Url,
 ) -> Url {
-  deno_path_util::url_to_file_path(specifier)
+  simien_path_util::url_to_file_path(specifier)
     .ok()
     // this path might not exist at the time the graph is being created
     // because the node_modules folder might not yet exist
     .and_then(|path| {
-      deno_path_util::fs::canonicalize_path_maybe_not_exists(sys, &path).ok()
+      simien_path_util::fs::canonicalize_path_maybe_not_exists(sys, &path).ok()
     })
-    .and_then(|path| deno_path_util::url_from_file_path(&path).ok())
+    .and_then(|path| simien_path_util::url_from_file_path(&path).ok())
     .unwrap_or_else(|| specifier.clone())
 }
 
@@ -2935,7 +2935,7 @@ pub fn types_package_name(package_name: &str) -> Option<String> {
   }
   // Scoped packages will get two underscores for each slash
   // https://github.com/DefinitelyTyped/DefinitelyTyped/tree/15f1ece08f7b498f4b9a2147c2a46e94416ca777#what-about-scoped-packages
-  capacity_builder::StringBuilder::build(|builder| {
+  simien_capacity_builder::StringBuilder::build(|builder| {
     builder.append("@types/");
     for (i, c) in package_name.chars().enumerate() {
       match c {
@@ -3098,11 +3098,11 @@ fn find_package_root_from_node_modules(path: &Path) -> Option<PathBuf> {
 
 #[cfg(test)]
 mod tests {
-  use deno_package_json::PackageJsonBins;
+  use simien_package_json::PackageJsonBins;
   use serde_json::json;
-  use sys_traits::FsCreateDirAll;
-  use sys_traits::FsWrite;
-  use sys_traits::impls::InMemorySys;
+  use simien_sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsWrite;
+  use simien_sys_traits::impls::InMemorySys;
 
   use super::*;
   use crate::PackageJsonResolver;
@@ -3170,7 +3170,7 @@ mod tests {
       TestInNpmPackageChecker,
       TestBuiltInNodeModuleChecker,
       TestNpmPackageFolderResolver,
-      deno_maybe_sync::new_rc(PackageJsonResolver::new(sys.clone(), None)),
+      simien_maybe_sync::new_rc(PackageJsonResolver::new(sys.clone(), None)),
       NodeResolutionSys::new(sys, None),
       NodeResolverOptions::default(),
     )

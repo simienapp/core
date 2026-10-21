@@ -1,5 +1,5 @@
 [package]
-name = "monch"
+name = "simien_monch"
 version = "0.6.0"
 authors = ["the Deno authors"]
 documentation = "https://docs.rs/monch"

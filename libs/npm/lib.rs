@@ -9,15 +9,15 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-use capacity_builder::CapacityDisplay;
-use capacity_builder::StringAppendable;
-use capacity_builder::StringBuilder;
-use deno_error::JsError;
-use deno_semver::CowVec;
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::package::PackageNv;
+use simien_capacity_builder::CapacityDisplay;
+use simien_capacity_builder::StringAppendable;
+use simien_capacity_builder::StringBuilder;
+use simien_error::JsError;
+use simien_semver::CowVec;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::package::PackageNv;
 use registry::NpmPackageVersionBinEntry;
 use registry::NpmPackageVersionDistInfo;
 use resolution::SerializedNpmResolutionSnapshotPackage;
@@ -63,7 +63,7 @@ impl NpmPackageIdPeerDependencies {
   }
 
   pub fn as_serialized(&self) -> StackString {
-    capacity_builder::appendable_to_string(self)
+    simien_capacity_builder::appendable_to_string(self)
   }
 
   pub fn push(&mut self, id: NpmPackageId) {
@@ -74,7 +74,7 @@ impl NpmPackageIdPeerDependencies {
     self.0.iter()
   }
 
-  fn peer_serialized_with_level<'a, TString: capacity_builder::StringType>(
+  fn peer_serialized_with_level<'a, TString: simien_capacity_builder::StringType>(
     &'a self,
     builder: &mut StringBuilder<'a, TString>,
     level: usize,
@@ -92,7 +92,7 @@ impl NpmPackageIdPeerDependencies {
 }
 
 impl<'a> StringAppendable<'a> for &'a NpmPackageIdPeerDependencies {
-  fn append_to_builder<TString: capacity_builder::StringType>(
+  fn append_to_builder<TString: simien_capacity_builder::StringType>(
     self,
     builder: &mut StringBuilder<'a, TString>,
   ) {
@@ -119,10 +119,10 @@ impl std::fmt::Debug for NpmPackageId {
 
 impl NpmPackageId {
   pub fn as_serialized(&self) -> StackString {
-    capacity_builder::appendable_to_string(self)
+    simien_capacity_builder::appendable_to_string(self)
   }
 
-  fn as_serialized_with_level<'a, TString: capacity_builder::StringType>(
+  fn as_serialized_with_level<'a, TString: simien_capacity_builder::StringType>(
     &'a self,
     builder: &mut StringBuilder<'a, TString>,
     level: usize,
@@ -143,7 +143,7 @@ impl NpmPackageId {
   pub fn from_serialized(
     id: &str,
   ) -> Result<Self, NpmPackageIdDeserializationError> {
-    use monch::*;
+    use simien_monch::*;
 
     fn parse_name(input: &str) -> ParseResult<'_, &str> {
       if_not_empty(substring(move |input| {
@@ -244,10 +244,10 @@ impl NpmPackageId {
   }
 }
 
-impl<'a> capacity_builder::StringAppendable<'a> for &'a NpmPackageId {
-  fn append_to_builder<TString: capacity_builder::StringType>(
+impl<'a> simien_capacity_builder::StringAppendable<'a> for &'a NpmPackageId {
+  fn append_to_builder<TString: simien_capacity_builder::StringType>(
     self,
-    builder: &mut capacity_builder::StringBuilder<'a, TString>,
+    builder: &mut simien_capacity_builder::StringBuilder<'a, TString>,
   ) {
     self.as_serialized_with_level(builder, 0)
   }

@@ -7,7 +7,7 @@ authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 repository = "https://github.com/simienapp/core"
-description = "JavaScript engine facade for simien_core (V8, or QuickJS behind a feature). Forked from Deno's deno_v8 0.4.0."
+description = "JavaScript engine facade for simien_core (V8, or QuickJS behind a feature). Forked from Deno's simien_v8 0.4.0."
 
 [lib]
 path = "lib.rs"

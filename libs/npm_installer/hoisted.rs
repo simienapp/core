@@ -21,28 +21,28 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use deno_error::JsErrorBox;
-use deno_npm::NpmPackageExtraInfo;
-use deno_npm::NpmPackageId;
-use deno_npm::NpmPackageIdPeerDependencies;
-use deno_npm::NpmResolutionPackage;
-use deno_npm::NpmResolutionPackageSystemInfo;
-use deno_npm::NpmSystemInfo;
-use deno_npm::resolution::NpmResolutionSnapshot;
-use deno_npm_cache::NpmCache;
-use deno_npm_cache::NpmCacheHttpClient;
-use deno_npm_cache::TarballCache;
+use simien_error::JsErrorBox;
+use simien_npm::NpmPackageExtraInfo;
+use simien_npm::NpmPackageId;
+use simien_npm::NpmPackageIdPeerDependencies;
+use simien_npm::NpmResolutionPackage;
+use simien_npm::NpmResolutionPackageSystemInfo;
+use simien_npm::NpmSystemInfo;
+use simien_npm::resolution::NpmResolutionSnapshot;
+use simien_npm_cache::NpmCache;
+use simien_npm_cache::NpmCacheHttpClient;
+use simien_npm_cache::TarballCache;
 use deno_resolver::npm::managed::NpmResolutionCell;
-use deno_semver::StackString;
-use deno_semver::package::PackageNv;
-use deno_terminal::colors;
+use simien_semver::StackString;
+use simien_semver::package::PackageNv;
+use simien_terminal::colors;
 use futures::FutureExt;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;
 use parking_lot::Mutex;
-use sys_traits::FsDirEntry;
-use sys_traits::FsMetadata;
-use sys_traits::PathsInErrorsExt;
+use simien_sys_traits::FsDirEntry;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::PathsInErrorsExt;
 
 use crate::BinEntries;
 use crate::CachedNpmPackageExtraInfoProvider;
@@ -881,7 +881,7 @@ impl<
   async fn clone_package<'a>(
     &'a self,
     package: &'a NpmResolutionPackage,
-    dist: &'a deno_npm::registry::NpmPackageVersionDistInfo,
+    dist: &'a simien_npm::registry::NpmPackageVersionDistInfo,
     package_path: PathBuf,
     install_reporter: Option<Arc<dyn crate::InstallReporter>>,
     extra_info_provider: Arc<CachedNpmPackageExtraInfoProvider>,
@@ -986,7 +986,7 @@ impl<
 struct WorkspaceLifecyclePackage {
   package: NpmResolutionPackage,
   package_path: PathBuf,
-  scripts: HashMap<deno_semver::SmallStackString, String>,
+  scripts: HashMap<simien_semver::SmallStackString, String>,
 }
 
 /// Resolves the on-disk location of a package version in the hoisted layout,
@@ -1023,7 +1023,7 @@ fn hoisted_package_path(
 
 fn resolve_remote_pkg_id(
   snapshot: &NpmResolutionSnapshot,
-  req: &deno_semver::package::PackageReq,
+  req: &simien_semver::package::PackageReq,
 ) -> Option<NpmPackageId> {
   match snapshot.resolve_pkg_from_pkg_req(req) {
     Ok(pkg) => Some(pkg.id.clone()),

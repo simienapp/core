@@ -5,9 +5,9 @@ use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::time::SystemTime;
 
-use deno_error::JsError;
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
+use simien_error::JsError;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
 use serde::Deserialize;
 use serde::Serialize;
 use thiserror::Error;
@@ -168,7 +168,7 @@ pub struct HttpCacheItemKey<'a> {
 }
 
 #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
-pub type HttpCacheRc = deno_maybe_sync::MaybeArc<dyn HttpCache>;
+pub type HttpCacheRc = simien_maybe_sync::MaybeArc<dyn HttpCache>;
 
 pub trait HttpCache: MaybeSend + MaybeSync + std::fmt::Debug {
   /// A pre-computed key for looking up items in the cache.

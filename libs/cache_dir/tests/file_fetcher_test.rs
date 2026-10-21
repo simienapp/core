@@ -4,27 +4,27 @@
 
 use std::time::SystemTime;
 
-use deno_cache_dir::Checksum;
-use deno_cache_dir::file_fetcher::AuthTokens;
-use deno_cache_dir::file_fetcher::CacheSetting;
-use deno_cache_dir::file_fetcher::CachedOrRedirect;
-use deno_cache_dir::file_fetcher::FetchLocalOptions;
-use deno_cache_dir::file_fetcher::FetchNoFollowErrorKind;
-use deno_cache_dir::file_fetcher::FetchNoFollowOptions;
-use deno_cache_dir::file_fetcher::FileFetcher;
-use deno_cache_dir::file_fetcher::FileFetcherOptions;
-use deno_cache_dir::file_fetcher::FileOrRedirect;
-use deno_cache_dir::file_fetcher::HttpClient;
-use deno_cache_dir::file_fetcher::NullBlobStore;
-use deno_cache_dir::file_fetcher::NullMemoryFiles;
-use deno_cache_dir::file_fetcher::SendError;
-use deno_cache_dir::file_fetcher::SendResponse;
-use deno_cache_dir::memory::MemoryHttpCache;
-use deno_maybe_sync::new_rc;
+use simien_cache_dir::Checksum;
+use simien_cache_dir::file_fetcher::AuthTokens;
+use simien_cache_dir::file_fetcher::CacheSetting;
+use simien_cache_dir::file_fetcher::CachedOrRedirect;
+use simien_cache_dir::file_fetcher::FetchLocalOptions;
+use simien_cache_dir::file_fetcher::FetchNoFollowErrorKind;
+use simien_cache_dir::file_fetcher::FetchNoFollowOptions;
+use simien_cache_dir::file_fetcher::FileFetcher;
+use simien_cache_dir::file_fetcher::FileFetcherOptions;
+use simien_cache_dir::file_fetcher::FileOrRedirect;
+use simien_cache_dir::file_fetcher::HttpClient;
+use simien_cache_dir::file_fetcher::NullBlobStore;
+use simien_cache_dir::file_fetcher::NullMemoryFiles;
+use simien_cache_dir::file_fetcher::SendError;
+use simien_cache_dir::file_fetcher::SendResponse;
+use simien_cache_dir::memory::MemoryHttpCache;
+use simien_maybe_sync::new_rc;
 use http::HeaderMap;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsWrite;
-use sys_traits::impls::InMemorySys;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsWrite;
+use simien_sys_traits::impls::InMemorySys;
 use url::Url;
 
 #[tokio::test]
@@ -204,7 +204,7 @@ async fn test_fetch_query_redirect_to_dts_is_cached() {
   #[derive(Debug, Clone, Default)]
   struct TestHttpClient {
     #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
-    request_count: deno_maybe_sync::MaybeArc<AtomicUsize>,
+    request_count: simien_maybe_sync::MaybeArc<AtomicUsize>,
   }
 
   #[async_trait::async_trait(?Send)]
@@ -325,14 +325,14 @@ async fn test_fetch_not_found_is_negatively_cached() {
   use std::time::Duration;
   use std::time::UNIX_EPOCH;
 
-  use deno_cache_dir::memory::MemoryHttpCache;
+  use simien_cache_dir::memory::MemoryHttpCache;
 
   #[derive(Debug, Clone, Default)]
   struct TestHttpClient {
     #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
-    request_count: deno_maybe_sync::MaybeArc<AtomicUsize>,
+    request_count: simien_maybe_sync::MaybeArc<AtomicUsize>,
     #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
-    respond_success: deno_maybe_sync::MaybeArc<AtomicBool>,
+    respond_success: simien_maybe_sync::MaybeArc<AtomicBool>,
   }
 
   #[async_trait::async_trait(?Send)]
@@ -357,7 +357,7 @@ async fn test_fetch_not_found_is_negatively_cached() {
   fn assert_not_found(
     result: Result<
       FileOrRedirect,
-      deno_cache_dir::file_fetcher::FetchNoFollowError,
+      simien_cache_dir::file_fetcher::FetchNoFollowError,
     >,
   ) {
     match result.unwrap_err().into_kind() {

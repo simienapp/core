@@ -1,8 +1,8 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_semver::StackString;
-use deno_semver::jsr::JsrDepPackageReqParseError;
-use deno_semver::package::PackageNv;
+use simien_semver::StackString;
+use simien_semver::jsr::JsrDepPackageReqParseError;
+use simien_semver::package::PackageNv;
 use thiserror::Error;
 
 use crate::transforms::TransformError;

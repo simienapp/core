@@ -1,6 +1,6 @@
 // Copyright 2018-2025 the Deno authors. All rights reserved. MIT license.
 
-use monch::*;
+use simien_monch::*;
 
 use crate::CowVec;
 use crate::Partial;

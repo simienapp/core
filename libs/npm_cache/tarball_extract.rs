@@ -10,22 +10,22 @@ use std::path::PathBuf;
 
 use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
-use deno_npm::registry::NpmPackageVersionDistInfo;
-use deno_npm::registry::NpmPackageVersionDistInfoIntegrity;
-use deno_semver::package::PackageNv;
+use simien_npm::registry::NpmPackageVersionDistInfo;
+use simien_npm::registry::NpmPackageVersionDistInfoIntegrity;
+use simien_semver::package::PackageNv;
 use flate2::read::GzDecoder;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsFileSetPermissions;
-use sys_traits::FsMetadata;
-use sys_traits::FsOpen;
-use sys_traits::FsRemoveDirAll;
-use sys_traits::FsRemoveFile;
-use sys_traits::FsRename;
-use sys_traits::OpenOptions;
-use sys_traits::PathsInErrorsExt;
-use sys_traits::SystemRandom;
-use sys_traits::ThreadSleep;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsFileSetPermissions;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRemoveDirAll;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::FsRename;
+use simien_sys_traits::OpenOptions;
+use simien_sys_traits::PathsInErrorsExt;
+use simien_sys_traits::SystemRandom;
+use simien_sys_traits::ThreadSleep;
 use tar::Archive;
 use tar::EntryType;
 
@@ -66,7 +66,7 @@ pub enum TarballExtractionMode {
   SiblingTempDir,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum VerifyAndExtractTarballError {
   #[class(inherit)]
   #[error(transparent)]
@@ -174,7 +174,7 @@ pub fn write_extracted_tarball(
       extract_tarball(sys, tar_data, output_folder).map_err(Into::into)
     }
     TarballExtractionMode::SiblingTempDir => {
-      let temp_dir = deno_path_util::get_atomic_path(sys, output_folder);
+      let temp_dir = simien_path_util::get_atomic_path(sys, output_folder);
       extract_tarball(sys, tar_data, &temp_dir)?;
       rename_with_retries(sys, &temp_dir, output_folder)
         .map_err(VerifyAndExtractTarballError::MoveFailed)
@@ -225,7 +225,7 @@ fn rename_with_retries(
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 pub enum TarballIntegrityError {
   #[error("Not implemented hash function for {package}: {hash_kind}")]
@@ -296,7 +296,7 @@ fn verify_tarball_integrity(
   Ok(())
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ExtractTarballError {
   #[class(inherit)]
   #[error(transparent)]
@@ -429,7 +429,7 @@ fn extract_tarball(
             )
           })?;
         f.write_all(entry_data)?;
-        if !sys_traits::impls::is_windows() {
+        if !simien_sys_traits::impls::is_windows() {
           let mode = entry.header().mode()?;
           if mode != 0o644 {
             f.fs_file_set_permissions(mode)?;
@@ -457,10 +457,10 @@ fn extract_tarball(
 
 #[cfg(test)]
 mod test {
-  use deno_semver::Version;
-  use sys_traits::FsMetadata;
-  use sys_traits::FsRead;
-  use sys_traits::FsWrite;
+  use simien_semver::Version;
+  use simien_sys_traits::FsMetadata;
+  use simien_sys_traits::FsRead;
+  use simien_sys_traits::FsWrite;
   use tempfile::TempDir;
 
   use super::*;
@@ -587,7 +587,7 @@ mod test {
     let folder_1 = temp_dir.path().join("folder_1");
     let folder_2 = temp_dir.path().join("folder_2");
 
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     sys.fs_create_dir_all(&folder_1).unwrap();
     sys.fs_write(folder_1.join("a.txt"), "test").unwrap();
     sys.fs_create_dir_all(&folder_2).unwrap();
@@ -608,7 +608,7 @@ mod test {
     let temp_dir = TempDir::new().unwrap();
     let output_folder = temp_dir.path().join("output");
     let outside_folder = temp_dir.path().join("outside");
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let mut builder = tar::Builder::new(Vec::new());
     append_raw_tar_entry(
       &mut builder,
@@ -629,7 +629,7 @@ mod test {
     let temp_dir = TempDir::new().unwrap();
     let output_folder = temp_dir.path().join("output");
     let outside_folder = temp_dir.path().join("outside");
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let mut builder = tar::Builder::new(Vec::new());
     append_raw_tar_entry(
       &mut builder,
@@ -649,7 +649,7 @@ mod test {
   fn extract_tarball_supports_valid_nested_and_extended_paths() {
     let temp_dir = TempDir::new().unwrap();
     let output_folder = temp_dir.path().join("output");
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let mut builder = tar::Builder::new(Vec::new());
     append_raw_tar_entry(
       &mut builder,
@@ -715,7 +715,7 @@ mod test {
     let temp_dir = TempDir::new().unwrap();
     let output_folder = temp_dir.path().join("output");
     let outside_folder = temp_dir.path().join("outside");
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let long_component = "p".repeat(120);
     let pax_path = format!("package/{long_component}/../../outside/file.txt");
     let mut builder = tar::Builder::new(Vec::new());

@@ -21,19 +21,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
 
 [[package]]
-name = "capacity_builder"
+name = "simien_capacity_builder"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f2d24a6dcf0cd402a21b65d35340f3a49ff3475dc5fdac91d22d2733e6641c6"
 dependencies = [
- "capacity_builder_macros",
+ "simien_capacity_builder_macros",
  "ecow",
  "hipstr",
  "itoa",
 ]
 
 [[package]]
-name = "capacity_builder_macros"
+name = "simien_capacity_builder_macros"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b4a6cae9efc04cc6cbb8faf338d2c497c165c83e74509cf4dbedea948bbf6e5"
@@ -91,17 +91,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "deno_error"
+name = "simien_error"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dde60bd153886964234c5012d3d9caf788287f28d81fb24a884436904101ef10"
 dependencies = [
- "deno_error_macro",
+ "simien_error_macro",
  "libc",
 ]
 
 [[package]]
-name = "deno_error_macro"
+name = "simien_error_macro"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "409f265785bd946d3006756955aaf40b0e4deb25752eae6a990afe54a31cfd83"
@@ -112,15 +112,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "deno_semver"
+name = "simien_semver"
 version = "0.10.1"
 dependencies = [
- "capacity_builder",
- "deno_error",
+ "simien_capacity_builder",
+ "simien_error",
  "divan",
  "ecow",
  "hipstr",
- "monch",
+ "simien_monch",
  "once_cell",
  "pretty_assertions",
  "serde",
@@ -390,7 +390,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "643cb0b8d4fcc284004d5fd0d67ccf61dfffadb7f75e1e71bc420f4688a3a704"
 
 [[package]]
-name = "monch"
+name = "simien_monch"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6bcc6ad3b93f756f2532d29f7c7291b8d246a2c460a99a3611327bb726830014"

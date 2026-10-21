@@ -6,7 +6,7 @@ fn main() {
 
 mod ch {
   use super::*;
-  use monch::ch;
+  use simien_monch::ch;
 
   #[divan::bench]
   fn hit(bencher: Bencher) {
@@ -23,8 +23,8 @@ mod ch {
 
 mod tag {
   use super::*;
-  use monch::tag;
-  use monch::tag_owned;
+  use simien_monch::tag;
+  use simien_monch::tag_owned;
 
   #[divan::bench]
   fn hit(bencher: Bencher) {
@@ -47,7 +47,7 @@ mod tag {
 
 mod one_of {
   use super::*;
-  use monch::one_of;
+  use simien_monch::one_of;
 
   const DIGITS: &str = "0123456789";
   const IDENT: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
@@ -92,8 +92,8 @@ mod one_of {
 
 mod many0 {
   use super::*;
-  use monch::ch;
-  use monch::many0;
+  use simien_monch::ch;
+  use simien_monch::many0;
 
   #[divan::bench]
   fn empty(bencher: Bencher) {

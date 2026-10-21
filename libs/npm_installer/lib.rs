@@ -6,18 +6,18 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use deno_config::deno_json::NodeModulesLinkerMode;
-use deno_error::JsErrorBox;
-use deno_npm::NpmSystemInfo;
-use deno_npm::registry::NpmPackageInfo;
-use deno_npm::registry::NpmRegistryPackageInfoLoadError;
-use deno_npm::resolution::UnmetPeerDepDiagnostic;
-use deno_npm_cache::NpmCache;
-use deno_npm_cache::NpmCacheHttpClient;
+use simien_error::JsErrorBox;
+use simien_npm::NpmSystemInfo;
+use simien_npm::registry::NpmPackageInfo;
+use simien_npm::registry::NpmRegistryPackageInfoLoadError;
+use simien_npm::resolution::UnmetPeerDepDiagnostic;
+use simien_npm_cache::NpmCache;
+use simien_npm_cache::NpmCacheHttpClient;
 use deno_resolver::lockfile::LockfileLock;
 use deno_resolver::npm::managed::NpmResolutionCell;
 use deno_resolver::workspace::WorkspaceNpmLinkPackagesRc;
-use deno_semver::package::PackageNv;
-use deno_semver::package::PackageReq;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
 
 mod bin_entries;
 mod extra_info;
@@ -36,9 +36,9 @@ pub mod resolution;
 mod rt;
 
 pub use bin_entries::BinEntries;
-use deno_terminal::colors;
-use deno_unsync::sync::AtomicFlag;
-use deno_unsync::sync::TaskQueue;
+use simien_terminal::colors;
+use simien_unsync::sync::AtomicFlag;
+use simien_unsync::sync::TaskQueue;
 use parking_lot::Mutex;
 use rustc_hash::FxHashSet;
 
@@ -125,11 +125,11 @@ impl Reporter for LogReporter {
   type ClearGuard = ();
 
   fn on_blocking(&self, message: &str) -> Self::Guard {
-    log::info!("{} {}", deno_terminal::colors::cyan("Blocking"), message);
+    log::info!("{} {}", simien_terminal::colors::cyan("Blocking"), message);
   }
 
   fn on_initializing(&self, message: &str) -> Self::Guard {
-    log::info!("{} {}", deno_terminal::colors::green("Initialize"), message);
+    log::info!("{} {}", simien_terminal::colors::green("Initialize"), message);
   }
 
   fn clear_guard(&self) -> Self::ClearGuard {}
@@ -146,7 +146,7 @@ pub(crate) trait NpmPackageFsInstaller:
   ) -> Result<(), JsErrorBox>;
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NpmInstallerSys:
   NpmResolutionInstallerSys + LocalNpmInstallSys + NpmPackageExtraInfoProviderSys
 {
@@ -192,7 +192,7 @@ impl<TNpmCacheHttpClient: NpmCacheHttpClient, TSys: NpmInstallerSys>
     npm_cache: Arc<NpmCache<TSys>>,
     npm_install_deps_provider: Arc<NpmInstallDepsProvider>,
     npm_registry_info_provider: Arc<
-      dyn deno_npm::registry::NpmRegistryApi + Send + Sync,
+      dyn simien_npm::registry::NpmRegistryApi + Send + Sync,
     >,
     npm_resolution: Arc<NpmResolutionCell>,
     npm_resolution_initializer: Arc<NpmResolutionInitializer<TSys>>,
@@ -201,7 +201,7 @@ impl<TNpmCacheHttpClient: NpmCacheHttpClient, TSys: NpmInstallerSys>
     >,
     reporter: &TReporter,
     sys: TSys,
-    tarball_cache: Arc<deno_npm_cache::TarballCache<TNpmCacheHttpClient, TSys>>,
+    tarball_cache: Arc<simien_npm_cache::TarballCache<TNpmCacheHttpClient, TSys>>,
     options: NpmInstallerOptions<TSys>,
   ) -> Self {
     let fs_installer: Arc<dyn NpmPackageFsInstaller> =
@@ -445,14 +445,14 @@ impl<TNpmCacheHttpClient: NpmCacheHttpClient, TSys: NpmInstallerSys>
   ) -> Result<(), EnsurePackageJsonDepsError> {
     for err in self.npm_install_deps_provider.pkg_json_dep_errors() {
       match err.source.as_kind() {
-        deno_package_json::PackageJsonDepValueParseErrorKind::JsrRequiresScope { .. } |
-        deno_package_json::PackageJsonDepValueParseErrorKind::VersionReq { .. } => {
+        simien_package_json::PackageJsonDepValueParseErrorKind::JsrRequiresScope { .. } |
+        simien_package_json::PackageJsonDepValueParseErrorKind::VersionReq { .. } => {
           return Err(Box::new(err.clone()).into());
         }
-        deno_package_json::PackageJsonDepValueParseErrorKind::Unsupported {
+        simien_package_json::PackageJsonDepValueParseErrorKind::Unsupported {
           ..
         }
-        | deno_package_json::PackageJsonDepValueParseErrorKind::EmptyName => {
+        | simien_package_json::PackageJsonDepValueParseErrorKind::EmptyName => {
           // only warn for these
           log::warn!(
             "{} {}\n    at {}",

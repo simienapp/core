@@ -23,10 +23,10 @@ use std::io::BufRead;
 use std::path::Path;
 use std::path::PathBuf;
 
-use sys_traits::FsMetadata;
-use sys_traits::FsOpen;
-use sys_traits::FsWrite;
-use sys_traits::PathsInErrorsExt;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsWrite;
+use simien_sys_traits::PathsInErrorsExt;
 
 use crate::bin_entries::EntrySetupOutcome;
 use crate::bin_entries::bin_script_stays_in_package;
@@ -65,7 +65,7 @@ fn parse_shebang(s: &str) -> Option<Shebang> {
 
 fn resolve_shebang(sys: &impl FsOpen, path: &Path) -> Option<Shebang> {
   let file = sys
-    .fs_open(path, sys_traits::OpenOptions::new().read())
+    .fs_open(path, simien_sys_traits::OpenOptions::new().read())
     .ok()?;
   let mut reader = std::io::BufReader::new(file);
   let mut line = String::new();
@@ -102,7 +102,7 @@ impl ShimData {
        }| (program.replace('\\', "/"), args.as_str(), vars.as_str()),
     );
 
-    capacity_builder::StringBuilder::build(|builder| {
+    simien_capacity_builder::StringBuilder::build(|builder| {
       builder.append("@ECHO off\r\n");
       builder.append("GOTO start\r\n");
       builder.append(":find_dp0\r\n");
@@ -159,7 +159,7 @@ impl ShimData {
        }| (program.replace('\\', "/"), args.as_str(), vars.as_str()),
     );
 
-    capacity_builder::StringBuilder::build(|builder| {
+    simien_capacity_builder::StringBuilder::build(|builder| {
       builder.append("#!/bin/sh\n");
       builder.append(
         "basedir=$(dirname \"$(echo \"$0\" | sed -e 's,\\\\,/,g')\")\n",
@@ -219,7 +219,7 @@ impl ShimData {
        }| (program.replace('\\', "/"), args.as_str()),
     );
 
-    capacity_builder::StringBuilder::build(|builder| {
+    simien_capacity_builder::StringBuilder::build(|builder| {
       builder.append("#!/usr/bin/env pwsh\n");
       builder.append(
         "$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent\n",
@@ -298,8 +298,8 @@ impl ShimData {
 
 pub fn set_up_bin_shim<'a>(
   sys: &(impl FsOpen + FsWrite + FsMetadata),
-  package: &'a deno_npm::NpmResolutionPackage,
-  extra: &'a deno_npm::NpmPackageExtraInfo,
+  package: &'a simien_npm::NpmResolutionPackage,
+  extra: &'a simien_npm::NpmPackageExtraInfo,
   bin_name: &'a str,
   bin_script: &'a str,
   package_path: &'a Path,

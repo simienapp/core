@@ -8,25 +8,25 @@ use std::path::PathBuf;
 use std::time::Duration;
 use std::time::SystemTime;
 
-use boxed_error::Boxed;
+use simien_boxed_error::Boxed;
 use data_url::DataUrl;
-use deno_error::JsError;
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
-use deno_media_type::MediaType;
-use deno_path_util::url_to_file_path;
+use simien_error::JsError;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
+use simien_media_type::MediaType;
+use simien_path_util::url_to_file_path;
 use http::header;
 use http::header::ACCEPT;
 use http::header::AUTHORIZATION;
 use http::header::IF_NONE_MATCH;
 use http::header::LOCATION;
 use log::debug;
-use sys_traits::FsFileMetadata;
-use sys_traits::FsMetadata;
-use sys_traits::FsMetadataValue;
-use sys_traits::FsOpen;
-use sys_traits::OpenOptions;
-use sys_traits::SystemTimeNow;
+use simien_sys_traits::FsFileMetadata;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsMetadataValue;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::OpenOptions;
+use simien_sys_traits::SystemTimeNow;
 use thiserror::Error;
 use url::Url;
 
@@ -163,7 +163,7 @@ pub enum LoadedFrom {
 
 impl File {
   pub fn resolve_media_type_and_charset(&self) -> (MediaType, Option<&str>) {
-    deno_media_type::resolve_media_type_and_charset_from_content_type(
+    simien_media_type::resolve_media_type_and_charset_from_content_type(
       &self.url,
       self
         .maybe_headers
@@ -175,7 +175,7 @@ impl File {
 }
 
 #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
-pub type MemoryFilesRc = deno_maybe_sync::MaybeArc<dyn MemoryFiles>;
+pub type MemoryFilesRc = simien_maybe_sync::MaybeArc<dyn MemoryFiles>;
 
 pub trait MemoryFiles: std::fmt::Debug + MaybeSend + MaybeSync {
   fn get(&self, url: &Url) -> Option<File>;
@@ -313,7 +313,7 @@ pub struct FetchNoFollowError(pub Box<FetchNoFollowErrorKind>);
 pub enum FetchNoFollowErrorKind {
   #[class(inherit)]
   #[error(transparent)]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
   #[class("NotFound")]
   #[error("Import '{0}' failed, not found.")]
   NotFound(Url),
@@ -418,7 +418,7 @@ pub struct FetchLocalError(pub Box<FetchLocalErrorKind>);
 pub enum FetchLocalErrorKind {
   #[class(inherit)]
   #[error(transparent)]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
   #[class(inherit)]
   #[error(transparent)]
   ReadingFile(#[from] FailedReadingLocalFileError),
@@ -539,7 +539,7 @@ pub struct FileFetcherOptions {
   pub auth_tokens: AuthTokens,
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait FileFetcherSys: FsOpen + FsMetadata + SystemTimeNow {}
 
 /// A structure for resolving, fetching and caching source files.

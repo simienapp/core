@@ -8,20 +8,20 @@ use std::io::Seek;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_npm::resolution::ValidSerializedNpmResolutionSnapshot;
+use simien_npm::resolution::ValidSerializedNpmResolutionSnapshot;
 use serde::Deserialize;
 use serde::Serialize;
-use sys_traits::BoxableFsFile;
+use simien_sys_traits::BoxableFsFile;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NpmProcessStateKind {
-  Snapshot(deno_npm::resolution::SerializedNpmResolutionSnapshot),
+  Snapshot(simien_npm::resolution::SerializedNpmResolutionSnapshot),
   Byonm,
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NpmProcessStateFromEnvVarSys:
-  sys_traits::FsOpen + sys_traits::EnvVar + sys_traits::EnvRemoveVar
+  simien_sys_traits::FsOpen + simien_sys_traits::EnvVar + simien_sys_traits::EnvRemoveVar
 {
 }
 
@@ -89,7 +89,7 @@ impl NpmProcessState {
       pub fn open(
         &self,
         sys: &impl NpmProcessStateFromEnvVarSys,
-      ) -> std::io::Result<sys_traits::boxed::BoxedFsFile> {
+      ) -> std::io::Result<simien_sys_traits::boxed::BoxedFsFile> {
         match self {
           FdOrPath::Fd(fd) => {
             #[cfg(target_arch = "wasm32")]
@@ -104,7 +104,7 @@ impl NpmProcessState {
             return Ok(
               // SAFETY: Assume valid file descriptor
               unsafe {
-                sys_traits::impls::RealFsFile::from_raw(
+                simien_sys_traits::impls::RealFsFile::from_raw(
                   <std::fs::File as std::os::unix::io::FromRawFd>::from_raw_fd(
                     *fd as _,
                   ),
@@ -116,13 +116,13 @@ impl NpmProcessState {
             Ok(
               // SAFETY: Assume valid file descriptor
               unsafe {
-                sys_traits::impls::RealFsFile::from_raw(<std::fs::File as std::os::windows::io::FromRawHandle>::from_raw_handle(*fd as _)).into_boxed()
+                simien_sys_traits::impls::RealFsFile::from_raw(<std::fs::File as std::os::windows::io::FromRawHandle>::from_raw_handle(*fd as _)).into_boxed()
               },
             )
           }
           FdOrPath::Path(path) => Ok(
             sys
-              .fs_open(path, &sys_traits::OpenOptions::new_read())?
+              .fs_open(path, &simien_sys_traits::OpenOptions::new_read())?
               .into_boxed(),
           ),
         }

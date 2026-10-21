@@ -1,7 +1,7 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
 #[cfg(not(target_arch = "wasm32"))]
-use deno_unsync::JoinHandle;
+use simien_unsync::JoinHandle;
 #[cfg(target_arch = "wasm32")]
 pub type JoinHandle<T> =
   std::future::Ready<Result<T, std::convert::Infallible>>;
@@ -19,12 +19,12 @@ pub fn spawn_blocking<
   }
   #[cfg(not(target_arch = "wasm32"))]
   {
-    deno_unsync::spawn_blocking(f)
+    simien_unsync::spawn_blocking(f)
   }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub use deno_unsync::sync::MultiRuntimeAsyncValueCreator;
+pub use simien_unsync::sync::MultiRuntimeAsyncValueCreator;
 
 #[cfg(target_arch = "wasm32")]
 mod wasm {

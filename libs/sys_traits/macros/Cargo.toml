@@ -1,10 +1,10 @@
 [package]
-name = "sys_traits_macros"
+name = "simien_sys_traits_macros"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/dsherret/sys_traits"
-description = "Procedural macros for sys_traits."
+description = "Procedural macros for simien_sys_traits."
 
 [lib]
 path = "lib.rs"

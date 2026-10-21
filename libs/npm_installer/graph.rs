@@ -3,13 +3,13 @@
 use std::borrow::Cow;
 use std::sync::Arc;
 
-use deno_error::JsErrorBox;
+use simien_error::JsErrorBox;
 use deno_graph::NpmLoadError;
 use deno_graph::NpmResolvePkgReqsResult;
-use deno_npm::resolution::NpmResolutionError;
-use deno_npm_cache::NpmCacheHttpClient;
+use simien_npm::resolution::NpmResolutionError;
+use simien_npm_cache::NpmCacheHttpClient;
 use deno_resolver::graph::FoundPackageJsonDepFlag;
-use deno_semver::package::PackageReq;
+use simien_semver::package::PackageReq;
 
 use crate::NpmInstaller;
 use crate::NpmInstallerSys;
@@ -79,7 +79,7 @@ impl<TNpmCacheHttpClient: NpmCacheHttpClient, TSys: NpmInstallerSys>
       if let Some(npm_installer) = &self.npm_installer {
         let npm_installer = npm_installer.clone();
         let package_name = package_name.to_string();
-        deno_unsync::spawn(async move {
+        simien_unsync::spawn(async move {
           let _ignore = npm_installer.cache_package_info(&package_name).await;
         });
       }
@@ -129,7 +129,7 @@ impl<TNpmCacheHttpClient: NpmCacheHttpClient, TSys: NpmInstallerSys>
           dep_graph_result: match top_level_result {
             Ok(()) => result
               .dependencies_result
-              .map_err(|e| Arc::new(e) as Arc<dyn deno_error::JsErrorClass>),
+              .map_err(|e| Arc::new(e) as Arc<dyn simien_error::JsErrorClass>),
             Err(err) => Err(Arc::new(err)),
           },
         }

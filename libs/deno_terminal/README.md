@@ -1,3 +1,3 @@
-# deno_terminal
+# simien_terminal
 
 Terminal styling and other functionality used in Deno.

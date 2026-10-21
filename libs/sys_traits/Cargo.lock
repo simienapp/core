@@ -282,7 +282,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sys_traits"
+name = "simien_sys_traits"
 version = "0.1.28"
 dependencies = [
  "filetime",
@@ -293,14 +293,14 @@ dependencies = [
  "parking_lot",
  "serde",
  "serde_json",
- "sys_traits_macros",
+ "simien_sys_traits_macros",
  "tempfile",
  "wasm-bindgen",
  "windows-sys 0.59.0",
 ]
 
 [[package]]
-name = "sys_traits_macros"
+name = "simien_sys_traits_macros"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",
@@ -313,7 +313,7 @@ name = "sys_traits_wasm_test"
 version = "0.0.0"
 dependencies = [
  "console_error_panic_hook",
- "sys_traits",
+ "simien_sys_traits",
  "wasm-bindgen",
 ]
 

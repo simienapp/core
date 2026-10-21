@@ -5,19 +5,19 @@ use std::time::Duration;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
 use serde::Deserialize;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsMetadata;
-use sys_traits::FsMetadataValue;
-use sys_traits::FsOpen;
-use sys_traits::FsRead;
-use sys_traits::FsRemoveFile;
-use sys_traits::FsRename;
-use sys_traits::SystemRandom;
-use sys_traits::SystemTimeNow;
-use sys_traits::ThreadSleep;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsMetadataValue;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRead;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::FsRename;
+use simien_sys_traits::SystemRandom;
+use simien_sys_traits::SystemTimeNow;
+use simien_sys_traits::ThreadSleep;
 use url::Url;
 
 use super::cache::HttpCache;
@@ -31,7 +31,7 @@ use crate::common::HeadersMap;
 
 mod cache_file;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait GlobalHttpCacheSys:
   FsCreateDirAll
   + FsMetadata
@@ -51,7 +51,7 @@ pub trait GlobalHttpCacheSys:
 
 #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
 pub type GlobalHttpCacheRc<TSys> =
-  deno_maybe_sync::MaybeArc<GlobalHttpCache<TSys>>;
+  simien_maybe_sync::MaybeArc<GlobalHttpCache<TSys>>;
 
 #[derive(Debug)]
 pub struct GlobalHttpCache<Sys: GlobalHttpCacheSys> {

@@ -2,26 +2,26 @@
 
 use std::sync::Arc;
 
-use deno_cache_dir::npm::NpmCacheDir;
-use deno_npm::resolution::PackageIdNotFoundError;
-use deno_npm::resolution::ValidSerializedNpmResolutionSnapshot;
-use deno_npm_cache::NpmCache;
-use deno_npm_cache::NpmCacheHttpClient;
-use deno_npm_cache::NpmCacheSetting;
-use deno_npm_cache::NpmCacheSys;
-use deno_npm_cache::NpmPackumentFormat;
-use deno_npm_cache::RegistryInfoProvider;
-use deno_npm_cache::TarballCache;
-use deno_npm_cache::TarballCacheReporter;
-use deno_npmrc::ResolvedNpmRc;
+use simien_cache_dir::npm::NpmCacheDir;
+use simien_npm::resolution::PackageIdNotFoundError;
+use simien_npm::resolution::ValidSerializedNpmResolutionSnapshot;
+use simien_npm_cache::NpmCache;
+use simien_npm_cache::NpmCacheHttpClient;
+use simien_npm_cache::NpmCacheSetting;
+use simien_npm_cache::NpmCacheSys;
+use simien_npm_cache::NpmPackumentFormat;
+use simien_npm_cache::RegistryInfoProvider;
+use simien_npm_cache::TarballCache;
+use simien_npm_cache::TarballCacheReporter;
+use simien_npmrc::ResolvedNpmRc;
 use deno_resolver::factory::ResolverFactory;
 use deno_resolver::factory::WorkspaceFactory;
 use deno_resolver::factory::WorkspaceFactorySys;
 use deno_resolver::lockfile::LockfileLock;
 use deno_resolver::lockfile::LockfileNpmPackageInfoApiAdapter;
-use deno_semver::jsr::JsrDepPackageReq;
-use deno_semver::package::PackageKind;
-use deno_semver::package::PackageReq;
+use simien_semver::jsr::JsrDepPackageReq;
+use simien_semver::package::PackageKind;
+use simien_semver::package::PackageReq;
 use futures::FutureExt;
 
 use crate::LifecycleScriptsConfig;
@@ -40,7 +40,7 @@ use crate::resolution::NpmResolutionInstaller;
 // todo(https://github.com/rust-lang/rust/issues/109737): remove once_cell after get_or_try_init is stabilized
 type Deferred<T> = once_cell::sync::OnceCell<T>;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NpmInstallerFactorySys:
   crate::NpmInstallerSys + WorkspaceFactorySys
 {
@@ -72,17 +72,17 @@ pub struct NpmInstallerFactoryOptions {
 }
 
 pub trait InstallReporter:
-  deno_npm::resolution::Reporter
+  simien_npm::resolution::Reporter
   + deno_graph::source::Reporter
-  + deno_npm_cache::TarballCacheReporter
+  + simien_npm_cache::TarballCacheReporter
   + crate::InstallProgressReporter
 {
 }
 
 impl<
-  T: deno_npm::resolution::Reporter
+  T: simien_npm::resolution::Reporter
     + deno_graph::source::Reporter
-    + deno_npm_cache::TarballCacheReporter
+    + simien_npm_cache::TarballCacheReporter
     + crate::InstallProgressReporter,
 > InstallReporter for T
 {
@@ -450,7 +450,7 @@ impl<
           self
             .install_reporter
             .as_ref()
-            .map(|r| r.clone() as Arc<dyn deno_npm::resolution::Reporter>),
+            .map(|r| r.clone() as Arc<dyn simien_npm::resolution::Reporter>),
           self.resolver_factory.npm_resolution().clone(),
           self.maybe_lockfile().await?.cloned(),
         )))
@@ -563,7 +563,7 @@ impl<
         self
           .install_reporter
           .as_ref()
-          .map(|r| r.clone() as Arc<dyn deno_npm_cache::TarballCacheReporter>),
+          .map(|r| r.clone() as Arc<dyn simien_npm_cache::TarballCacheReporter>),
       ))
     })
   }

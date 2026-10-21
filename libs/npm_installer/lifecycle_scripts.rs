@@ -8,16 +8,16 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::Error as AnyError;
-use deno_error::JsErrorBox;
-use deno_npm::NpmPackageExtraInfo;
-use deno_npm::NpmPackageId;
-use deno_npm::NpmResolutionPackage;
-use deno_npm::resolution::NpmResolutionSnapshot;
-use deno_semver::SmallStackString;
-use deno_semver::Version;
-use deno_semver::package::PackageNv;
-use deno_semver::package::PackageReq;
-use sys_traits::FsMetadata;
+use simien_error::JsErrorBox;
+use simien_npm::NpmPackageExtraInfo;
+use simien_npm::NpmPackageId;
+use simien_npm::NpmResolutionPackage;
+use simien_npm::resolution::NpmResolutionSnapshot;
+use simien_semver::SmallStackString;
+use simien_semver::Version;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
+use simien_sys_traits::FsMetadata;
 
 use crate::CachedNpmPackageExtraInfoProvider;
 use crate::LifecycleScriptsConfig;
@@ -78,7 +78,7 @@ impl std::fmt::Debug for LifecycleScriptsWarning {
 }
 
 type DidWarnFn =
-  Box<dyn FnOnce(&dyn sys_traits::boxed::FsOpenBoxed) + Send + Sync>;
+  Box<dyn FnOnce(&dyn simien_sys_traits::boxed::FsOpenBoxed) + Send + Sync>;
 
 impl LifecycleScriptsWarning {
   pub(crate) fn new(message: String, did_warn_fn: DidWarnFn) -> Self {
@@ -90,7 +90,7 @@ impl LifecycleScriptsWarning {
 
   pub fn into_message(
     self,
-    sys: &dyn sys_traits::boxed::FsOpenBoxed,
+    sys: &dyn simien_sys_traits::boxed::FsOpenBoxed,
   ) -> String {
     (self.did_warn_fn)(sys);
     self.message
@@ -322,7 +322,7 @@ impl<'a, TSys: FsMetadata> LifecycleScripts<'a, TSys> {
 pub static LIFECYCLE_SCRIPTS_RUNNING_ENV_VAR: &str =
   "DENO_INTERNAL_IS_LIFECYCLE_SCRIPT";
 
-pub fn is_running_lifecycle_script(sys: &impl sys_traits::EnvVar) -> bool {
+pub fn is_running_lifecycle_script(sys: &impl simien_sys_traits::EnvVar) -> bool {
   sys.env_var(LIFECYCLE_SCRIPTS_RUNNING_ENV_VAR).is_ok()
 }
 
@@ -451,14 +451,14 @@ mod tests {
   use std::collections::HashMap;
   use std::path::PathBuf;
 
-  use deno_npm::NpmPackageId;
-  use deno_npm::NpmResolutionPackage;
-  use deno_npm::NpmResolutionPackageSystemInfo;
-  use deno_npm::resolution::NpmResolutionSnapshot;
-  use deno_npm::resolution::SerializedNpmResolutionSnapshot;
-  use deno_npm::resolution::SerializedNpmResolutionSnapshotPackage;
-  use deno_semver::StackString;
-  use deno_semver::package::PackageReq;
+  use simien_npm::NpmPackageId;
+  use simien_npm::NpmResolutionPackage;
+  use simien_npm::NpmResolutionPackageSystemInfo;
+  use simien_npm::resolution::NpmResolutionSnapshot;
+  use simien_npm::resolution::SerializedNpmResolutionSnapshot;
+  use simien_npm::resolution::SerializedNpmResolutionSnapshotPackage;
+  use simien_semver::StackString;
+  use simien_semver::package::PackageReq;
 
   use super::PackageWithScript;
   use super::compute_lifecycle_script_layers;

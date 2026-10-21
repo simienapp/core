@@ -3,10 +3,10 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use deno_error::JsErrorBox;
-use deno_npm::registry::NpmPackageVersionDistInfo;
-use deno_npmrc::ResolvedNpmRc;
-use deno_semver::package::PackageNv;
+use simien_error::JsErrorBox;
+use simien_npm::registry::NpmPackageVersionDistInfo;
+use simien_npmrc::ResolvedNpmRc;
+use simien_semver::package::PackageNv;
 use futures::FutureExt;
 use futures::future::LocalBoxFuture;
 use parking_lot::Mutex;
@@ -63,7 +63,7 @@ pub struct TarballCache<THttpClient: NpmCacheHttpClient, TSys: NpmCacheSys> {
   reporter: Option<Arc<dyn TarballCacheReporter>>,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 #[error("Failed caching npm package '{package_nv}'")]
 pub struct EnsurePackageError {

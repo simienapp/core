@@ -10,27 +10,27 @@ use std::io::ErrorKind;
 use std::path::Path;
 use std::path::PathBuf;
 
-use boxed_error::Boxed;
-use deno_error::JsError;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::VersionReq;
-use deno_semver::npm::NpmVersionReqParseError;
-use deno_semver::package::PackageReq;
+use simien_boxed_error::Boxed;
+use simien_error::JsError;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::VersionReq;
+use simien_semver::npm::NpmVersionReqParseError;
+use simien_semver::package::PackageReq;
 use indexmap::IndexMap;
 use serde::Serialize;
 use serde_json::Map;
 use serde_json::Value;
-use sys_traits::FsRead;
+use simien_sys_traits::FsRead;
 use thiserror::Error;
 use url::Url;
 
 #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
-pub type PackageJsonRc = deno_maybe_sync::MaybeArc<PackageJson>;
+pub type PackageJsonRc = simien_maybe_sync::MaybeArc<PackageJson>;
 #[allow(clippy::disallowed_types, reason = "arc wrapper type")]
-pub type PackageJsonDepsRc = deno_maybe_sync::MaybeArc<PackageJsonDeps>;
+pub type PackageJsonDepsRc = simien_maybe_sync::MaybeArc<PackageJsonDeps>;
 #[allow(clippy::disallowed_types, reason = "once lock wrapper type")]
-type PackageJsonDepsRcCell = deno_maybe_sync::MaybeOnceLock<PackageJsonDepsRc>;
+type PackageJsonDepsRcCell = simien_maybe_sync::MaybeOnceLock<PackageJsonDepsRc>;
 
 pub enum PackageJsonCacheResult {
   Hit(Option<PackageJsonRc>),
@@ -180,7 +180,7 @@ pub fn parse_jsr_dep_value<'a>(
   };
 
   let npm_name =
-    capacity_builder::StringBuilder::<StackString>::build(|builder| {
+    simien_capacity_builder::StringBuilder::<StackString>::build(|builder| {
       builder.append("@jsr/");
       builder.append(scope);
       builder.append("__");
@@ -437,7 +437,7 @@ impl PackageJson {
           Ok(file_text) => {
             let pkg_json =
               PackageJson::load_from_string(path.to_path_buf(), &file_text)?;
-            let pkg_json = deno_maybe_sync::new_rc(pkg_json);
+            let pkg_json = simien_maybe_sync::new_rc(pkg_json);
             if let Some(cache) = maybe_cache {
               cache.set(path.to_path_buf(), Some(pkg_json.clone()));
             }
@@ -760,7 +760,7 @@ impl PackageJson {
   }
 
   pub fn specifier(&self) -> Url {
-    deno_path_util::url_from_file_path(&self.path).unwrap()
+    simien_path_util::url_from_file_path(&self.path).unwrap()
   }
 
   pub fn dir_path(&self) -> &Path {

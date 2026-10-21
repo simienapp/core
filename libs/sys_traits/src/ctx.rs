@@ -1,14 +1,14 @@
-//! Error context wrapper for sys_traits operations.
+//! Error context wrapper for simien_sys_traits operations.
 //!
 //! This module provides [`SysWithPathsInErrors`], a wrapper that adds operation and path
-//! context to errors returned by sys_traits methods.
+//! context to errors returned by simien_sys_traits methods.
 //!
 //! # Example
 //!
 //! ```no_run
-//! use sys_traits::PathsInErrorsExt;
+//! use simien_sys_traits::PathsInErrorsExt;
 //! # #[cfg(feature = "real")]
-//! use sys_traits::impls::RealSys;
+//! use simien_sys_traits::impls::RealSys;
 //!
 //! # #[cfg(feature = "real")]
 //! # fn example() -> std::io::Result<()> {
@@ -124,7 +124,7 @@ pub enum OperationErrorKind {
   WithTwoPaths(String, String),
 }
 
-/// A wrapper that adds error context to sys_traits operations.
+/// A wrapper that adds error context to simien_sys_traits operations.
 ///
 /// Use [`PathsInErrorsExt::with_paths_in_errors`] to create an instance.
 #[derive(Debug)]

@@ -18,39 +18,39 @@ use std::sync::Arc;
 
 use anyhow::Error as AnyError;
 use async_trait::async_trait;
-use deno_error::JsErrorBox;
-use deno_npm::NpmPackageExtraInfo;
-use deno_npm::NpmPackageId;
-use deno_npm::NpmPackageIdPeerDependencies;
-use deno_npm::NpmResolutionPackage;
-use deno_npm::NpmResolutionPackageSystemInfo;
-use deno_npm::NpmSystemInfo;
-use deno_npm::resolution::NpmResolutionSnapshot;
-use deno_npm_cache::NpmCache;
-use deno_npm_cache::NpmCacheHttpClient;
-use deno_npm_cache::NpmCacheSys;
-use deno_npm_cache::TarballCache;
-use deno_npm_cache::create_dir_all_no_symlink;
-use deno_npm_cache::ensure_not_symlink;
-use deno_npm_cache::hard_link_file;
-use deno_path_util::fs::atomic_write_file_with_retries;
+use simien_error::JsErrorBox;
+use simien_npm::NpmPackageExtraInfo;
+use simien_npm::NpmPackageId;
+use simien_npm::NpmPackageIdPeerDependencies;
+use simien_npm::NpmResolutionPackage;
+use simien_npm::NpmResolutionPackageSystemInfo;
+use simien_npm::NpmSystemInfo;
+use simien_npm::resolution::NpmResolutionSnapshot;
+use simien_npm_cache::NpmCache;
+use simien_npm_cache::NpmCacheHttpClient;
+use simien_npm_cache::NpmCacheSys;
+use simien_npm_cache::TarballCache;
+use simien_npm_cache::create_dir_all_no_symlink;
+use simien_npm_cache::ensure_not_symlink;
+use simien_npm_cache::hard_link_file;
+use simien_path_util::fs::atomic_write_file_with_retries;
 use deno_resolver::npm::get_package_folder_id_folder_name;
 use deno_resolver::npm::managed::NpmResolutionCell;
-use deno_semver::StackString;
-use deno_semver::package::PackageNv;
-use deno_terminal::colors;
+use simien_semver::StackString;
+use simien_semver::package::PackageNv;
+use simien_terminal::colors;
 use futures::FutureExt;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;
 use parking_lot::Mutex;
 use serde::Deserialize;
 use serde::Serialize;
-use sys_traits::FsDirEntry;
-use sys_traits::FsMetadata;
-use sys_traits::FsOpen;
-use sys_traits::FsWrite;
-use sys_traits::PathsInErrorsExt;
-use sys_traits::SysWithPathsInErrors;
+use simien_sys_traits::FsDirEntry;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsWrite;
+use simien_sys_traits::PathsInErrorsExt;
+use simien_sys_traits::SysWithPathsInErrors;
 
 use crate::BinEntries;
 use crate::CachedNpmPackageExtraInfoProvider;
@@ -77,16 +77,16 @@ use crate::package_json::InstallWorkspacePkgDep;
 use crate::package_json::NpmInstallDepsProvider;
 use crate::process_state::NpmProcessState;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait LocalNpmInstallSys:
   NpmCacheSys
   + CloneDirRecursiveSys
   + SetupBinEntrySys
   + LaxSingleProcessFsFlagSys
-  + sys_traits::EnvVar
-  + sys_traits::FsSymlinkDir
-  + sys_traits::FsCreateJunction
-  + sys_traits::FsRemoveDir
+  + simien_sys_traits::EnvVar
+  + simien_sys_traits::FsSymlinkDir
+  + simien_sys_traits::FsCreateJunction
+  + simien_sys_traits::FsRemoveDir
 {
 }
 
@@ -325,7 +325,7 @@ impl<
       let tags = package_tags
         .get(&package.id.nv)
         .map(|tags| {
-          capacity_builder::StringBuilder::<String>::build(|builder| {
+          simien_capacity_builder::StringBuilder::<String>::build(|builder| {
             for (i, tag) in tags.iter().enumerate() {
               if i > 0 {
                 builder.append(',')
@@ -1249,12 +1249,12 @@ impl<
 struct WorkspaceLifecyclePackage {
   package: NpmResolutionPackage,
   package_path: PathBuf,
-  scripts: HashMap<deno_semver::SmallStackString, String>,
+  scripts: HashMap<simien_semver::SmallStackString, String>,
 }
 
 fn resolve_remote_pkg_id(
   snapshot: &NpmResolutionSnapshot,
-  req: &deno_semver::package::PackageReq,
+  req: &simien_semver::package::PackageReq,
 ) -> Option<NpmPackageId> {
   match snapshot.resolve_pkg_from_pkg_req(req) {
     Ok(pkg) => Some(pkg.id.clone()),
@@ -1286,7 +1286,7 @@ impl<
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum SyncResolutionWithFsError {
   #[class(generic)]
   #[error(transparent)]
@@ -1678,12 +1678,12 @@ impl<TSys: NpmCacheSys> LocalSetupCache<TSys> {
 
 pub(crate) fn symlink_package_dir(
   sys: &(
-     impl sys_traits::FsSymlinkDir
-     + sys_traits::FsRemoveDir
-     + sys_traits::FsRemoveFile
-     + sys_traits::FsRemoveDirAll
-     + sys_traits::FsCreateDirAll
-     + sys_traits::FsCreateJunction
+     impl simien_sys_traits::FsSymlinkDir
+     + simien_sys_traits::FsRemoveDir
+     + simien_sys_traits::FsRemoveFile
+     + simien_sys_traits::FsRemoveDirAll
+     + simien_sys_traits::FsCreateDirAll
+     + simien_sys_traits::FsCreateJunction
    ),
   old_path: &Path,
   new_path: &Path,
@@ -1701,7 +1701,7 @@ pub(crate) fn symlink_package_dir(
   let old_path_relative = relative_path(new_parent, old_path)
     .unwrap_or_else(|| old_path.to_path_buf());
 
-  if sys_traits::impls::is_windows() {
+  if simien_sys_traits::impls::is_windows() {
     junction_or_symlink_dir(
       sys.as_ref(),
       &old_path_relative,
@@ -1723,9 +1723,9 @@ fn relative_path(from: &Path, to: &Path) -> Option<PathBuf> {
 /// runs, for example when it's restored from a CI cache.
 fn remove_existing_entry(
   sys: &(
-     impl sys_traits::FsRemoveDir
-     + sys_traits::FsRemoveFile
-     + sys_traits::FsRemoveDirAll
+     impl simien_sys_traits::FsRemoveDir
+     + simien_sys_traits::FsRemoveFile
+     + simien_sys_traits::FsRemoveDirAll
    ),
   path: &Path,
 ) -> Result<(), std::io::Error> {
@@ -1735,7 +1735,7 @@ fn remove_existing_entry(
   // is discarded: if it fails we fall through to the recursive removal below
   // and surface that error instead, since it's the last and most complete
   // attempt.
-  if sys_traits::impls::is_windows() {
+  if simien_sys_traits::impls::is_windows() {
     // On Windows a directory symlink or junction must be removed with
     // RemoveDirectory rather than DeleteFile, and `remove_dir_all` may fail on
     // a dangling directory symlink, so remove the link itself first.
@@ -1919,9 +1919,9 @@ pub(crate) async fn setup_member_bin_entries<'a, TSys: LocalNpmInstallSys>(
 /// junction resilient to a stale entry left over from a previous run.
 fn create_retry_if_exists(
   sys: &(
-     impl sys_traits::FsRemoveDir
-     + sys_traits::FsRemoveFile
-     + sys_traits::FsRemoveDirAll
+     impl simien_sys_traits::FsRemoveDir
+     + simien_sys_traits::FsRemoveFile
+     + simien_sys_traits::FsRemoveDirAll
    ),
   path: &Path,
   mut create: impl FnMut() -> Result<(), std::io::Error>,
@@ -1937,11 +1937,11 @@ fn create_retry_if_exists(
 
 fn junction_or_symlink_dir(
   sys: &(
-     impl sys_traits::FsSymlinkDir
-     + sys_traits::FsCreateJunction
-     + sys_traits::FsRemoveDir
-     + sys_traits::FsRemoveFile
-     + sys_traits::FsRemoveDirAll
+     impl simien_sys_traits::FsSymlinkDir
+     + simien_sys_traits::FsCreateJunction
+     + simien_sys_traits::FsRemoveDir
+     + simien_sys_traits::FsRemoveFile
+     + simien_sys_traits::FsRemoveDirAll
    ),
   old_path_relative: &Path,
   old_path: &Path,
@@ -2001,13 +2001,13 @@ fn write_initialized_file(
   }
 }
 
-fn create_initialized_file<F: sys_traits::boxed::FsOpenBoxed + ?Sized>(
+fn create_initialized_file<F: simien_sys_traits::boxed::FsOpenBoxed + ?Sized>(
   sys: &F,
   path: &Path,
 ) -> Result<(), std::io::Error> {
   let sys = sys.with_paths_in_errors();
   sys
-    .fs_open_boxed(path, &sys_traits::OpenOptions::new_write())
+    .fs_open_boxed(path, &simien_sys_traits::OpenOptions::new_write())
     .map(|_| ())
 }
 
@@ -2030,7 +2030,7 @@ pub(crate) fn join_package_name(
 /// Calculates a hash of the current package set for change detection.
 /// This allows us to detect when npm packages have been added, removed, or changed.
 fn calculate_packages_hash(
-  package_partitions: &deno_npm::resolution::NpmPackagesPartitioned,
+  package_partitions: &simien_npm::resolution::NpmPackagesPartitioned,
   root_folder_names: &BTreeSet<String>,
 ) -> u64 {
   use std::hash::Hash;
@@ -2105,7 +2105,7 @@ fn cleanup_unused_packages<TSys: LocalNpmInstallSys>(
   sys: &TSys,
   root_node_modules_dir: &Path,
   deno_local_registry_dir: &Path,
-  package_partitions: &deno_npm::resolution::NpmPackagesPartitioned,
+  package_partitions: &simien_npm::resolution::NpmPackagesPartitioned,
   root_folder_names: &BTreeSet<String>,
   setup_cache: &mut LocalSetupCache<TSys>,
 ) {
@@ -2255,11 +2255,11 @@ pub fn remove_unused_node_modules_symlinks<TSys: LocalNpmInstallSys>(
 
 #[cfg(test)]
 mod test {
-  use sys_traits::FsCreateDirAll;
-  use sys_traits::FsMetadata;
-  use sys_traits::FsRead;
-  use sys_traits::FsSymlinkDir;
-  use sys_traits::FsWrite;
+  use simien_sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsMetadata;
+  use simien_sys_traits::FsRead;
+  use simien_sys_traits::FsSymlinkDir;
+  use simien_sys_traits::FsWrite;
   use test_util::TempDir;
 
   use super::*;
@@ -2267,7 +2267,7 @@ mod test {
   #[test]
   fn clone_dir_recursive_except_node_modules_child_rejects_symlink_destination()
   {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     let from = Path::new("/from");
     let to = Path::new("/to");
     let target = Path::new("/target");
@@ -2287,7 +2287,7 @@ mod test {
   fn test_setup_cache() {
     let temp_dir = TempDir::new();
     let cache_bin_path = temp_dir.path().join("cache.bin").to_path_buf();
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let mut cache = LocalSetupCache::load(sys.clone(), cache_bin_path.clone());
     assert!(cache.insert_deno_symlink("package-a", "package-a@1.0.0"));
     assert!(cache.insert_root_symlink("package-a", "package-a@1.0.0"));
@@ -2348,14 +2348,14 @@ mod test {
       BTreeSet::from(["package-a".to_string(), "package-b".to_string()]);
 
     let hash = calculate_packages_hash(
-      &deno_npm::resolution::NpmPackagesPartitioned {
+      &simien_npm::resolution::NpmPackagesPartitioned {
         packages,
         copy_packages: Vec::new(),
       },
       &root_folder_names,
     );
     let reversed_hash = calculate_packages_hash(
-      &deno_npm::resolution::NpmPackagesPartitioned {
+      &simien_npm::resolution::NpmPackagesPartitioned {
         packages: reversed_packages,
         copy_packages: Vec::new(),
       },
@@ -2367,7 +2367,7 @@ mod test {
   #[test]
   fn test_symlink_package_dir_replaces_existing_link() {
     let temp_dir = TempDir::new();
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let root = temp_dir.path().to_path_buf();
 
     let target_a = root.join("target_a");
@@ -2395,7 +2395,7 @@ mod test {
   #[test]
   fn test_create_retry_if_exists_clears_stale_entry() {
     let temp_dir = TempDir::new();
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let path = temp_dir.path().join("entry").to_path_buf();
 
     // A stale entry is sitting where we want to create something new.
@@ -2424,7 +2424,7 @@ mod test {
   #[test]
   fn test_create_retry_if_exists_passes_through_success() {
     let temp_dir = TempDir::new();
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let path = temp_dir.path().join("entry").to_path_buf();
 
     let mut attempts = 0;
@@ -2475,7 +2475,7 @@ mod test {
   #[test]
   fn test_ensure_jsr_npmrc() {
     let temp_dir = TempDir::new();
-    let sys = sys_traits::impls::RealSys;
+    let sys = simien_sys_traits::impls::RealSys;
     let dir = temp_dir.path().to_path_buf();
     let npmrc_path = dir.join(".npmrc");
 

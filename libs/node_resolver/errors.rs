@@ -4,10 +4,10 @@ use std::borrow::Cow;
 use std::fmt::Write;
 use std::path::PathBuf;
 
-use boxed_error::Boxed;
-use deno_error::JsError;
-use deno_package_json::MissingPkgJsonNameError;
-use deno_path_util::UrlToFilePathError;
+use simien_boxed_error::Boxed;
+use simien_error::JsError;
+use simien_package_json::MissingPkgJsonNameError;
+use simien_path_util::UrlToFilePathError;
 use thiserror::Error;
 use url::Url;
 
@@ -59,9 +59,9 @@ impl NodeJsErrorCode {
   }
 }
 
-impl From<NodeJsErrorCode> for deno_error::PropertyValue {
+impl From<NodeJsErrorCode> for simien_error::PropertyValue {
   fn from(value: NodeJsErrorCode) -> Self {
-    deno_error::PropertyValue::String(value.as_str().into())
+    simien_error::PropertyValue::String(value.as_str().into())
   }
 }
 
@@ -212,7 +212,7 @@ pub enum PackageFolderResolveErrorKind {
   #[class(inherit)]
   #[error(transparent)]
   #[property("code" = self.code())]
-  PathToUrl(#[from] deno_path_util::PathToUrlError),
+  PathToUrl(#[from] simien_path_util::PathToUrlError),
 }
 
 #[derive(Debug, Boxed, JsError)]
@@ -468,7 +468,7 @@ pub enum PackageTargetResolveErrorKind {
   #[class(inherit)]
   #[error(transparent)]
   #[property("code" = self.code())]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
 }
 
 impl PackageTargetResolveErrorKind {
@@ -539,7 +539,7 @@ impl NodeJsErrorCoded for TypesNotFoundError {
 #[derive(Debug, Error, JsError)]
 #[class(inherit)]
 #[error("[{}] Invalid package config. {}", self.code(), .0)]
-pub struct PackageJsonLoadError(pub deno_package_json::PackageJsonLoadError);
+pub struct PackageJsonLoadError(pub simien_package_json::PackageJsonLoadError);
 
 impl NodeJsErrorCoded for PackageJsonLoadError {
   fn code(&self) -> NodeJsErrorCode {
@@ -753,10 +753,10 @@ pub enum NodeResolveErrorKind {
   RelativeJoin(#[from] NodeResolveRelativeJoinError),
   #[class(inherit)]
   #[error(transparent)]
-  PathToUrl(#[from] deno_path_util::PathToUrlError),
+  PathToUrl(#[from] simien_path_util::PathToUrlError),
   #[class(inherit)]
   #[error(transparent)]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
   #[class(inherit)]
   #[error(transparent)]
   PackageImportsResolve(#[from] PackageImportsResolveError),
@@ -878,7 +878,7 @@ pub enum FinalizeResolutionErrorKind {
   #[class(inherit)]
   #[error(transparent)]
   #[property("code" = self.code())]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
 }
 
 impl NodeJsErrorCoded for FinalizeResolutionErrorKind {
@@ -1099,7 +1099,7 @@ pub enum ResolvePkgNpmBinaryCommandsError {
   MissingPkgJsonName(#[from] MissingPkgJsonNameError),
 }
 
-#[derive(Error, Debug, Clone, deno_error::JsError)]
+#[derive(Error, Debug, Clone, simien_error::JsError)]
 #[class("NotFound")]
 #[error("No such built-in module: node:{module_name}")]
 #[property("code" = self.code())]

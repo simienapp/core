@@ -4,7 +4,7 @@ fn main() {
 }
 
 mod package_req {
-  use deno_semver::package::PackageReq;
+  use simien_semver::package::PackageReq;
 
   #[divan::bench(sample_size = 1000)]
   fn from_str_loose() -> usize {
@@ -24,7 +24,7 @@ mod package_req {
 }
 
 mod version {
-  use deno_semver::Version;
+  use simien_semver::Version;
 
   #[divan::bench(sample_size = 1000)]
   fn to_string() -> usize {
@@ -42,7 +42,7 @@ mod version {
 }
 
 mod version_req {
-  use deno_semver::VersionReq;
+  use simien_semver::VersionReq;
 
   #[divan::bench(sample_size = 1000)]
   fn to_string() -> usize {
@@ -65,7 +65,7 @@ mod version_req {
 }
 
 mod parse_npm_version_req {
-  use deno_semver::VersionReq;
+  use simien_semver::VersionReq;
 
   #[divan::bench(sample_size = 1000)]
   fn caret_simple() -> usize {
@@ -109,7 +109,7 @@ mod parse_npm_version_req {
 }
 
 mod parse_npm_version {
-  use deno_semver::Version;
+  use simien_semver::Version;
 
   #[divan::bench(sample_size = 1000)]
   fn simple() -> u64 {

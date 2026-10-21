@@ -10,8 +10,8 @@ use std::borrow::Cow;
 use std::path::Component;
 use std::path::Path;
 use std::path::PathBuf;
-use sys_traits::SystemRandom;
-use sys_traits::impls::is_windows;
+use simien_sys_traits::SystemRandom;
+use simien_sys_traits::impls::is_windows;
 use thiserror::Error;
 use url::Url;
 
@@ -188,7 +188,7 @@ pub fn normalize_path(path: Cow<Path>) -> Cow<Path> {
     #[cfg(target_arch = "wasm32")]
     let raw = raw.as_bytes();
 
-    if sys_traits::impls::is_windows() {
+    if simien_sys_traits::impls::is_windows() {
       raw.contains(&b'/') || raw.ends_with(b"\\")
     } else {
       raw.ends_with(b"/")
@@ -211,7 +211,7 @@ pub fn normalize_path(path: Cow<Path>) -> Cow<Path> {
       return true;
     }
 
-    if sys_traits::impls::is_windows() {
+    if simien_sys_traits::impls::is_windows() {
       for window in raw.windows(3) {
         if matches!(window, [b'\\', b'.', b'\\']) {
           return true;
@@ -793,7 +793,7 @@ mod tests {
 
   #[test]
   fn test_atomic_path() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     sys.set_seed(Some(10));
     let path = Path::new("/a/b/c.txt");
     let atomic_path = get_atomic_path(&sys, path);

@@ -6,10 +6,10 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::io;
 
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::jsr::JsrDepPackageReq;
-use deno_semver::package::PackageNv;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::jsr::JsrDepPackageReq;
+use simien_semver::package::PackageNv;
 use serde::Serialize;
 
 use crate::JsrPackageInfo;

@@ -3,10 +3,10 @@
 use std::borrow::Cow;
 use std::path::Path;
 
-use sys_traits::EnvCacheDir;
-use sys_traits::EnvCurrentDir;
-use sys_traits::EnvHomeDir;
-use sys_traits::EnvVar;
+use simien_sys_traits::EnvCacheDir;
+use simien_sys_traits::EnvCurrentDir;
+use simien_sys_traits::EnvHomeDir;
+use simien_sys_traits::EnvVar;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -24,7 +24,7 @@ pub enum DenoDirResolutionError {
   },
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait ResolveDenoDirSys:
   EnvCacheDir + EnvHomeDir + EnvVar + EnvCurrentDir
 {

@@ -1,7 +1,7 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_npm"
+name = "simien_npm"
 version = "0.71.0"
 authors.workspace = true
 edition.workspace = true
@@ -20,16 +20,16 @@ tracing = []
 [dependencies]
 async-trait.workspace = true
 bytemuck = { workspace = true, features = ["aarch64_simd", "avx512_simd", "must_cast"] }
-capacity_builder.workspace = true
+simien_capacity_builder.workspace = true
 chrono = { workspace = true, default-features = false, features = ["serde"] }
-deno_error.workspace = true
-deno_lockfile.workspace = true
-deno_package_json.workspace = true
-deno_semver.workspace = true
+simien_error.workspace = true
+simien_lockfile.workspace = true
+simien_package_json.workspace = true
+simien_semver.workspace = true
 futures.workspace = true
 indexmap.workspace = true
 log.workspace = true
-monch.workspace = true
+simien_monch.workspace = true
 rustc-hash.workspace = true
 serde = { workspace = true, features = ["derive", "rc"] }
 serde_json = { workspace = true, features = ["preserve_order"] }

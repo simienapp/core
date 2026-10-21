@@ -3,9 +3,9 @@
 use std::hint::black_box;
 use std::path::PathBuf;
 
-use deno_npm::fast_registry_json;
-use deno_npm::registry::NpmPackageInfo;
-use deno_npm::registry::NpmPackageVersionInfo;
+use simien_npm::fast_registry_json;
+use simien_npm::registry::NpmPackageInfo;
+use simien_npm::registry::NpmPackageVersionInfo;
 use divan::Bencher;
 use rustc_hash::FxHashMap;
 
@@ -44,7 +44,7 @@ macro_rules! bench_parse_pluck {
             #[divan::bench]
             fn [<bench_parse_versions_ $name>](b: Bencher) {
                 let input = read_packument($package);
-                let version = deno_semver::Version::parse_from_npm($version).unwrap();
+                let version = simien_semver::Version::parse_from_npm($version).unwrap();
                 b.bench(|| {
                     black_box({
                         let info: NpmPackageInfo = serde_json::from_str(&input).unwrap();

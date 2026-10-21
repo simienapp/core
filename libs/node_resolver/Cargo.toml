@@ -1,7 +1,7 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "node_resolver"
+name = "simien_node_resolver"
 version = "0.97.0"
 authors.workspace = true
 edition.workspace = true
@@ -15,20 +15,20 @@ path = "lib.rs"
 
 [features]
 graph = ["deno_graph"]
-sync = ["deno_maybe_sync/sync", "deno_package_json/sync"]
+sync = ["simien_maybe_sync/sync", "simien_package_json/sync"]
 
 [dependencies]
 anyhow.workspace = true
 async-trait.workspace = true
-boxed_error.workspace = true
-capacity_builder.workspace = true
-deno_error.workspace = true
+simien_boxed_error.workspace = true
+simien_capacity_builder.workspace = true
+simien_error.workspace = true
 deno_graph = { workspace = true, optional = true }
-deno_maybe_sync.workspace = true
-deno_media_type.workspace = true
-deno_package_json.workspace = true
-deno_path_util.workspace = true
-deno_semver.workspace = true
+simien_maybe_sync.workspace = true
+simien_media_type.workspace = true
+simien_package_json.workspace = true
+simien_path_util.workspace = true
+simien_semver.workspace = true
 futures.workspace = true
 lazy-regex.workspace = true
 log.workspace = true
@@ -40,9 +40,9 @@ regex.workspace = true
 rustc-hash.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-sys_traits.workspace = true
+simien_sys_traits.workspace = true
 thiserror.workspace = true
 url.workspace = true
 
 [dev-dependencies]
-sys_traits = { workspace = true, features = ["memory"] }
+simien_sys_traits = { workspace = true, features = ["memory"] }

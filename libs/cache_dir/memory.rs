@@ -4,10 +4,10 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 use std::time::UNIX_EPOCH;
 
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
 use parking_lot::Mutex;
-use sys_traits::SystemTimeNow;
+use simien_sys_traits::SystemTimeNow;
 use url::Url;
 
 use crate::CacheEntry;
@@ -21,7 +21,7 @@ use crate::SerializedCachedUrlMetadata;
 /// A settable clock for use with [`MemoryHttpCache`].
 ///
 /// Defaults to [`std::time::UNIX_EPOCH`]. Call [`set`](Self::set) to change
-/// the time returned by [`sys_time_now`](sys_traits::SystemTimeNow::sys_time_now).
+/// the time returned by [`sys_time_now`](simien_sys_traits::SystemTimeNow::sys_time_now).
 #[derive(Debug)]
 pub struct MemoryHttpCacheTimeClock(Mutex<std::time::SystemTime>);
 
@@ -37,7 +37,7 @@ impl MemoryHttpCacheTimeClock {
   }
 }
 
-impl sys_traits::SystemTimeNow for MemoryHttpCacheTimeClock {
+impl simien_sys_traits::SystemTimeNow for MemoryHttpCacheTimeClock {
   fn sys_time_now(&self) -> std::time::SystemTime {
     *self.0.lock()
   }

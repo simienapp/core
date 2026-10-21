@@ -8,8 +8,8 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use monch::*;
-use sys_traits::EnvVar;
+use simien_monch::*;
+use simien_sys_traits::EnvVar;
 use url::Url;
 
 use self::ini::Key;
@@ -35,7 +35,7 @@ pub enum ResolveError {
   Url(#[source] url::ParseError),
 }
 
-pub type NpmRcParseError = monch::ParseErrorFailureError;
+pub type NpmRcParseError = simien_monch::ParseErrorFailureError;
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct RegistryConfig {
@@ -713,8 +713,8 @@ impl NpmRegistryUrl {
 #[cfg(test)]
 mod test {
   use pretty_assertions::assert_eq;
-  use sys_traits::EnvSetVar;
-  use sys_traits::impls::InMemorySys;
+  use simien_sys_traits::EnvSetVar;
+  use simien_sys_traits::impls::InMemorySys;
 
   use super::*;
 

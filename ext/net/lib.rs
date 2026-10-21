@@ -1,6 +1,6 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-//! The stream layer of Deno's deno_net, forked for Simien: the TCP, TLS and
+//! The stream layer of Deno's simien_net, forked for Simien: the TCP, TLS and
 //! Unix stream types an HTTP server or a WebSocket runs on, and the resources
 //! that hold them. The `Deno.listen`/`Deno.connect` APIs, DNS, UDP, QUIC and
 //! tunnels are not part of it.
