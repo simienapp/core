@@ -5,7 +5,7 @@ use deno_graph::ast::CapturingEsParser;
 use deno_graph::ast::DefaultEsParser;
 use deno_graph::ast::EsParser;
 use deno_graph::ast::ParsedSourceStore;
-use deno_media_type::MediaType;
+use simien_media_type::MediaType;
 use url::Url;
 
 /// Lazily parses JS/TS sources from a `deno_graph::ModuleGraph` given
@@ -52,11 +52,11 @@ impl<'a> LazyGraphSourceParser<'a> {
 type ArcStr = std::sync::Arc<str>;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-pub type ParsedSourceCacheRc = deno_maybe_sync::MaybeArc<ParsedSourceCache>;
+pub type ParsedSourceCacheRc = simien_maybe_sync::MaybeArc<ParsedSourceCache>;
 
 #[derive(Debug, Default)]
 pub struct ParsedSourceCache {
-  sources: deno_maybe_sync::MaybeDashMap<Url, ParsedSource>,
+  sources: simien_maybe_sync::MaybeDashMap<Url, ParsedSource>,
 }
 
 impl ParsedSourceCache {

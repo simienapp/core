@@ -1,23 +1,23 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_npm::NpmPackageCacheFolderId;
-use deno_npm::NpmPackageId;
-use deno_npm::NpmResolutionPackage;
-use deno_npm::NpmSystemInfo;
-use deno_npm::resolution::NpmPackagesPartitioned;
-use deno_npm::resolution::NpmResolutionSnapshot;
-use deno_npm::resolution::PackageCacheFolderIdNotFoundError;
-use deno_npm::resolution::PackageNotFoundFromReferrerError;
-use deno_npm::resolution::PackageNvNotFoundError;
-use deno_npm::resolution::PackageReqNotFoundError;
-use deno_npm::resolution::ValidSerializedNpmResolutionSnapshot;
-use deno_semver::package::PackageNv;
-use deno_semver::package::PackageReq;
-use deno_unsync::sync::AtomicFlag;
+use simien_npm::NpmPackageCacheFolderId;
+use simien_npm::NpmPackageId;
+use simien_npm::NpmResolutionPackage;
+use simien_npm::NpmSystemInfo;
+use simien_npm::resolution::NpmPackagesPartitioned;
+use simien_npm::resolution::NpmResolutionSnapshot;
+use simien_npm::resolution::PackageCacheFolderIdNotFoundError;
+use simien_npm::resolution::PackageNotFoundFromReferrerError;
+use simien_npm::resolution::PackageNvNotFoundError;
+use simien_npm::resolution::PackageReqNotFoundError;
+use simien_npm::resolution::ValidSerializedNpmResolutionSnapshot;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
+use simien_unsync::sync::AtomicFlag;
 use parking_lot::RwLock;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-pub type NpmResolutionCellRc = deno_maybe_sync::MaybeArc<NpmResolutionCell>;
+pub type NpmResolutionCellRc = simien_maybe_sync::MaybeArc<NpmResolutionCell>;
 
 /// Handles updating and storing npm resolution in memory.
 ///
@@ -25,7 +25,7 @@ pub type NpmResolutionCellRc = deno_maybe_sync::MaybeArc<NpmResolutionCell>;
 #[derive(Default)]
 pub struct NpmResolutionCell {
   snapshot: RwLock<NpmResolutionSnapshot>,
-  is_pending: deno_unsync::sync::AtomicFlag,
+  is_pending: simien_unsync::sync::AtomicFlag,
 }
 
 impl std::fmt::Debug for NpmResolutionCell {
@@ -199,7 +199,7 @@ impl NpmResolutionCell {
   /// Checks if the resolution is "pending" meaning that its
   /// current state requires an npm install to get it up
   /// to date. This occurs when the workspace config changes
-  /// and deno_lockfile has incompletely updated the npm
+  /// and simien_lockfile has incompletely updated the npm
   /// snapshot.
   pub fn is_pending(&self) -> bool {
     self.is_pending.is_raised()

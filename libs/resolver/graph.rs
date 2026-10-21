@@ -2,8 +2,8 @@
 
 use std::borrow::Cow;
 
-use boxed_error::Boxed;
-use deno_error::JsErrorClass;
+use simien_boxed_error::Boxed;
+use simien_error::JsErrorClass;
 use deno_graph::JsrLoadError;
 use deno_graph::Module;
 use deno_graph::ModuleError;
@@ -14,18 +14,18 @@ use deno_graph::Resolution;
 use deno_graph::ResolutionError;
 use deno_graph::SpecifierError;
 use deno_graph::source::ResolveError;
-use deno_media_type::MediaType;
-use deno_semver::npm::NpmPackageReqReference;
-use deno_semver::package::PackageReq;
-use deno_unsync::sync::AtomicFlag;
+use simien_media_type::MediaType;
+use simien_semver::npm::NpmPackageReqReference;
+use simien_semver::package::PackageReq;
+use simien_unsync::sync::AtomicFlag;
 use import_map::ImportMapErrorKind;
-use node_resolver::DenoIsBuiltInNodeModuleChecker;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::IsBuiltInNodeModuleChecker;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::UrlOrPath;
-use node_resolver::errors::NodeJsErrorCode;
-use node_resolver::errors::NodeJsErrorCoded;
+use simien_node_resolver::DenoIsBuiltInNodeModuleChecker;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::IsBuiltInNodeModuleChecker;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::UrlOrPath;
+use simien_node_resolver::errors::NodeJsErrorCode;
+use simien_node_resolver::errors::NodeJsErrorCoded;
 use url::Url;
 
 use crate::DenoResolveError;
@@ -40,7 +40,7 @@ use crate::workspace::sloppy_imports_resolve;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type FoundPackageJsonDepFlagRc =
-  deno_maybe_sync::MaybeArc<FoundPackageJsonDepFlag>;
+  simien_maybe_sync::MaybeArc<FoundPackageJsonDepFlag>;
 
 /// A flag that indicates if a package.json dependency was
 /// found during resolution.
@@ -59,7 +59,7 @@ impl FoundPackageJsonDepFlag {
   }
 }
 
-#[derive(Debug, deno_error::JsError, Boxed)]
+#[derive(Debug, simien_error::JsError, Boxed)]
 pub struct ResolveWithGraphError(pub Box<ResolveWithGraphErrorKind>);
 
 impl ResolveWithGraphError {
@@ -107,7 +107,7 @@ impl ResolveWithGraphError {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ResolveWithGraphErrorKind {
   #[error(transparent)]
   #[class(inherit)]
@@ -133,21 +133,21 @@ pub enum ResolveWithGraphErrorKind {
   Resolve(#[from] DenoResolveError),
   #[error(transparent)]
   #[class(inherit)]
-  PathToUrl(#[from] deno_path_util::PathToUrlError),
+  PathToUrl(#[from] simien_path_util::PathToUrlError),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(inherit)]
 #[error("Could not resolve '{reference}'")]
 pub struct CouldNotResolveNpmReqRefError {
-  pub reference: deno_semver::npm::NpmPackageReqReference,
+  pub reference: simien_semver::npm::NpmPackageReqReference,
   #[source]
   #[inherit]
-  pub source: node_resolver::errors::PackageSubpathFromDenoModuleResolveError,
+  pub source: simien_node_resolver::errors::PackageSubpathFromDenoModuleResolveError,
 }
 
 impl NodeJsErrorCoded for CouldNotResolveNpmReqRefError {
-  fn code(&self) -> node_resolver::errors::NodeJsErrorCode {
+  fn code(&self) -> simien_node_resolver::errors::NodeJsErrorCode {
     self.source.code()
   }
 }
@@ -159,15 +159,15 @@ pub struct MappedResolutionDiagnosticWithPosition<'a> {
 }
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-pub type OnMappedResolutionDiagnosticFn = deno_maybe_sync::MaybeArc<
+pub type OnMappedResolutionDiagnosticFn = simien_maybe_sync::MaybeArc<
   dyn Fn(MappedResolutionDiagnosticWithPosition) + Send + Sync,
 >;
 
 pub struct ResolveWithGraphOptions {
-  pub mode: node_resolver::ResolutionMode,
-  pub kind: node_resolver::NodeResolutionKind,
+  pub mode: simien_node_resolver::ResolutionMode,
+  pub kind: simien_node_resolver::NodeResolutionKind,
   /// Whether to maintain npm specifiers as-is. It's necessary for the
-  /// deno_core module loader to resolve npm specifiers as-is so that
+  /// simien_core module loader to resolve npm specifiers as-is so that
   /// the loader can properly dynamic import and install npm packages
   /// when managed.
   pub maintain_npm_specifiers: bool,
@@ -192,7 +192,7 @@ pub type DenoResolverRc<
   TIsBuiltInNodeModuleChecker,
   TNpmPackageFolderResolver,
   TSys,
-> = deno_maybe_sync::MaybeArc<
+> = simien_maybe_sync::MaybeArc<
   DenoResolver<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
@@ -217,7 +217,7 @@ pub struct DenoResolver<
   >,
   sys: TSys,
   found_package_json_dep_flag: FoundPackageJsonDepFlagRc,
-  warned_pkgs: deno_maybe_sync::MaybeDashSet<PackageReq>,
+  warned_pkgs: simien_maybe_sync::MaybeDashSet<PackageReq>,
   on_warning: Option<OnMappedResolutionDiagnosticFn>,
 }
 
@@ -325,7 +325,7 @@ impl<
       Some(Module::Json(module)) => module.specifier.clone(),
       Some(Module::Wasm(module)) => module.specifier.clone(),
       Some(Module::External(module)) => {
-        node_resolver::resolve_specifier_into_node_modules(
+        simien_node_resolver::resolve_specifier_into_node_modules(
           &self.sys,
           &module.specifier,
         )
@@ -357,9 +357,9 @@ impl<
     &self,
     npm_req_ref: &NpmPackageReqReference,
     referrer: &Url,
-    resolution_mode: node_resolver::ResolutionMode,
-    resolution_kind: node_resolver::NodeResolutionKind,
-  ) -> Result<node_resolver::UrlOrPath, npm::ResolveNpmReqRefError> {
+    resolution_mode: simien_node_resolver::ResolutionMode,
+    resolution_kind: simien_node_resolver::NodeResolutionKind,
+  ) -> Result<simien_node_resolver::UrlOrPath, npm::ResolveNpmReqRefError> {
     self.resolver.resolve_non_workspace_npm_req_ref_to_file(
       npm_req_ref,
       referrer,
@@ -372,8 +372,8 @@ impl<
     &self,
     req_ref: &NpmPackageReqReference,
     maybe_referrer: Option<&Url>,
-    resolution_mode: node_resolver::ResolutionMode,
-    resolution_kind: node_resolver::NodeResolutionKind,
+    resolution_mode: simien_node_resolver::ResolutionMode,
+    resolution_kind: simien_node_resolver::NodeResolutionKind,
   ) -> Result<Url, ResolveWithGraphError> {
     let node_and_npm_resolver =
       self.resolver.node_and_npm_resolver.as_ref().unwrap();
@@ -385,7 +385,7 @@ impl<
       .resolve_pkg_folder_from_deno_module_req(req_ref.req())?;
     Ok(
       node_and_npm_resolver
-        .node_resolver
+        .simien_node_resolver
         .resolve_package_subpath_from_deno_module(
           &package_folder,
           req_ref.sub_path(),
@@ -427,8 +427,8 @@ impl<
     &self,
     raw_specifier: &str,
     maybe_referrer: Option<&Url>,
-    resolution_mode: node_resolver::ResolutionMode,
-    resolution_kind: node_resolver::NodeResolutionKind,
+    resolution_mode: simien_node_resolver::ResolutionMode,
+    resolution_kind: simien_node_resolver::NodeResolutionKind,
   ) -> Option<Url> {
     let req_ref =
       NpmPackageReqReference::from_str(&format!("npm:{raw_specifier}")).ok()?;
@@ -451,8 +451,8 @@ impl<
     raw_specifier: &str,
     referrer: &Url,
     referrer_range_start: deno_graph::Position,
-    resolution_mode: node_resolver::ResolutionMode,
-    resolution_kind: node_resolver::NodeResolutionKind,
+    resolution_mode: simien_node_resolver::ResolutionMode,
+    resolution_kind: simien_node_resolver::NodeResolutionKind,
   ) -> Result<Url, DenoResolveError> {
     let resolution = self.resolver.resolve(
       raw_specifier,
@@ -594,14 +594,14 @@ impl<
   ) -> Result<Url, ResolveError> {
     let resolution_mode = referrer_range
       .resolution_mode
-      .map(node_resolver::ResolutionMode::from_deno_graph)
+      .map(simien_node_resolver::ResolutionMode::from_deno_graph)
       .unwrap_or_else(|| {
         self
           .cjs_tracker
           .get_referrer_kind(&referrer_range.specifier)
       });
     let node_resolution_kind =
-      node_resolver::NodeResolutionKind::from_deno_graph(resolution_kind);
+      simien_node_resolver::NodeResolutionKind::from_deno_graph(resolution_kind);
     let resolve = |kind| match self.maybe_graph {
       Some(graph) => self.resolver.resolve_with_graph(
         graph,
@@ -627,14 +627,14 @@ impl<
     };
 
     let result = resolve(node_resolution_kind);
-    if node_resolution_kind == node_resolver::NodeResolutionKind::Types
+    if node_resolution_kind == simien_node_resolver::NodeResolutionKind::Types
       && self.npm_types_resolution_mode
         == NpmTypesResolutionMode::FallbackToExecution
       && result
         .as_ref()
         .is_err_and(|err| err.is_types_not_found_for_npm_resolution())
     {
-      return resolve(node_resolver::NodeResolutionKind::Execution)
+      return resolve(simien_node_resolver::NodeResolutionKind::Execution)
         .map_err(|err| err.into_deno_graph_error());
     }
 
@@ -666,7 +666,7 @@ pub enum EnhanceGraphErrorMode {
   HideRange,
 }
 
-#[derive(Debug, deno_error::JsError)]
+#[derive(Debug, simien_error::JsError)]
 #[class(inherit)]
 pub struct EnhancedGraphError {
   #[inherit]
@@ -697,7 +697,7 @@ impl std::fmt::Display for EnhancedGraphError {
 impl std::error::Error for EnhancedGraphError {}
 
 pub fn enhance_graph_error(
-  sys: &(impl sys_traits::FsMetadata + Clone),
+  sys: &(impl simien_sys_traits::FsMetadata + Clone),
   error: ModuleGraphError,
   mode: EnhanceGraphErrorMode,
   // Names of packages importable by bare specifier (workspace members and
@@ -732,7 +732,7 @@ pub fn enhance_graph_error(
   if let Some(docs_url) = maybe_docs_url_for_graph_error(&error) {
     message.push_str(&format!(
       "\n  {} {}",
-      deno_terminal::colors::cyan("docs:"),
+      simien_terminal::colors::cyan("docs:"),
       docs_url,
     ));
   }
@@ -811,7 +811,7 @@ pub fn enhanced_resolution_error_message(
   if let Some(hint) = maybe_hint {
     message.push_str(&format!(
       "\n  {} {}",
-      deno_terminal::colors::cyan("hint:"),
+      simien_terminal::colors::cyan("hint:"),
       hint
     ));
   }
@@ -822,7 +822,7 @@ pub fn enhanced_resolution_error_message(
 static RUN_WITH_SLOPPY_IMPORTS_MSG: &str = "or run with --sloppy-imports";
 
 fn enhanced_sloppy_imports_error_message(
-  sys: &(impl sys_traits::FsMetadata + Clone),
+  sys: &(impl simien_sys_traits::FsMetadata + Clone),
   error: &ModuleError,
 ) -> Option<String> {
   match error.as_kind() {
@@ -840,7 +840,7 @@ fn enhanced_sloppy_imports_error_message(
 }
 
 pub fn maybe_additional_sloppy_imports_message(
-  sys: &(impl sys_traits::FsMetadata + Clone),
+  sys: &(impl simien_sys_traits::FsMetadata + Clone),
   specifier: &Url,
 ) -> Option<String> {
   let (resolved, sloppy_reason) = sloppy_imports_resolve(
@@ -926,7 +926,7 @@ fn enhanced_unsupported_import_attribute(err: &ModuleError) -> Option<String> {
       let mut text = format_deno_graph_error(err);
       text.push_str(&format!(
         "\n  {} run with --unstable-raw-imports",
-        deno_terminal::colors::cyan("hint:")
+        simien_terminal::colors::cyan("hint:")
       ));
       Some(text)
     }
@@ -1057,7 +1057,7 @@ fn get_import_prefix_missing_error(error: &ResolutionError) -> Option<&str> {
 }
 
 pub fn format_range_with_colors(referrer: &deno_graph::Range) -> String {
-  use deno_terminal::colors;
+  use simien_terminal::colors;
   format!(
     "{}:{}:{}",
     colors::cyan(referrer.specifier.as_str()),

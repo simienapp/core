@@ -17,21 +17,21 @@ use deno_config::workspace::CompilerOptionsSource;
 use deno_config::workspace::TsTypeLib;
 use deno_config::workspace::WorkspaceDirectory;
 use deno_config::workspace::WorkspaceRc;
-use deno_error::JsError;
-use deno_maybe_sync::new_rc;
-use deno_path_util::normalize_path;
-use deno_path_util::url_from_directory_path;
-use deno_path_util::url_from_file_path;
-use deno_path_util::url_to_file_path;
-use deno_terminal::colors;
-use deno_unsync::sync::AtomicFlag;
+use simien_error::JsError;
+use simien_maybe_sync::new_rc;
+use simien_path_util::normalize_path;
+use simien_path_util::url_from_directory_path;
+use simien_path_util::url_from_file_path;
+use simien_path_util::url_to_file_path;
+use simien_terminal::colors;
+use simien_unsync::sync::AtomicFlag;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
-use node_resolver::DenoIsBuiltInNodeModuleChecker;
-use node_resolver::NodeResolutionKind;
-use node_resolver::NodeResolver;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::ResolutionMode;
+use simien_node_resolver::DenoIsBuiltInNodeModuleChecker;
+use simien_node_resolver::NodeResolutionKind;
+use simien_node_resolver::NodeResolver;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::ResolutionMode;
 #[cfg(feature = "sync")]
 use once_cell::sync::OnceCell;
 #[cfg(not(feature = "sync"))]
@@ -40,7 +40,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde::Serializer;
 use serde_json::json;
-use sys_traits::FsRead;
+use simien_sys_traits::FsRead;
 use thiserror::Error;
 use url::Url;
 
@@ -50,12 +50,12 @@ use crate::npm::DenoInNpmPackageChecker;
 use crate::npm::NpmResolverSys;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-type UrlRc = deno_maybe_sync::MaybeArc<Url>;
+type UrlRc = simien_maybe_sync::MaybeArc<Url>;
 #[allow(clippy::disallowed_types, reason = "definition")]
-type CompilerOptionsRc = deno_maybe_sync::MaybeArc<CompilerOptions>;
+type CompilerOptionsRc = simien_maybe_sync::MaybeArc<CompilerOptions>;
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type CompilerOptionsTypesRc =
-  deno_maybe_sync::MaybeArc<Vec<(Url, Vec<String>)>>;
+  simien_maybe_sync::MaybeArc<Vec<(Url, Vec<String>)>>;
 
 /// A structure that represents a set of options that were ignored and the
 /// path those options came from.
@@ -241,7 +241,7 @@ impl JsxImportSourceConfig {
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type JsxImportSourceConfigRc =
-  deno_maybe_sync::MaybeArc<JsxImportSourceConfig>;
+  simien_maybe_sync::MaybeArc<JsxImportSourceConfig>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 enum CompilerOptionsModule {
@@ -384,7 +384,7 @@ pub struct TranspileAndEmitOptions {
 #[cfg(feature = "deno_ast")]
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type TranspileAndEmitOptionsRc =
-  deno_maybe_sync::MaybeArc<TranspileAndEmitOptions>;
+  simien_maybe_sync::MaybeArc<TranspileAndEmitOptions>;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct WildcardString {
@@ -482,11 +482,11 @@ impl CompilerOptionsPaths {
 #[derive(Debug, Default)]
 struct LoggedWarnings {
   experimental_decorators: AtomicFlag,
-  folders: deno_maybe_sync::MaybeDashSet<Url>,
+  folders: simien_maybe_sync::MaybeDashSet<Url>,
 }
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-type LoggedWarningsRc = deno_maybe_sync::MaybeArc<LoggedWarnings>;
+type LoggedWarningsRc = simien_maybe_sync::MaybeArc<LoggedWarnings>;
 
 #[derive(Default, Debug)]
 struct MemoizedValues {
@@ -1022,7 +1022,7 @@ impl TsConfigFileFilter {
 }
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-type TsConfigFileFilterRc = deno_maybe_sync::MaybeArc<TsConfigFileFilter>;
+type TsConfigFileFilterRc = simien_maybe_sync::MaybeArc<TsConfigFileFilter>;
 
 #[derive(Debug)]
 pub struct TsConfigData {
@@ -1240,8 +1240,8 @@ impl<
         }
       })
       .filter_map(|s| {
-        let node_resolver = (self.get_node_resolver)(&specifier)?;
-        let node_resolution = node_resolver
+        let simien_node_resolver = (self.get_node_resolver)(&specifier)?;
+        let node_resolution = simien_node_resolver
           .resolve(
             s,
             &specifier,
@@ -1451,7 +1451,7 @@ impl CompilerOptionsResolver {
   >(
     sys: &TSys,
     workspace: &WorkspaceRc,
-    node_resolver: &TsConfigNodeResolver<NSys, TNpfr>,
+    simien_node_resolver: &TsConfigNodeResolver<NSys, TNpfr>,
     config_discover: &ConfigDiscoveryOption,
     overrides: &CompilerOptionsOverrides,
   ) -> Self {
@@ -1472,7 +1472,7 @@ impl CompilerOptionsResolver {
     let logged_warnings = new_rc(LoggedWarnings::default());
     let mut ts_config_collector = TsConfigCollector::new(
       sys,
-      Box::new(|_| Some(node_resolver)),
+      Box::new(|_| Some(simien_node_resolver)),
       &logged_warnings,
       overrides.clone(),
     );
@@ -1696,7 +1696,7 @@ impl deno_graph::CheckJsResolver for CompilerOptionsResolver {
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type CompilerOptionsResolverRc =
-  deno_maybe_sync::MaybeArc<CompilerOptionsResolver>;
+  simien_maybe_sync::MaybeArc<CompilerOptionsResolver>;
 
 #[derive(Debug, Default)]
 struct JsxImportSourceConfigData {

@@ -13,42 +13,42 @@ use deno_config::deno_json::ConfigFileError;
 use deno_config::deno_json::ConfigFileRc;
 use deno_config::workspace::ResolverWorkspaceJsrPackage;
 use deno_config::workspace::Workspace;
-use deno_error::JsError;
-use deno_maybe_sync::MaybeDashMap;
-use deno_maybe_sync::new_rc;
-use deno_media_type::MediaType;
-use deno_npm::registry::NpmPackageVersionInfo;
-use deno_package_json::PackageJsonDepValue;
-use deno_package_json::PackageJsonDepValueParseError;
-use deno_package_json::PackageJsonDepWorkspaceReq;
-use deno_package_json::PackageJsonDepsRc;
-use deno_package_json::PackageJsonRc;
-use deno_path_util::SpecifierError;
-use deno_path_util::url_from_directory_path;
-use deno_path_util::url_from_file_path;
-use deno_path_util::url_to_file_path;
-use deno_semver::RangeSetOrTag;
-use deno_semver::SmallStackString;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::VersionReq;
-use deno_semver::jsr::JsrPackageReqReference;
-use deno_semver::package::PackageName;
-use deno_semver::package::PackageReq;
-use deno_terminal::colors;
+use simien_error::JsError;
+use simien_maybe_sync::MaybeDashMap;
+use simien_maybe_sync::new_rc;
+use simien_media_type::MediaType;
+use simien_npm::registry::NpmPackageVersionInfo;
+use simien_package_json::PackageJsonDepValue;
+use simien_package_json::PackageJsonDepValueParseError;
+use simien_package_json::PackageJsonDepWorkspaceReq;
+use simien_package_json::PackageJsonDepsRc;
+use simien_package_json::PackageJsonRc;
+use simien_path_util::SpecifierError;
+use simien_path_util::url_from_directory_path;
+use simien_path_util::url_from_file_path;
+use simien_path_util::url_to_file_path;
+use simien_semver::RangeSetOrTag;
+use simien_semver::SmallStackString;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::VersionReq;
+use simien_semver::jsr::JsrPackageReqReference;
+use simien_semver::package::PackageName;
+use simien_semver::package::PackageReq;
+use simien_terminal::colors;
 use import_map::ImportMap;
 use import_map::ImportMapDiagnostic;
 use import_map::ImportMapError;
 use import_map::ImportMapErrorKind;
 use import_map::ImportMapWithDiagnostics;
 use indexmap::IndexMap;
-use node_resolver::NodeResolutionKind;
+use simien_node_resolver::NodeResolutionKind;
 use parking_lot::RwLock;
 use serde::Deserialize;
 use serde::Serialize;
-use sys_traits::FsMetadata;
-use sys_traits::FsMetadataValue;
-use sys_traits::FsRead;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsMetadataValue;
+use simien_sys_traits::FsRead;
 use thiserror::Error;
 use url::Url;
 
@@ -58,7 +58,7 @@ use crate::deno_json::CompilerOptionsPaths;
 use crate::deno_json::CompilerOptionsResolverRc;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-type UrlRc = deno_maybe_sync::MaybeArc<Url>;
+type UrlRc = simien_maybe_sync::MaybeArc<Url>;
 
 #[derive(Debug)]
 struct PkgJsonResolverFolderConfig {
@@ -693,7 +693,7 @@ pub fn sloppy_imports_resolve<TSys: FsMetadata>(
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 type SloppyImportsResolverRc<T> =
-  deno_maybe_sync::MaybeArc<SloppyImportsResolver<T>>;
+  simien_maybe_sync::MaybeArc<SloppyImportsResolver<T>>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CompilerOptionsRootDirsDiagnostic {
@@ -836,7 +836,7 @@ impl fmt::Display for WorkspaceResolverDiagnostic<'_> {
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 type CompilerOptionsResolverCellRc =
-  deno_maybe_sync::MaybeArc<RwLock<CompilerOptionsResolverRc>>;
+  simien_maybe_sync::MaybeArc<RwLock<CompilerOptionsResolverRc>>;
 
 #[derive(Debug)]
 pub struct WorkspaceResolver<TSys: FsMetadata + FsRead> {
@@ -1294,7 +1294,7 @@ impl<TSys: FsMetadata + FsRead> WorkspaceResolver<TSys> {
           url_to_file_path(&root_dir_url.join(&relative_path).unwrap())
             .unwrap();
         let pkg_json =
-          deno_package_json::PackageJson::load_from_value(path, json).unwrap();
+          simien_package_json::PackageJson::load_from_value(path, json).unwrap();
         PackageJsonRc::new(pkg_json)
       })
       .collect();
@@ -1370,7 +1370,7 @@ impl<TSys: FsMetadata + FsRead> WorkspaceResolver<TSys> {
         .resolve(specifier, referrer)
         .map_err(MappedResolutionError::ImportMap)
     } else {
-      deno_path_util::resolve_import(specifier, referrer)
+      simien_path_util::resolve_import(specifier, referrer)
         .map_err(MappedResolutionError::Specifier)
     };
     let resolve_error = match resolve_result {
@@ -1787,7 +1787,7 @@ impl<TSys: FsMetadata + FsRead> WorkspaceResolver<TSys> {
 /// Collapses redundant path segments (such as the empty segment produced by a
 /// `//` in the specifier) in a `file:` URL. Other schemes are left untouched.
 ///
-/// `deno_path_util::normalize_path` intentionally leaves a lone `//` alone, so
+/// `simien_path_util::normalize_path` intentionally leaves a lone `//` alone, so
 /// we rely on `Path::components()` here, which discards repeated separators and
 /// `.` segments while preserving the rest of the path verbatim.
 fn collapse_redundant_file_specifier_segments(specifier: &mut Url) {
@@ -1913,7 +1913,7 @@ impl WorkspaceNpmLinkPackagesRc {
         }
       }
     }
-    Self(deno_maybe_sync::new_arc(entries))
+    Self(simien_maybe_sync::new_arc(entries))
   }
 }
 
@@ -1928,12 +1928,12 @@ enum PkgJsonToVersionInfoError {
   )]
   VersionInvalid {
     #[source]
-    source: deno_semver::npm::NpmVersionParseError,
+    source: simien_semver::npm::NpmVersionParseError,
   },
 }
 
 fn pkg_json_to_version_info(
-  pkg_json: &deno_package_json::PackageJson,
+  pkg_json: &simien_package_json::PackageJson,
 ) -> Result<NpmPackageVersionInfo, PkgJsonToVersionInfoError> {
   fn parse_deps(
     deps: Option<&IndexMap<String, String>>,
@@ -1966,7 +1966,7 @@ fn pkg_json_to_version_info(
     exports: pkg_json
       .exports
       .as_ref()
-      .map(deno_npm::registry::NpmPackageExportKeys::from_exports_object),
+      .map(simien_npm::registry::NpmPackageExportKeys::from_exports_object),
     dist: None,
     bin: pkg_json
       .bin
@@ -2025,22 +2025,22 @@ mod test {
   use deno_config::workspace::WorkspaceDirectoryRc;
   use deno_config::workspace::WorkspaceDiscoverOptions;
   use deno_config::workspace::WorkspaceDiscoverStart;
-  use deno_npm::registry::NpmPeerDependencyMeta;
-  use deno_path_util::url_from_directory_path;
-  use deno_path_util::url_from_file_path;
-  use deno_semver::VersionReq;
-  use node_resolver::DenoIsBuiltInNodeModuleChecker;
-  use node_resolver::NodeResolver;
-  use node_resolver::NodeResolverOptions;
-  use node_resolver::NpmPackageFolderResolver;
-  use node_resolver::PackageJsonResolver;
-  use node_resolver::cache::NodeResolutionSys;
-  use node_resolver::errors::PackageFolderResolveError;
-  use node_resolver::errors::PackageFolderResolveErrorKind;
-  use node_resolver::errors::PackageNotFoundError;
+  use simien_npm::registry::NpmPeerDependencyMeta;
+  use simien_path_util::url_from_directory_path;
+  use simien_path_util::url_from_file_path;
+  use simien_semver::VersionReq;
+  use simien_node_resolver::DenoIsBuiltInNodeModuleChecker;
+  use simien_node_resolver::NodeResolver;
+  use simien_node_resolver::NodeResolverOptions;
+  use simien_node_resolver::NpmPackageFolderResolver;
+  use simien_node_resolver::PackageJsonResolver;
+  use simien_node_resolver::cache::NodeResolutionSys;
+  use simien_node_resolver::errors::PackageFolderResolveError;
+  use simien_node_resolver::errors::PackageFolderResolveErrorKind;
+  use simien_node_resolver::errors::PackageNotFoundError;
   use serde_json::json;
-  use sys_traits::FsCanonicalize;
-  use sys_traits::impls::InMemorySys;
+  use simien_sys_traits::FsCanonicalize;
+  use simien_sys_traits::impls::InMemorySys;
   use url::Url;
 
   use super::*;
@@ -2052,8 +2052,8 @@ mod test {
 
   pub struct UnreachableSys;
 
-  impl sys_traits::BaseFsMetadata for UnreachableSys {
-    type Metadata = sys_traits::impls::RealFsMetadata;
+  impl simien_sys_traits::BaseFsMetadata for UnreachableSys {
+    type Metadata = simien_sys_traits::impls::RealFsMetadata;
 
     #[doc(hidden)]
     fn base_fs_metadata(
@@ -2072,7 +2072,7 @@ mod test {
     }
   }
 
-  impl sys_traits::BaseFsRead for UnreachableSys {
+  impl simien_sys_traits::BaseFsRead for UnreachableSys {
     fn base_fs_read(
       &self,
       _path: &Path,
@@ -2096,7 +2096,7 @@ mod test {
     fn resolve_package_folder_from_package(
       &self,
       specifier: &str,
-      referrer: &node_resolver::UrlOrPathRef,
+      referrer: &simien_node_resolver::UrlOrPathRef,
     ) -> Result<PathBuf, PackageFolderResolveError> {
       Err(PackageFolderResolveError(Box::new(
         PackageFolderResolveErrorKind::PackageNotFound(PackageNotFoundError {
@@ -2111,7 +2111,7 @@ mod test {
       &self,
       _types_package_name: &str,
       _maybe_package_version: Option<&Version>,
-      _maybe_referrer: Option<&node_resolver::UrlOrPathRef>,
+      _maybe_referrer: Option<&simien_node_resolver::UrlOrPathRef>,
     ) -> Option<PathBuf> {
       None
     }
@@ -2244,7 +2244,7 @@ mod test {
     let resolve = |name: &str, referrer: &str| {
       resolver.resolve(
         name,
-        &url_from_file_path(&deno_path_util::normalize_path(Cow::Owned(
+        &url_from_file_path(&simien_path_util::normalize_path(Cow::Owned(
           root_dir().join(referrer),
         )))
         .unwrap(),
@@ -2786,7 +2786,7 @@ mod test {
   fn resolve_sloppy_imports() {
     let sys = InMemorySys::default();
     let root_url = url_from_file_path(
-      &sys_traits::impls::RealSys.fs_canonicalize("/").unwrap(),
+      &simien_sys_traits::impls::RealSys.fs_canonicalize("/").unwrap(),
     )
     .unwrap();
     let fs = CachedMetadataFs::new(sys.clone(), FsCacheOptions::Enabled);
@@ -3819,7 +3819,7 @@ mod test {
     fn convert(
       text: &str,
     ) -> Result<NpmPackageVersionInfo, PkgJsonToVersionInfoError> {
-      let pkg_json = deno_package_json::PackageJson::load_from_string(
+      let pkg_json = simien_package_json::PackageJson::load_from_string(
         PathBuf::from("package.json"),
         text,
       )
@@ -3865,7 +3865,7 @@ mod test {
         exports: None,
         dist: None,
         has_install_script: None,
-        bin: Some(deno_npm::registry::NpmPackageVersionBinEntry::String(
+        bin: Some(simien_npm::registry::NpmPackageVersionBinEntry::String(
           "./bin.js".to_string()
         )),
         dependencies: HashMap::from([(
@@ -3898,7 +3898,7 @@ mod test {
             "testing2".to_string(),
           )
         ]),
-        // we don't bother ever setting this because we don't store it in deno_package_json
+        // we don't bother ever setting this because we don't store it in simien_package_json
         deprecated: None,
         npm_user: None,
       }

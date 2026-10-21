@@ -5,7 +5,7 @@
 //! the time being it's fine for this to live here.
 use std::fmt::Write as _;
 
-use deno_terminal::colors;
+use simien_terminal::colors;
 use imara_diff::Diff;
 use imara_diff::InternedInput;
 

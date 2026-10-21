@@ -10,19 +10,19 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use deno_config::deno_json::NodeModulesLinkerMode;
-use deno_npm::NpmPackageCacheFolderId;
-use deno_npm::NpmPackageId;
-use deno_npm::NpmSystemInfo;
-use deno_npm::resolution::PackageCacheFolderIdNotFoundError;
-use deno_npm::resolution::PackageNvNotFoundError;
-use deno_npm::resolution::PackageReqNotFoundError;
-use deno_path_util::fs::canonicalize_path_maybe_not_exists;
-use deno_semver::Version;
-use deno_semver::package::PackageReq;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::UrlOrPathRef;
-use node_resolver::cache::NodeResolutionSys;
+use simien_npm::NpmPackageCacheFolderId;
+use simien_npm::NpmPackageId;
+use simien_npm::NpmSystemInfo;
+use simien_npm::resolution::PackageCacheFolderIdNotFoundError;
+use simien_npm::resolution::PackageNvNotFoundError;
+use simien_npm::resolution::PackageReqNotFoundError;
+use simien_path_util::fs::canonicalize_path_maybe_not_exists;
+use simien_semver::Version;
+use simien_semver::package::PackageReq;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::UrlOrPathRef;
+use simien_node_resolver::cache::NodeResolutionSys;
 use url::Url;
 
 use self::common::NpmPackageFsResolver;
@@ -34,7 +34,7 @@ pub use self::resolution::NpmResolutionCellRc;
 use crate::NpmCacheDirRc;
 use crate::npmrc::ResolvedNpmRcRc;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ResolvePkgFolderFromDenoModuleError {
   #[class(inherit)]
   #[error(transparent)]
@@ -44,7 +44,7 @@ pub enum ResolvePkgFolderFromDenoModuleError {
   ResolvePkgFolderFromPkgId(#[from] ResolvePkgFolderFromPkgIdError),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[error(transparent)]
 pub enum ResolvePkgFolderFromPkgIdError {
   #[class(inherit)]
@@ -55,12 +55,12 @@ pub enum ResolvePkgFolderFromPkgIdError {
   FailedCanonicalizing(#[from] FailedCanonicalizingError),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 #[error("Package folder not found for '{0}'")]
-pub struct NpmManagedPackageFolderNotFoundError(deno_semver::StackString);
+pub struct NpmManagedPackageFolderNotFoundError(simien_semver::StackString);
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 #[error("Failed canonicalizing '{}'", path.display())]
 pub struct FailedCanonicalizingError {
@@ -69,7 +69,7 @@ pub struct FailedCanonicalizingError {
   source: std::io::Error,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ManagedResolvePkgFolderFromDenoReqError {
   #[class(inherit)]
   #[error(transparent)]
@@ -79,7 +79,7 @@ pub enum ManagedResolvePkgFolderFromDenoReqError {
   ResolvePkgFolderFromPkgId(#[from] ResolvePkgFolderFromPkgIdError),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ResolvePkgIdFromSpecifierError {
   #[class(inherit)]
   #[error(transparent)]
@@ -99,12 +99,12 @@ pub struct ManagedNpmResolverCreateOptions<TSys: ManagedNpmResolverSys> {
   pub linker_mode: NodeModulesLinkerMode,
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait ManagedNpmResolverSys: GlobalNpmPackageResolverSys + Clone {}
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type ManagedNpmResolverRc<TSys> =
-  deno_maybe_sync::MaybeArc<ManagedNpmResolver<TSys>>;
+  simien_maybe_sync::MaybeArc<ManagedNpmResolver<TSys>>;
 
 #[derive(Debug)]
 pub struct ManagedNpmResolver<TSys: ManagedNpmResolverSys> {
@@ -257,7 +257,7 @@ impl<TSys: ManagedNpmResolverSys> NpmPackageFolderResolver
     &self,
     specifier: &str,
     referrer: &UrlOrPathRef,
-  ) -> Result<PathBuf, node_resolver::errors::PackageFolderResolveError> {
+  ) -> Result<PathBuf, simien_node_resolver::errors::PackageFolderResolveError> {
     let path = self
       .fs_resolver
       .resolve_package_folder_from_package(specifier, referrer)?;
@@ -306,7 +306,7 @@ pub fn create_managed_in_npm_pkg_checker(
 ) -> ManagedInNpmPackageChecker {
   let root_dir = match options.maybe_node_modules_path {
     Some(node_modules_folder) => {
-      deno_path_util::url_from_directory_path(node_modules_folder).unwrap()
+      simien_path_util::url_from_directory_path(node_modules_folder).unwrap()
     }
     None => options.root_cache_dir_url.clone(),
   };

@@ -7,17 +7,17 @@ use std::path::PathBuf;
 
 use anyhow::Error as AnyError;
 use anyhow::anyhow;
-use deno_unsync::sync::AtomicFlag;
+use simien_unsync::sync::AtomicFlag;
 use url::Url;
 
 use super::DiskCache;
 use super::DiskCacheSys;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-pub type EmitCacheRc<TSys> = deno_maybe_sync::MaybeArc<EmitCache<TSys>>;
+pub type EmitCacheRc<TSys> = simien_maybe_sync::MaybeArc<EmitCache<TSys>>;
 
-#[sys_traits::auto_impl]
-pub trait EmitCacheSys: DiskCacheSys + sys_traits::EnvVar {}
+#[simien_sys_traits::auto_impl]
+pub trait EmitCacheSys: DiskCacheSys + simien_sys_traits::EnvVar {}
 
 /// The cache that stores previously emitted files.
 #[derive(Debug)]
@@ -194,7 +194,7 @@ mod test {
   pub fn emit_cache_general_use() {
     let temp_dir = TempDir::new();
     let disk_cache =
-      DiskCache::new(sys_traits::impls::RealSys, temp_dir.path().to_path_buf());
+      DiskCache::new(simien_sys_traits::impls::RealSys, temp_dir.path().to_path_buf());
     let cache = EmitCache {
       disk_cache: disk_cache.clone(),
       file_serializer: EmitFileSerializer {
@@ -204,11 +204,11 @@ mod test {
       mode: Mode::Normal,
     };
 
-    let specifier1 = deno_path_util::url_from_file_path(
+    let specifier1 = simien_path_util::url_from_file_path(
       temp_dir.path().join("file1.ts").as_path(),
     )
     .unwrap();
-    let specifier2 = deno_path_util::url_from_file_path(
+    let specifier2 = simien_path_util::url_from_file_path(
       temp_dir.path().join("file2.ts").as_path(),
     )
     .unwrap();

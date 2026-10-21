@@ -8,7 +8,7 @@ use deno_graph::NpmLoadError;
 use deno_graph::NpmResolvePkgReqsResult;
 use simien_npm::resolution::NpmResolutionError;
 use simien_npm_cache::NpmCacheHttpClient;
-use deno_resolver::graph::FoundPackageJsonDepFlag;
+use simien_resolver::graph::FoundPackageJsonDepFlag;
 use simien_semver::package::PackageReq;
 
 use crate::NpmInstaller;
@@ -142,7 +142,7 @@ impl<TNpmCacheHttpClient: NpmCacheHttpClient, TSys: NpmInstallerSys>
           }
         } else {
           let err =
-            Arc::new(JsErrorBox::from_err(deno_resolver::npm::NoNpmError));
+            Arc::new(JsErrorBox::from_err(simien_resolver::npm::NoNpmError));
           NpmResolvePkgReqsResult {
             results: package_reqs
               .iter()

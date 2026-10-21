@@ -1,21 +1,21 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_maybe_sync::MaybeDashMap;
-use deno_media_type::MediaType;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::PackageJsonResolverRc;
-use node_resolver::ResolutionMode;
-use node_resolver::errors::PackageJsonLoadError;
+use simien_maybe_sync::MaybeDashMap;
+use simien_media_type::MediaType;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::PackageJsonResolverRc;
+use simien_node_resolver::ResolutionMode;
+use simien_node_resolver::errors::PackageJsonLoadError;
 use rustc_hash::FxHashSet;
-use sys_traits::FsMetadata;
-use sys_traits::FsRead;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsRead;
 use url::Url;
 
 pub mod analyzer;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type CjsTrackerRc<TInNpmPackageChecker, TSys> =
-  deno_maybe_sync::MaybeArc<CjsTracker<TInNpmPackageChecker, TSys>>;
+  simien_maybe_sync::MaybeArc<CjsTracker<TInNpmPackageChecker, TSys>>;
 
 /// Keeps track of what module specifiers were resolved as CJS.
 ///
@@ -313,7 +313,7 @@ impl<TInNpmPackageChecker: InNpmPackageChecker, TSys: FsRead + FsMetadata>
     specifier: &Url,
   ) -> Result<ResolutionMode, PackageJsonLoadError> {
     if self.in_npm_pkg_checker.in_npm_package(specifier) {
-      let Ok(path) = deno_path_util::url_to_file_path(specifier) else {
+      let Ok(path) = simien_path_util::url_to_file_path(specifier) else {
         return Ok(ResolutionMode::Require);
       };
       if let Some(pkg_json) =
@@ -329,7 +329,7 @@ impl<TInNpmPackageChecker: InNpmPackageChecker, TSys: FsRead + FsMetadata>
         Ok(ResolutionMode::Require)
       }
     } else if self.mode != IsCjsResolutionMode::Disabled {
-      let Ok(path) = deno_path_util::url_to_file_path(specifier) else {
+      let Ok(path) = simien_path_util::url_to_file_path(specifier) else {
         return Ok(ResolutionMode::Import);
       };
       if let Some(pkg_json) =
@@ -383,7 +383,7 @@ impl<TInNpmPackageChecker: InNpmPackageChecker, TSys: FsRead + FsMetadata>
       | MediaType::SourceMap
       | MediaType::Sql
       | MediaType::Unknown => {
-        let Ok(path) = deno_path_util::url_to_file_path(specifier) else {
+        let Ok(path) = simien_path_util::url_to_file_path(specifier) else {
           return Ok(ResolutionMode::Import);
         };
         let Some(pkg_json) =

@@ -12,7 +12,7 @@ use simien_npm_cache::NpmCache;
 use simien_npm_cache::NpmCacheHttpClient;
 use simien_npm_cache::NpmCacheSys;
 use simien_npm_cache::TarballCache;
-use deno_resolver::npm::managed::NpmResolutionCell;
+use simien_resolver::npm::managed::NpmResolutionCell;
 use simien_terminal::colors;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;

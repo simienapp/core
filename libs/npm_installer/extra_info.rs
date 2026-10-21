@@ -8,7 +8,7 @@ use simien_error::JsErrorBox;
 use simien_npm::NpmPackageExtraInfo;
 use simien_npm::NpmResolutionPackage;
 use simien_npm::registry::NpmRegistryApi;
-use deno_resolver::workspace::WorkspaceNpmLinkPackagesRc;
+use simien_resolver::workspace::WorkspaceNpmLinkPackagesRc;
 use simien_semver::package::PackageNv;
 use parking_lot::RwLock;
 

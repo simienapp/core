@@ -4,27 +4,27 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_package_json::PackageJson;
-use deno_package_json::PackageJsonDepValue;
-use deno_package_json::PackageJsonRc;
-use deno_path_util::url_to_file_path;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::package::PackageReq;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::PackageJsonResolverRc;
-use node_resolver::UrlOrPathRef;
-use node_resolver::cache::NodeResolutionSys;
-use node_resolver::errors::PackageFolderResolveError;
-use node_resolver::errors::PackageFolderResolveIoError;
-use node_resolver::errors::PackageJsonLoadError;
-use node_resolver::errors::PackageNotFoundError;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsDirEntry;
-use sys_traits::FsMetadata;
-use sys_traits::FsRead;
-use sys_traits::FsReadDir;
+use simien_package_json::PackageJson;
+use simien_package_json::PackageJsonDepValue;
+use simien_package_json::PackageJsonRc;
+use simien_path_util::url_to_file_path;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::package::PackageReq;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::PackageJsonResolverRc;
+use simien_node_resolver::UrlOrPathRef;
+use simien_node_resolver::cache::NodeResolutionSys;
+use simien_node_resolver::errors::PackageFolderResolveError;
+use simien_node_resolver::errors::PackageFolderResolveIoError;
+use simien_node_resolver::errors::PackageJsonLoadError;
+use simien_node_resolver::errors::PackageNotFoundError;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsDirEntry;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsRead;
+use simien_sys_traits::FsReadDir;
 use thiserror::Error;
 use url::Url;
 
@@ -32,7 +32,7 @@ use super::local::normalize_pkg_name_for_node_modules_deno_folder;
 use crate::npm::join_package_name_to_path;
 use crate::npm::version_req_matches_including_pre;
 
-#[derive(Debug, Error, deno_error::JsError)]
+#[derive(Debug, Error, simien_error::JsError)]
 pub enum ByonmResolvePkgFolderFromDenoReqError {
   #[class(generic)]
   #[error("Could not find \"{}\" in a node_modules folder. Deno expects the node_modules/ directory to be up to date. Did you forget to run `deno install`?", .0)]
@@ -58,7 +58,7 @@ pub struct ByonmNpmResolverCreateOptions<TSys: FsRead + FsMetadata> {
   pub pkg_json_resolver: PackageJsonResolverRc<TSys>,
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait ByonmNpmResolverSys:
   FsCanonicalize + FsRead + FsMetadata + FsReadDir
 {
@@ -66,7 +66,7 @@ pub trait ByonmNpmResolverSys:
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type ByonmNpmResolverRc<TSys> =
-  deno_maybe_sync::MaybeArc<ByonmNpmResolver<TSys>>;
+  simien_maybe_sync::MaybeArc<ByonmNpmResolver<TSys>>;
 
 #[derive(Debug)]
 pub struct ByonmNpmResolver<TSys: ByonmNpmResolverSys> {
@@ -148,7 +148,7 @@ impl<TSys: ByonmNpmResolverSys> ByonmNpmResolver<TSys> {
             join_package_name_to_path(Cow::Owned(node_modules_folder), alias);
           if sys.is_dir(Cow::Borrowed(&sub_dir)) {
             return Ok(Some(
-              deno_path_util::fs::canonicalize_path_maybe_not_exists(
+              simien_path_util::fs::canonicalize_path_maybe_not_exists(
                 sys, &sub_dir,
               )?,
             ));

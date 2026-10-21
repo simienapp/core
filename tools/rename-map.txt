@@ -41,3 +41,4 @@ capacity_builder_macros simien_capacity_builder_macros
 capacity_builder simien_capacity_builder
 monch simien_monch
 deno_terminal simien_terminal
+deno_resolver simien_resolver

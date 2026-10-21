@@ -30,7 +30,7 @@ simien_npm_cache.workspace = true
 simien_npmrc.workspace = true
 simien_package_json.workspace = true
 simien_path_util.workspace = true
-deno_resolver = { workspace = true, features = ["graph", "sync"] }
+simien_resolver = { workspace = true, features = ["graph", "sync"] }
 simien_semver.workspace = true
 simien_terminal.workspace = true
 simien_unsync.workspace = true

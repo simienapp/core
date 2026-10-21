@@ -13,17 +13,17 @@ pub struct ExternalImportMap {
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type WorkspaceExternalImportMapLoaderRc<TSys> =
-  deno_maybe_sync::MaybeArc<WorkspaceExternalImportMapLoader<TSys>>;
+  simien_maybe_sync::MaybeArc<WorkspaceExternalImportMapLoader<TSys>>;
 
 #[derive(Debug)]
-pub struct WorkspaceExternalImportMapLoader<TSys: sys_traits::FsRead> {
+pub struct WorkspaceExternalImportMapLoader<TSys: simien_sys_traits::FsRead> {
   sys: TSys,
   workspace: WorkspaceRc,
   maybe_external_import_map:
     once_cell::sync::OnceCell<Option<ExternalImportMap>>,
 }
 
-impl<TSys: sys_traits::FsRead> WorkspaceExternalImportMapLoader<TSys> {
+impl<TSys: simien_sys_traits::FsRead> WorkspaceExternalImportMapLoader<TSys> {
   pub fn new(sys: TSys, workspace: WorkspaceRc) -> Self {
     Self {
       sys,

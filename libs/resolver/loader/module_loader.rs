@@ -2,16 +2,16 @@
 
 use std::borrow::Cow;
 
-use boxed_error::Boxed;
+use simien_boxed_error::Boxed;
 use deno_ast::ModuleKind;
 use deno_graph::JsModule;
 use deno_graph::JsonModule;
 use deno_graph::ModuleGraph;
 use deno_graph::WasmModule;
-use deno_media_type::MediaType;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::analyze::CjsAnalysisSourceProvider;
-use node_resolver::errors::PackageJsonLoadError;
+use simien_media_type::MediaType;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::analyze::CjsAnalysisSourceProvider;
+use simien_node_resolver::errors::PackageJsonLoadError;
 use url::Url;
 
 use super::AllowJsonImports;
@@ -38,11 +38,11 @@ use crate::npm::DenoInNpmPackageChecker;
 )]
 type ArcStr = std::sync::Arc<str>;
 
-#[derive(Debug, deno_error::JsError, Boxed)]
+#[derive(Debug, simien_error::JsError, Boxed)]
 #[class(inherit)]
 pub struct LoadPreparedModuleError(pub Box<LoadPreparedModuleErrorKind>);
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum LoadPreparedModuleErrorKind {
   #[class(inherit)]
   #[error(transparent)]
@@ -58,21 +58,21 @@ pub enum LoadPreparedModuleErrorKind {
   Emit(#[from] EmitParsedSourceHelperError),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum LoadMaybeCjsError {
   #[class(inherit)]
   #[error(transparent)]
   NpmModuleLoad(#[from] crate::emit::EmitParsedSourceHelperError),
   #[class(inherit)]
   #[error(transparent)]
-  TranslateCjsToEsm(#[from] node_resolver::analyze::TranslateCjsToEsmError),
+  TranslateCjsToEsm(#[from] simien_node_resolver::analyze::TranslateCjsToEsmError),
 }
 
-#[derive(Debug, deno_error::JsError, Boxed)]
+#[derive(Debug, simien_error::JsError, Boxed)]
 #[class(inherit)]
 pub struct LoadCodeSourceError(pub Box<LoadCodeSourceErrorKind>);
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum LoadCodeSourceErrorKind {
   #[class(inherit)]
   #[error(transparent)]
@@ -98,7 +98,7 @@ pub enum LoadCodeSourceErrorKind {
   NpmModuleLoad(#[from] NpmModuleLoadError),
   #[class(inherit)]
   #[error(transparent)]
-  PathToUrl(#[from] deno_path_util::PathToUrlError),
+  PathToUrl(#[from] simien_path_util::PathToUrlError),
   #[class(inherit)]
   #[error(transparent)]
   UnsupportedScheme(#[from] UnsupportedSchemeError),
@@ -106,7 +106,7 @@ pub enum LoadCodeSourceErrorKind {
 
 // this message list additional `npm` and `jsr` schemes, but they should actually be handled
 // before these APIs are even hit.
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 #[error(
   "Unsupported scheme \"{}\" for module \"{}\". Supported schemes:\n - \"blob\"\n - \"data\"\n - \"file\"\n - \"http\"\n - \"https\"\n - \"jsr\"\n - \"npm\"", url.scheme(), url
@@ -115,7 +115,7 @@ pub struct UnsupportedSchemeError {
   pub url: Url,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 #[error("Loading unprepared module: {}{}", .specifier, .maybe_referrer.as_ref().map(|r| format!(", imported from: {}", r)).unwrap_or_default())]
 pub struct LoadUnpreparedModuleError {
@@ -124,13 +124,13 @@ pub struct LoadUnpreparedModuleError {
 }
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-pub type ModuleLoaderRc<TSys> = deno_maybe_sync::MaybeArc<ModuleLoader<TSys>>;
+pub type ModuleLoaderRc<TSys> = simien_maybe_sync::MaybeArc<ModuleLoader<TSys>>;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait ModuleLoaderSys:
   super::NpmModuleLoaderSys
   + crate::emit::EmitterSys
-  + node_resolver::analyze::NodeCodeTranslatorSys
+  + simien_node_resolver::analyze::NodeCodeTranslatorSys
   + crate::cjs::analyzer::DenoCjsCodeAnalyzerSys
   + crate::npm::NpmResolverSys
 {
@@ -195,7 +195,7 @@ impl<TSys: ModuleLoaderSys> ModuleLoader<TSys> {
     graph: &'a ModuleGraph,
     specifier: &'a Url,
     // todo(#30074): we should remove passing the referrer in here and remove the
-    // referrer from all error messages. This should be up to deno_core to display.
+    // referrer from all error messages. This should be up to simien_core to display.
     maybe_referrer: Option<&Url>,
     requested_module_type: &RequestedModuleType<'_>,
     cjs_analysis_source_provider: Option<&dyn CjsAnalysisSourceProvider>,

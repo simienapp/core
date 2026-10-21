@@ -1,3 +1,3 @@
-# deno_resolver
+# simien_resolver
 
 Deno resolution algorithm.

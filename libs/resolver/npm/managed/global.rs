@@ -5,20 +5,20 @@
 use std::borrow::Cow;
 use std::path::PathBuf;
 
-use deno_npm::NpmPackageCacheFolderId;
-use deno_npm::NpmPackageId;
-use deno_semver::StackString;
-use deno_semver::Version;
-use deno_semver::package::PackageNv;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::UrlOrPathRef;
-use node_resolver::cache::NodeResolutionSys;
-use node_resolver::errors::PackageFolderResolveError;
-use node_resolver::errors::PackageFolderResolveIoError;
-use node_resolver::errors::PackageNotFoundError;
-use node_resolver::errors::ReferrerNotFoundError;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsMetadata;
+use simien_npm::NpmPackageCacheFolderId;
+use simien_npm::NpmPackageId;
+use simien_semver::StackString;
+use simien_semver::Version;
+use simien_semver::package::PackageNv;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::UrlOrPathRef;
+use simien_node_resolver::cache::NodeResolutionSys;
+use simien_node_resolver::errors::PackageFolderResolveError;
+use simien_node_resolver::errors::PackageFolderResolveIoError;
+use simien_node_resolver::errors::PackageNotFoundError;
+use simien_node_resolver::errors::ReferrerNotFoundError;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsMetadata;
 use url::Url;
 
 use super::super::join_package_name_to_path;
@@ -26,7 +26,7 @@ use super::NpmCacheDirRc;
 use super::resolution::NpmResolutionCellRc;
 use crate::npmrc::ResolvedNpmRcRc;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait GlobalNpmPackageResolverSys: FsCanonicalize + FsMetadata {}
 
 /// Resolves packages from the global npm cache.
@@ -103,7 +103,7 @@ impl<TSys: GlobalNpmPackageResolverSys> GlobalNpmPackageResolver<TSys> {
       return Ok(None);
     };
     // strip any subpath (e.g. "@denotest/add2/sub.js" -> "@denotest/add2")
-    let name = deno_npm::package_name_without_subpath(name);
+    let name = simien_npm::package_name_without_subpath(name);
     let cache_location = self.cache.root_dir();
     for current_folder in referrer_path
       .ancestors()
@@ -146,7 +146,7 @@ impl<TSys: GlobalNpmPackageResolverSys> NpmPackageFolderResolver
     name: &str,
     referrer: &UrlOrPathRef,
   ) -> Result<PathBuf, PackageFolderResolveError> {
-    use deno_npm::resolution::PackageNotFoundFromReferrerError;
+    use simien_npm::resolution::PackageNotFoundFromReferrerError;
     let Some(referrer_cache_folder_id) = self
       .resolve_package_cache_folder_id_from_specifier_inner(referrer.url()?)
     else {

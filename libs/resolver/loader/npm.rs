@@ -3,14 +3,14 @@
 use std::borrow::Cow;
 use std::path::PathBuf;
 
-use deno_media_type::MediaType;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::IsBuiltInNodeModuleChecker;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::analyze::CjsAnalysisSourceProvider;
-use node_resolver::analyze::CjsCodeAnalyzer;
-use node_resolver::analyze::NodeCodeTranslatorRc;
-use node_resolver::analyze::NodeCodeTranslatorSys;
+use simien_media_type::MediaType;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::IsBuiltInNodeModuleChecker;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::analyze::CjsAnalysisSourceProvider;
+use simien_node_resolver::analyze::CjsCodeAnalyzer;
+use simien_node_resolver::analyze::NodeCodeTranslatorRc;
+use simien_node_resolver::analyze::NodeCodeTranslatorSys;
 use thiserror::Error;
 use url::Url;
 
@@ -20,7 +20,7 @@ use super::RequestedModuleType;
 use super::media_type_name;
 use crate::cjs::CjsTrackerRc;
 
-#[derive(Debug, Error, deno_error::JsError)]
+#[derive(Debug, Error, simien_error::JsError)]
 #[class(type)]
 #[error("[{}]: Stripping types is currently unsupported for files under node_modules, for \"{}\"", self.code(), specifier)]
 pub struct StrippingTypesNodeModulesError {
@@ -33,20 +33,20 @@ impl StrippingTypesNodeModulesError {
   }
 }
 
-#[derive(Debug, Error, deno_error::JsError)]
+#[derive(Debug, Error, simien_error::JsError)]
 pub enum NpmModuleLoadError {
   #[class(inherit)]
   #[error(transparent)]
-  UrlToFilePath(#[from] deno_path_util::UrlToFilePathError),
+  UrlToFilePath(#[from] simien_path_util::UrlToFilePathError),
   #[class(inherit)]
   #[error(transparent)]
   StrippingTypesNodeModules(#[from] StrippingTypesNodeModulesError),
   #[class(inherit)]
   #[error(transparent)]
-  ClosestPkgJson(#[from] node_resolver::errors::PackageJsonLoadError),
+  ClosestPkgJson(#[from] simien_node_resolver::errors::PackageJsonLoadError),
   #[class(inherit)]
   #[error(transparent)]
-  TranslateCjsToEsm(#[from] node_resolver::analyze::TranslateCjsToEsmError),
+  TranslateCjsToEsm(#[from] simien_node_resolver::analyze::TranslateCjsToEsmError),
   #[class(inherit)]
   #[error("Unable to load {}{}", file_path.display(), maybe_referrer.as_ref().map(|r| format!(" imported from {}", r)).unwrap_or_default())]
   UnableToLoad {
@@ -101,17 +101,17 @@ fn format_dir_import_message(
   msg
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NpmModuleLoaderSys: NodeCodeTranslatorSys {}
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type DenoNpmModuleLoaderRc<TSys> =
-  deno_maybe_sync::MaybeArc<DenoNpmModuleLoader<TSys>>;
+  simien_maybe_sync::MaybeArc<DenoNpmModuleLoader<TSys>>;
 
 pub type DenoNpmModuleLoader<TSys> = NpmModuleLoader<
   crate::cjs::analyzer::DenoCjsCodeAnalyzer<TSys>,
   crate::npm::DenoInNpmPackageChecker,
-  node_resolver::DenoIsBuiltInNodeModuleChecker,
+  simien_node_resolver::DenoIsBuiltInNodeModuleChecker,
   crate::npm::NpmResolver<TSys>,
   TSys,
 >;
@@ -178,7 +178,7 @@ impl<
     requested_module_type: &RequestedModuleType<'_>,
     fallback_source_provider: Option<&dyn CjsAnalysisSourceProvider>,
   ) -> Result<LoadedModule<'a>, NpmModuleLoadError> {
-    let file_path = deno_path_util::url_to_file_path(&specifier)?;
+    let file_path = simien_path_util::url_to_file_path(&specifier)?;
     let code = self.sys.fs_read(&file_path).map_err(|source| {
       if self.sys.fs_is_dir_no_err(&file_path) {
         let suggestion = ["index.mjs", "index.js", "index.cjs"]
@@ -283,7 +283,7 @@ where
         .fallback
         .and_then(|provider| provider.load_source(specifier));
     }
-    let path = deno_path_util::url_to_file_path(specifier).ok()?;
+    let path = simien_path_util::url_to_file_path(specifier).ok()?;
     self
       .sys
       .fs_read_to_string_lossy(path)

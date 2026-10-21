@@ -6,26 +6,26 @@
 use std::borrow::Cow;
 use std::path::PathBuf;
 
-use boxed_error::Boxed;
-use deno_cache_dir::npm::NpmCacheDir;
-use deno_error::JsError;
-use deno_package_json::PackageJsonDepValue;
-use deno_package_json::PackageJsonDepValueParseError;
-use deno_semver::npm::NpmPackageReqReference;
-pub use node_resolver::DenoIsBuiltInNodeModuleChecker;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::IsBuiltInNodeModuleChecker;
-use node_resolver::NodeResolutionKind;
-pub use node_resolver::NodeResolverOptions;
-use node_resolver::NodeResolverRc;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::ResolutionMode;
-use node_resolver::UrlOrPath;
-use node_resolver::UrlOrPathRef;
-use node_resolver::errors::NodeJsErrorCode;
-use node_resolver::errors::NodeResolveError;
-use node_resolver::errors::NodeResolveErrorKind;
-use node_resolver::errors::UnknownBuiltInNodeModuleError;
+use simien_boxed_error::Boxed;
+use simien_cache_dir::npm::NpmCacheDir;
+use simien_error::JsError;
+use simien_package_json::PackageJsonDepValue;
+use simien_package_json::PackageJsonDepValueParseError;
+use simien_semver::npm::NpmPackageReqReference;
+pub use simien_node_resolver::DenoIsBuiltInNodeModuleChecker;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::IsBuiltInNodeModuleChecker;
+use simien_node_resolver::NodeResolutionKind;
+pub use simien_node_resolver::NodeResolverOptions;
+use simien_node_resolver::NodeResolverRc;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::ResolutionMode;
+use simien_node_resolver::UrlOrPath;
+use simien_node_resolver::UrlOrPathRef;
+use simien_node_resolver::errors::NodeJsErrorCode;
+use simien_node_resolver::errors::NodeResolveError;
+use simien_node_resolver::errors::NodeResolveErrorKind;
+use simien_node_resolver::errors::UnknownBuiltInNodeModuleError;
 use npm::NodeModulesOutOfDateError;
 use npm::NpmReqResolverRc;
 use npm::ResolveIfForNpmPackageErrorKind;
@@ -69,10 +69,10 @@ pub mod yarn_lockfile_import;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type WorkspaceResolverRc<TSys> =
-  deno_maybe_sync::MaybeArc<WorkspaceResolver<TSys>>;
+  simien_maybe_sync::MaybeArc<WorkspaceResolver<TSys>>;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
-pub(crate) type NpmCacheDirRc = deno_maybe_sync::MaybeArc<NpmCacheDir>;
+pub(crate) type NpmCacheDirRc = simien_maybe_sync::MaybeArc<NpmCacheDir>;
 
 #[derive(Debug, Clone)]
 pub struct DenoResolution {
@@ -157,7 +157,7 @@ pub enum DenoResolveErrorKind {
   PackageJsonDepValueUrlParse(url::ParseError),
   #[class(inherit)]
   #[error(transparent)]
-  PathToUrl(#[from] deno_path_util::PathToUrlError),
+  PathToUrl(#[from] simien_path_util::PathToUrlError),
   #[class(inherit)]
   #[error(transparent)]
   ResolveNpmReqRef(#[from] ResolveNpmReqRefError),
@@ -197,7 +197,7 @@ pub struct NodeAndNpmResolvers<
   TNpmPackageFolderResolver: NpmPackageFolderResolver,
   TSys: NpmResolverSys,
 > {
-  pub node_resolver: NodeResolverRc<
+  pub simien_node_resolver: NodeResolverRc<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
     TNpmPackageFolderResolver,
@@ -212,7 +212,7 @@ pub struct NodeAndNpmResolvers<
   >,
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait DenoResolverSys: NpmResolverSys {}
 
 pub struct DenoResolverOptions<
@@ -245,7 +245,7 @@ pub type RawDenoResolverRc<
   TIsBuiltInNodeModuleChecker,
   TNpmPackageFolderResolver,
   TSys,
-> = deno_maybe_sync::MaybeArc<
+> = simien_maybe_sync::MaybeArc<
   RawDenoResolver<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
@@ -314,7 +314,7 @@ impl<
       is_byonm: options.is_byonm,
       maybe_vendor_specifier: options
         .maybe_vendor_dir
-        .and_then(|v| deno_path_util::url_from_directory_path(v).ok()),
+        .and_then(|v| simien_path_util::url_from_directory_path(v).ok()),
     }
   }
 
@@ -329,19 +329,19 @@ impl<
     let mut maybe_diagnostic = None;
     // Use node resolution if we're in an npm package
     if let Some(node_and_npm_resolver) = self.node_and_npm_resolver.as_ref() {
-      let node_resolver = &node_and_npm_resolver.node_resolver;
+      let simien_node_resolver = &node_and_npm_resolver.simien_node_resolver;
       if referrer.scheme() == "file"
         && self.in_npm_pkg_checker.in_npm_package(referrer)
       {
         log::debug!(
           "{}: specifier={} referrer={} mode={:?} kind={:?}",
-          deno_terminal::colors::magenta("resolving in npm package"),
+          simien_terminal::colors::magenta("resolving in npm package"),
           raw_specifier,
           referrer,
           resolution_mode,
           resolution_kind
         );
-        return node_resolver
+        return simien_node_resolver
           .resolve(raw_specifier, referrer, resolution_mode, resolution_kind)
           .and_then(|res| {
             Ok(DenoResolution {
@@ -381,7 +381,7 @@ impl<
           .node_and_npm_resolver
           .as_ref()
           .unwrap()
-          .node_resolver
+          .simien_node_resolver
           .resolve_package_subpath_from_deno_module(
             pkg_json.dir_path(),
             sub_path.as_deref(),
@@ -445,7 +445,7 @@ impl<
                     .node_and_npm_resolver
                     .as_ref()
                     .unwrap()
-                    .node_resolver
+                    .simien_node_resolver
                     .resolve_package_subpath_from_deno_module(
                       pkg_folder,
                       sub_path.as_deref(),
@@ -485,7 +485,7 @@ impl<
           .node_and_npm_resolver
           .as_ref()
           .unwrap()
-          .node_resolver
+          .simien_node_resolver
           .resolve_package_import(
             raw_specifier,
             Some(&UrlOrPathRef::from_url(referrer)),
@@ -516,7 +516,7 @@ impl<
     }
 
     let Some(NodeAndNpmResolvers {
-      node_resolver,
+      simien_node_resolver,
       npm_req_resolver,
       ..
     }) = &self.node_and_npm_resolver
@@ -532,7 +532,7 @@ impl<
       Ok(specifier) => {
         if specifier.scheme() == "node" {
           let module_name = specifier.path();
-          return if node_resolver.is_builtin_node_module(module_name) {
+          return if simien_node_resolver.is_builtin_node_module(module_name) {
             Ok(DenoResolution {
               url: specifier,
               maybe_diagnostic,
@@ -561,7 +561,7 @@ impl<
               npm_req_ref.req(),
             )
           {
-            return node_resolver
+            return simien_node_resolver
               .resolve_package_subpath_from_deno_module(
                 pkg_folder,
                 npm_req_ref.sub_path(),
@@ -607,7 +607,7 @@ impl<
         }
 
         Ok(DenoResolution {
-          url: node_resolver
+          url: simien_node_resolver
             .handle_if_in_node_modules(&specifier)
             .unwrap_or(specifier),
           maybe_diagnostic,
@@ -618,7 +618,7 @@ impl<
         // Check if the bare specifier is a known Node built-in module.
         // Built-ins always take priority, matching Node.js behavior where
         // built-in modules cannot be shadowed by node_modules packages.
-        if node_resolver.is_builtin_node_module(raw_specifier) {
+        if simien_node_resolver.is_builtin_node_module(raw_specifier) {
           return Ok(DenoResolution {
             url: Url::parse(&format!("node:{}", raw_specifier)).unwrap(),
             maybe_diagnostic,
@@ -664,7 +664,7 @@ impl<
     referrer: &Url,
     resolution_mode: ResolutionMode,
     resolution_kind: NodeResolutionKind,
-  ) -> Result<node_resolver::UrlOrPath, npm::ResolveNpmReqRefError> {
+  ) -> Result<simien_node_resolver::UrlOrPath, npm::ResolveNpmReqRefError> {
     let Some(NodeAndNpmResolvers {
       npm_req_resolver, ..
     }) = &self.node_and_npm_resolver
@@ -691,7 +691,7 @@ impl<
 /// The variable is read exactly once (via `sys`) and cached. Module loading
 /// happens before any user code runs, so the value is effectively snapshotted
 /// at startup and cannot be toggled later via `Deno.env.set`.
-pub fn is_react_cve_patch_enabled(sys: &impl sys_traits::EnvVar) -> bool {
+pub fn is_react_cve_patch_enabled(sys: &impl simien_sys_traits::EnvVar) -> bool {
   static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
   *ENABLED.get_or_init(|| {
     sys

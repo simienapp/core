@@ -17,16 +17,16 @@ use deno_ast::swc::ast::Decorator;
 use deno_ast::swc::ecma_visit::Visit;
 use deno_ast::swc::ecma_visit::VisitWith;
 use deno_ast::swc::ecma_visit::noop_visit_type;
-use deno_error::JsErrorBox;
+use simien_error::JsErrorBox;
 use deno_graph::MediaType;
 use deno_graph::Module;
 use deno_graph::ModuleGraph;
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
 use futures::FutureExt;
 use futures::StreamExt;
 use futures::stream::FuturesUnordered;
-use node_resolver::InNpmPackageChecker;
+use simien_node_resolver::InNpmPackageChecker;
 use url::Url;
 
 use crate::cache::EmitCacheRc;
@@ -45,9 +45,9 @@ type ArcStr = std::sync::Arc<str>;
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type EmitterRc<TInNpmPackageChecker, TSys> =
-  deno_maybe_sync::MaybeArc<Emitter<TInNpmPackageChecker, TSys>>;
+  simien_maybe_sync::MaybeArc<Emitter<TInNpmPackageChecker, TSys>>;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait EmitterSys: EmitCacheSys {}
 
 #[derive(Debug)]
@@ -297,7 +297,7 @@ impl<TInNpmPackageChecker: InNpmPackageChecker, TSys: EmitterSys>
     emit_options.source_map = SourceMapOption::Separate;
     // strip off the path to have more deterministic builds as we don't care
     // about the source name because we manually provide the source map to v8
-    emit_options.source_map_base = Some(deno_path_util::url_parent(specifier));
+    emit_options.source_map_base = Some(simien_path_util::url_parent(specifier));
     let parsed_source = self.parsed_source_cache.remove_or_parse_module(
       specifier,
       media_type,
@@ -466,7 +466,7 @@ enum PreEmitResult {
   NotCached { source_hash: u64 },
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum EmitParsedSourceHelperError {
   #[class(inherit)]
   #[error(transparent)]

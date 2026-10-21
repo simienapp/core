@@ -4,14 +4,14 @@ use std::cmp::Ordering;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_npm::NpmPackageCacheFolderId;
-use deno_npm::NpmPackageId;
-use deno_npm::resolution::NpmResolutionSnapshot;
-use deno_semver::Version;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::UrlOrPathRef;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsMetadata;
+use simien_npm::NpmPackageCacheFolderId;
+use simien_npm::NpmPackageId;
+use simien_npm::resolution::NpmResolutionSnapshot;
+use simien_semver::Version;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::UrlOrPathRef;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsMetadata;
 use url::Url;
 
 #[derive(Debug)]
@@ -65,7 +65,7 @@ impl<TSys: FsCanonicalize + FsMetadata> NpmPackageFolderResolver
     &self,
     specifier: &str,
     referrer: &UrlOrPathRef,
-  ) -> Result<PathBuf, node_resolver::errors::PackageFolderResolveError> {
+  ) -> Result<PathBuf, simien_node_resolver::errors::PackageFolderResolveError> {
     match self {
       NpmPackageFsResolver::Local(r) => {
         r.resolve_package_folder_from_package(specifier, referrer)

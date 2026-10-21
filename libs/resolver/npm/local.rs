@@ -2,11 +2,11 @@
 
 use std::borrow::Cow;
 
-use deno_cache_dir::npm::mixed_case_package_name_decode;
-use deno_cache_dir::npm::mixed_case_package_name_encode;
-use deno_npm::NpmPackageCacheFolderId;
-use deno_semver::StackString;
-use deno_semver::package::PackageNv;
+use simien_cache_dir::npm::mixed_case_package_name_decode;
+use simien_cache_dir::npm::mixed_case_package_name_encode;
+use simien_npm::NpmPackageCacheFolderId;
+use simien_semver::StackString;
+use simien_semver::package::PackageNv;
 
 #[inline]
 pub fn get_package_folder_id_folder_name(
@@ -48,7 +48,7 @@ pub fn get_package_folder_id_from_folder_name(
     }
     None => (ending, 0),
   };
-  let version = deno_semver::Version::parse_from_npm(raw_version).ok()?;
+  let version = simien_semver::Version::parse_from_npm(raw_version).ok()?;
   Some(NpmPackageCacheFolderId {
     nv: PackageNv { name, version },
     copy_index,
@@ -73,8 +73,8 @@ pub fn normalize_pkg_name_for_node_modules_deno_folder(
 
 #[cfg(test)]
 mod test {
-  use deno_npm::NpmPackageCacheFolderId;
-  use deno_semver::package::PackageNv;
+  use simien_npm::NpmPackageCacheFolderId;
+  use simien_semver::package::PackageNv;
 
   use super::*;
 

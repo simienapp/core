@@ -6,20 +6,20 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_npm::NpmPackageCacheFolderId;
-use deno_npm::NpmPackageId;
-use deno_path_util::fs::canonicalize_path_maybe_not_exists;
-use deno_path_util::url_from_directory_path;
-use deno_semver::Version;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::UrlOrPathRef;
-use node_resolver::cache::NodeResolutionSys;
-use node_resolver::errors::PackageFolderResolveError;
-use node_resolver::errors::PackageFolderResolveIoError;
-use node_resolver::errors::PackageNotFoundError;
-use node_resolver::errors::ReferrerNotFoundError;
-use sys_traits::FsCanonicalize;
-use sys_traits::FsMetadata;
+use simien_npm::NpmPackageCacheFolderId;
+use simien_npm::NpmPackageId;
+use simien_path_util::fs::canonicalize_path_maybe_not_exists;
+use simien_path_util::url_from_directory_path;
+use simien_semver::Version;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::UrlOrPathRef;
+use simien_node_resolver::cache::NodeResolutionSys;
+use simien_node_resolver::errors::PackageFolderResolveError;
+use simien_node_resolver::errors::PackageFolderResolveIoError;
+use simien_node_resolver::errors::PackageNotFoundError;
+use simien_node_resolver::errors::ReferrerNotFoundError;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsMetadata;
 use url::Url;
 
 use super::super::join_package_name_to_path;
@@ -126,7 +126,7 @@ impl<TSys: FsCanonicalize + FsMetadata> LocalNpmPackageResolver<TSys> {
       return Ok(None);
     }
     // it's within the directory, so use it
-    let Some(path) = deno_path_util::url_to_file_path(specifier).ok() else {
+    let Some(path) = simien_path_util::url_to_file_path(specifier).ok() else {
       return Ok(None);
     };
     // Canonicalize the path so it's not pointing to the symlinked directory

@@ -6,12 +6,12 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::bail;
-use boxed_error::Boxed;
-use deno_cache_dir::DenoDirResolutionError;
-use deno_cache_dir::GlobalHttpCacheRc;
-use deno_cache_dir::GlobalOrLocalHttpCache;
-use deno_cache_dir::LocalHttpCache;
-use deno_cache_dir::npm::NpmCacheDir;
+use simien_boxed_error::Boxed;
+use simien_cache_dir::DenoDirResolutionError;
+use simien_cache_dir::GlobalHttpCacheRc;
+use simien_cache_dir::GlobalOrLocalHttpCache;
+use simien_cache_dir::LocalHttpCache;
+use simien_cache_dir::npm::NpmCacheDir;
 use deno_config::deno_json::MinimumDependencyAgeConfig;
 use deno_config::deno_json::NewestDependencyDate;
 use deno_config::deno_json::NodeModulesDirMode;
@@ -24,25 +24,25 @@ use deno_config::workspace::WorkspaceDirectoryRc;
 use deno_config::workspace::WorkspaceDiscoverError;
 use deno_config::workspace::WorkspaceDiscoverOptions;
 use deno_config::workspace::WorkspaceDiscoverStart;
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
-use deno_maybe_sync::new_rc;
-pub use deno_npm::NpmSystemInfo;
-use deno_npm::resolution::NpmOverrides;
-use deno_npm::resolution::NpmVersionResolver;
-use deno_path_util::fs::canonicalize_path_maybe_not_exists;
-use deno_semver::package::PackageName;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
+use simien_maybe_sync::new_rc;
+pub use simien_npm::NpmSystemInfo;
+use simien_npm::resolution::NpmOverrides;
+use simien_npm::resolution::NpmVersionResolver;
+use simien_path_util::fs::canonicalize_path_maybe_not_exists;
+use simien_semver::package::PackageName;
 use futures::future::FutureExt;
-use node_resolver::DenoIsBuiltInNodeModuleChecker;
-use node_resolver::NodeResolver;
-use node_resolver::NodeResolverOptions;
-use node_resolver::NodeResolverRc;
-use node_resolver::PackageJsonResolver;
-use node_resolver::PackageJsonResolverRc;
-use node_resolver::analyze::CjsModuleExportAnalyzerRc;
-use node_resolver::analyze::NodeCodeTranslator;
-use node_resolver::analyze::NodeCodeTranslatorRc;
-use node_resolver::cache::NodeResolutionSys;
+use simien_node_resolver::DenoIsBuiltInNodeModuleChecker;
+use simien_node_resolver::NodeResolver;
+use simien_node_resolver::NodeResolverOptions;
+use simien_node_resolver::NodeResolverRc;
+use simien_node_resolver::PackageJsonResolver;
+use simien_node_resolver::PackageJsonResolverRc;
+use simien_node_resolver::analyze::CjsModuleExportAnalyzerRc;
+use simien_node_resolver::analyze::NodeCodeTranslator;
+use simien_node_resolver::analyze::NodeCodeTranslatorRc;
+use simien_node_resolver::cache::NodeResolutionSys;
 use thiserror::Error;
 use url::Url;
 
@@ -118,11 +118,11 @@ pub type DenoNodeCodeTranslatorRc<TSys> = NodeCodeTranslatorRc<
   TSys,
 >;
 #[allow(clippy::disallowed_types, reason = "definition")]
-pub type NpmVersionResolverRc = deno_maybe_sync::MaybeArc<NpmVersionResolver>;
+pub type NpmVersionResolverRc = simien_maybe_sync::MaybeArc<NpmVersionResolver>;
 #[cfg(feature = "graph")]
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type JsrVersionResolverRc =
-  deno_maybe_sync::MaybeArc<deno_graph::packages::JsrVersionResolver>;
+  simien_maybe_sync::MaybeArc<deno_graph::packages::JsrVersionResolver>;
 
 #[derive(Debug, Boxed)]
 pub struct HttpCacheCreateError(pub Box<HttpCacheCreateErrorKind>);
@@ -169,7 +169,7 @@ pub enum ConfigDiscoveryOption {
 }
 
 /// Resolves the JSR registry URL to use for the given system.
-pub fn resolve_jsr_url(sys: &impl sys_traits::EnvVar) -> Url {
+pub fn resolve_jsr_url(sys: &impl simien_sys_traits::EnvVar) -> Url {
   let env_var_name = "JSR_URL";
   if let Ok(registry_url) = sys.env_var(env_var_name) {
     // ensure there is a trailing slash for the directory
@@ -231,17 +231,17 @@ pub struct WorkspaceFactoryOptions {
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type WorkspaceFactoryRc<TSys> =
-  deno_maybe_sync::MaybeArc<WorkspaceFactory<TSys>>;
+  simien_maybe_sync::MaybeArc<WorkspaceFactory<TSys>>;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait WorkspaceFactorySys:
   DenoDirSys
   + crate::lockfile::LockfileSys
   + crate::npm::NpmResolverSys
-  + deno_cache_dir::GlobalHttpCacheSys
-  + deno_cache_dir::LocalHttpCacheSys
+  + simien_cache_dir::GlobalHttpCacheSys
+  + simien_cache_dir::LocalHttpCacheSys
   + crate::loader::NpmModuleLoaderSys
-  + sys_traits::SystemTimeNow
+  + simien_sys_traits::SystemTimeNow
 {
 }
 
@@ -498,7 +498,7 @@ impl<TSys: WorkspaceFactorySys> WorkspaceFactory<TSys> {
   ) -> Result<&GlobalHttpCacheRc<TSys>, DenoDirResolutionError> {
     self.global_http_cache.get_or_try_init(|| {
       let global_cache_dir = self.deno_dir()?.remote_folder_path();
-      let global_http_cache = new_rc(deno_cache_dir::GlobalHttpCache::new(
+      let global_http_cache = new_rc(simien_cache_dir::GlobalHttpCache::new(
         self.sys.clone(),
         global_cache_dir,
       ));
@@ -508,7 +508,7 @@ impl<TSys: WorkspaceFactorySys> WorkspaceFactory<TSys> {
 
   pub fn http_cache(
     &self,
-  ) -> Result<&deno_cache_dir::GlobalOrLocalHttpCache<TSys>, HttpCacheCreateError>
+  ) -> Result<&simien_cache_dir::GlobalOrLocalHttpCache<TSys>, HttpCacheCreateError>
   {
     self.http_cache.get_or_try_init(|| {
       let global_cache = self.global_http_cache()?.clone();
@@ -517,7 +517,7 @@ impl<TSys: WorkspaceFactorySys> WorkspaceFactory<TSys> {
           let local_cache = LocalHttpCache::new(
             local_path.clone(),
             global_cache,
-            deno_cache_dir::GlobalToLocalCopy::Allow,
+            simien_cache_dir::GlobalToLocalCopy::Allow,
             self.jsr_url().clone(),
           );
           Ok(new_rc(local_cache).into())
@@ -529,7 +529,7 @@ impl<TSys: WorkspaceFactorySys> WorkspaceFactory<TSys> {
 
   pub async fn maybe_lockfile(
     &self,
-    npm_package_info_provider: &dyn deno_lockfile::NpmPackageInfoProvider,
+    npm_package_info_provider: &dyn simien_lockfile::NpmPackageInfoProvider,
   ) -> Result<Option<&LockfileLockRc<TSys>>, anyhow::Error> {
     self
       .lockfile
@@ -561,7 +561,7 @@ impl<TSys: WorkspaceFactorySys> WorkspaceFactory<TSys> {
           npm_package_info_provider,
         )
         .await?
-        .map(deno_maybe_sync::new_rc);
+        .map(simien_maybe_sync::new_rc);
 
         Ok(maybe_lock_file)
       })
@@ -620,7 +620,7 @@ impl<TSys: WorkspaceFactorySys> WorkspaceFactory<TSys> {
         }
         WorkspaceDiscoverOptions {
           deno_json_cache: None,
-          pkg_json_cache: Some(&node_resolver::PackageJsonThreadLocalCache),
+          pkg_json_cache: Some(&simien_node_resolver::PackageJsonThreadLocalCache),
           workspace_cache: None,
           additional_config_file_names: self
             .options
@@ -631,7 +631,7 @@ impl<TSys: WorkspaceFactorySys> WorkspaceFactory<TSys> {
       };
       let resolve_empty_options = || WorkspaceDirectoryEmptyOptions {
         root_dir: new_rc(
-          deno_path_util::url_from_directory_path(&self.initial_cwd).unwrap(),
+          simien_path_util::url_from_directory_path(&self.initial_cwd).unwrap(),
         ),
         use_vendor_dir: maybe_vendor_override
           .unwrap_or(VendorEnablement::Disable),
@@ -717,11 +717,11 @@ pub struct ResolverFactoryOptions {
   /// Prevents installing packages newer than the specified date.
   pub newest_dependency_date: Option<NewestDependencyDate>,
   pub node_analysis_cache: Option<NodeAnalysisCacheRc>,
-  pub node_code_translator_mode: node_resolver::analyze::NodeCodeTranslatorMode,
+  pub node_code_translator_mode: simien_node_resolver::analyze::NodeCodeTranslatorMode,
   pub node_resolver_options: NodeResolverOptions,
-  pub node_resolution_cache: Option<node_resolver::NodeResolutionCacheRc>,
+  pub node_resolution_cache: Option<simien_node_resolver::NodeResolutionCacheRc>,
   pub npm_system_info: NpmSystemInfo,
-  pub package_json_cache: Option<node_resolver::PackageJsonCacheRc>,
+  pub package_json_cache: Option<simien_node_resolver::PackageJsonCacheRc>,
   pub package_json_dep_resolution: Option<PackageJsonDepResolution>,
   pub specified_import_map: Option<Box<dyn SpecifiedImportMapProvider>>,
   pub unstable_sloppy_imports: bool,
@@ -740,7 +740,7 @@ pub struct ResolverFactory<TSys: WorkspaceFactorySys> {
   cjs_tracker: Deferred<CjsTrackerRc<DenoInNpmPackageChecker, TSys>>,
   compiler_options_resolver: Deferred<CompilerOptionsResolverRc>,
   #[cfg(feature = "graph")]
-  deno_resolver:
+  simien_resolver:
     async_once_cell::OnceCell<crate::graph::DefaultDenoResolverRc<TSys>>,
   #[cfg(feature = "deno_ast")]
   emitter: Deferred<crate::emit::EmitterRc<DenoInNpmPackageChecker, TSys>>,
@@ -751,7 +751,7 @@ pub struct ResolverFactory<TSys: WorkspaceFactorySys> {
   jsr_version_resolver: Deferred<JsrVersionResolverRc>,
   minimum_dependency_age: Deferred<MinimumDependencyAgeConfig>,
   node_code_translator: Deferred<DenoNodeCodeTranslatorRc<TSys>>,
-  node_resolver: Deferred<
+  simien_node_resolver: Deferred<
     NodeResolverRc<
       DenoInNpmPackageChecker,
       DenoIsBuiltInNodeModuleChecker,
@@ -796,7 +796,7 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
       compiler_options_resolver: Default::default(),
       raw_deno_resolver: Default::default(),
       #[cfg(feature = "graph")]
-      deno_resolver: Default::default(),
+      simien_resolver: Default::default(),
       #[cfg(feature = "deno_ast")]
       emitter: Default::default(),
       #[cfg(feature = "graph")]
@@ -806,7 +806,7 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
       jsr_version_resolver: Default::default(),
       minimum_dependency_age: Default::default(),
       node_code_translator: Default::default(),
-      node_resolver: Default::default(),
+      simien_node_resolver: Default::default(),
       npm_module_loader: Default::default(),
       npm_req_resolver: Default::default(),
       npm_resolution: Default::default(),
@@ -836,7 +836,7 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
               None
             } else {
               Some(NodeAndNpmResolvers {
-                node_resolver: self.node_resolver()?.clone(),
+                simien_node_resolver: self.simien_node_resolver()?.clone(),
                 npm_resolver: self.npm_resolver()?.clone(),
                 npm_req_resolver: self.npm_req_resolver()?.clone(),
               })
@@ -875,10 +875,10 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
         new_rc(crate::cjs::analyzer::NotImplementedModuleExportAnalyzer),
       );
       Ok(new_rc(
-        node_resolver::analyze::CjsModuleExportAnalyzer::new(
+        simien_node_resolver::analyze::CjsModuleExportAnalyzer::new(
           code_analyzer,
           self.in_npm_package_checker()?.clone(),
-          self.node_resolver()?.clone(),
+          self.simien_node_resolver()?.clone(),
           self.npm_resolver()?.clone(),
           self.pkg_json_resolver().clone(),
           self.workspace_factory.sys().clone(),
@@ -907,7 +907,7 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
       Ok(new_rc(CompilerOptionsResolver::new(
         &self.sys,
         &self.workspace_factory.workspace_directory()?.workspace,
-        self.node_resolver()?,
+        self.simien_node_resolver()?,
         &self.workspace_factory.options.config_discovery,
         &self.options.compiler_options_overrides,
       )))
@@ -939,11 +939,11 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
   }
 
   #[cfg(feature = "graph")]
-  pub async fn deno_resolver(
+  pub async fn simien_resolver(
     &self,
   ) -> Result<&crate::graph::DefaultDenoResolverRc<TSys>, anyhow::Error> {
     self
-      .deno_resolver
+      .simien_resolver
       .get_or_try_init(async {
         Ok(new_rc(crate::graph::DenoResolver::new(
           self.raw_deno_resolver().await?.clone(),
@@ -1050,7 +1050,7 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
     })
   }
 
-  pub fn node_resolver(
+  pub fn simien_node_resolver(
     &self,
   ) -> Result<
     &NodeResolverRc<
@@ -1061,7 +1061,7 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
     >,
     anyhow::Error,
   > {
-    self.node_resolver.get_or_try_init(|| {
+    self.simien_node_resolver.get_or_try_init(|| {
       Ok(new_rc(NodeResolver::new(
         self.in_npm_package_checker()?.clone(),
         DenoIsBuiltInNodeModuleChecker,
@@ -1104,7 +1104,7 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
     self.npm_req_resolver.get_or_try_init(|| {
       Ok(new_rc(NpmReqResolver::new(NpmReqResolverOptions {
         in_npm_pkg_checker: self.in_npm_package_checker()?.clone(),
-        node_resolver: self.node_resolver()?.clone(),
+        simien_node_resolver: self.simien_node_resolver()?.clone(),
         npm_resolver: self.npm_resolver()?.clone(),
         sys: self.workspace_factory.sys.clone(),
       })))
@@ -1162,13 +1162,13 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
       // the `trust-policy` / `trust-policy-ignore-after` npmrc settings drive
       // the `no-downgrade` publishing-trust policy
       let npmrc = self.workspace_factory.npmrc()?;
-      let trust_policy = deno_npm::resolution::TrustPolicyOptions {
+      let trust_policy = simien_npm::resolution::TrustPolicyOptions {
         policy: match npmrc.trust_policy {
-          deno_npmrc::TrustPolicyConfig::NoDowngrade => {
-            deno_npm::resolution::NpmTrustPolicy::NoDowngrade
+          simien_npmrc::TrustPolicyConfig::NoDowngrade => {
+            simien_npm::resolution::NpmTrustPolicy::NoDowngrade
           }
-          deno_npmrc::TrustPolicyConfig::Off => {
-            deno_npm::resolution::NpmTrustPolicy::Off
+          simien_npmrc::TrustPolicyConfig::Off => {
+            simien_npm::resolution::NpmTrustPolicy::Off
           }
         },
         // turn the relative `trust-policy-ignore-after` minutes into an
@@ -1202,12 +1202,12 @@ impl<TSys: WorkspaceFactorySys> ResolverFactory<TSys> {
 
       Ok(new_rc(NpmVersionResolver {
         newest_dependency_date_options:
-          deno_npm::resolution::NewestDependencyDateOptions {
+          simien_npm::resolution::NewestDependencyDateOptions {
             date: minimum_dependency_age_config
               .age
               .as_ref()
               .and_then(|d| d.into_option())
-              .map(deno_npm::resolution::NewestDependencyDate),
+              .map(simien_npm::resolution::NewestDependencyDate),
             exclude,
             exclude_prefixes,
           },
@@ -1412,7 +1412,7 @@ pub fn npm_overrides_from_workspace(
     Err(e) => {
       log::warn!(
         "{} failed to parse npm overrides: {}",
-        deno_terminal::colors::yellow("Warning"),
+        simien_terminal::colors::yellow("Warning"),
         e
       );
       NpmOverrides::default()

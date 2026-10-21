@@ -7,16 +7,16 @@ use std::path::PathBuf;
 use std::path::Prefix;
 use std::str;
 
-use deno_cache_dir::CACHE_PERM;
-use deno_cache_dir::url_to_filename;
-use deno_path_util::fs::atomic_write_file_with_retries;
-use sys_traits::FsRead;
+use simien_cache_dir::CACHE_PERM;
+use simien_cache_dir::url_to_filename;
+use simien_path_util::fs::atomic_write_file_with_retries;
+use simien_sys_traits::FsRead;
 use url::Host;
 use url::Url;
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait DiskCacheSys:
-  deno_path_util::fs::AtomicWriteFileWithRetriesSys + FsRead
+  simien_path_util::fs::AtomicWriteFileWithRetriesSys + FsRead
 {
 }
 
@@ -75,13 +75,13 @@ impl<TSys: DiskCacheSys> DiskCache<TSys> {
       }
       "http" | "https" | "data" | "blob" => out = url_to_filename(url).ok()?,
       "file" => {
-        let path = match deno_path_util::url_to_file_path(url) {
+        let path = match simien_path_util::url_to_file_path(url) {
           Ok(path) => path,
           Err(_) => return None,
         };
         let mut path_components = path.components();
 
-        if sys_traits::impls::is_windows() {
+        if simien_sys_traits::impls::is_windows() {
           if url.path() == "/" {
             return None; // not a valid windows path
           }
@@ -137,7 +137,7 @@ impl<TSys: DiskCacheSys> DiskCache<TSys> {
 #[cfg(test)]
 mod tests {
   #[allow(clippy::disallowed_types, reason = "ok in tests")]
-  use sys_traits::impls::RealSys;
+  use simien_sys_traits::impls::RealSys;
   use test_util::TempDir;
 
   use super::*;

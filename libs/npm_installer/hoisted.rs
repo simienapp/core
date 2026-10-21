@@ -32,7 +32,7 @@ use simien_npm::resolution::NpmResolutionSnapshot;
 use simien_npm_cache::NpmCache;
 use simien_npm_cache::NpmCacheHttpClient;
 use simien_npm_cache::TarballCache;
-use deno_resolver::npm::managed::NpmResolutionCell;
+use simien_resolver::npm::managed::NpmResolutionCell;
 use simien_semver::StackString;
 use simien_semver::package::PackageNv;
 use simien_terminal::colors;

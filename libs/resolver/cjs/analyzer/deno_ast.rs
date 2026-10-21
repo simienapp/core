@@ -16,7 +16,7 @@ use deno_ast::swc::ast::MemberProp;
 use deno_ast::swc::ast::ModuleItem;
 use deno_ast::swc::ast::SimpleAssignTarget;
 use deno_ast::swc::ast::Stmt;
-use deno_error::JsErrorBox;
+use simien_error::JsErrorBox;
 use deno_graph::ast::ParsedSourceStore;
 use url::Url;
 

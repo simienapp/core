@@ -5,34 +5,34 @@ use std::fmt::Debug;
 use std::path::Path;
 use std::path::PathBuf;
 
-use boxed_error::Boxed;
-use deno_error::JsError;
-use deno_maybe_sync::MaybeSend;
-use deno_maybe_sync::MaybeSync;
-use deno_maybe_sync::new_rc;
-use deno_semver::Version;
-use deno_semver::npm::NpmPackageReqReference;
-use deno_semver::package::PackageReq;
-use deno_semver::package::PackageReqReference;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::IsBuiltInNodeModuleChecker;
-use node_resolver::NodeResolution;
-use node_resolver::NodeResolutionKind;
-use node_resolver::NodeResolverRc;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::ResolutionMode;
-use node_resolver::UrlOrPath;
-use node_resolver::UrlOrPathRef;
-use node_resolver::errors::NodeJsErrorCode;
-use node_resolver::errors::NodeJsErrorCoded;
-use node_resolver::errors::NodeResolveError;
-use node_resolver::errors::NodeResolveErrorKind;
-use node_resolver::errors::PackageFolderResolveErrorKind;
-use node_resolver::errors::PackageFolderResolveIoError;
-use node_resolver::errors::PackageNotFoundError;
-use node_resolver::errors::PackageResolveErrorKind;
-use node_resolver::errors::PackageSubpathFromDenoModuleResolveError;
-use node_resolver::errors::TypesNotFoundError;
+use simien_boxed_error::Boxed;
+use simien_error::JsError;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
+use simien_maybe_sync::new_rc;
+use simien_semver::Version;
+use simien_semver::npm::NpmPackageReqReference;
+use simien_semver::package::PackageReq;
+use simien_semver::package::PackageReqReference;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::IsBuiltInNodeModuleChecker;
+use simien_node_resolver::NodeResolution;
+use simien_node_resolver::NodeResolutionKind;
+use simien_node_resolver::NodeResolverRc;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::ResolutionMode;
+use simien_node_resolver::UrlOrPath;
+use simien_node_resolver::UrlOrPathRef;
+use simien_node_resolver::errors::NodeJsErrorCode;
+use simien_node_resolver::errors::NodeJsErrorCoded;
+use simien_node_resolver::errors::NodeResolveError;
+use simien_node_resolver::errors::NodeResolveErrorKind;
+use simien_node_resolver::errors::PackageFolderResolveErrorKind;
+use simien_node_resolver::errors::PackageFolderResolveIoError;
+use simien_node_resolver::errors::PackageNotFoundError;
+use simien_node_resolver::errors::PackageResolveErrorKind;
+use simien_node_resolver::errors::PackageSubpathFromDenoModuleResolveError;
+use simien_node_resolver::errors::TypesNotFoundError;
 use thiserror::Error;
 use url::Url;
 
@@ -274,11 +274,11 @@ pub enum NpmResolverCreateOptions<TSys: NpmResolverSys> {
   Byonm(ByonmNpmResolverCreateOptions<TSys>),
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait NpmResolverSys:
   managed::ManagedNpmResolverSys
   + byonm::ByonmNpmResolverSys
-  + node_resolver::NodeResolverSys
+  + simien_node_resolver::NodeResolverSys
   + std::fmt::Debug
   + MaybeSend
   + MaybeSync
@@ -355,7 +355,7 @@ impl<TSys: NpmResolverSys> NpmPackageFolderResolver for NpmResolver<TSys> {
     &self,
     specifier: &str,
     referrer: &UrlOrPathRef,
-  ) -> Result<PathBuf, node_resolver::errors::PackageFolderResolveError> {
+  ) -> Result<PathBuf, simien_node_resolver::errors::PackageFolderResolveError> {
     match self {
       NpmResolver::Byonm(byonm_resolver) => {
         byonm_resolver.resolve_package_folder_from_package(specifier, referrer)
@@ -395,7 +395,7 @@ pub struct NpmReqResolverOptions<
   TSys: NpmResolverSys,
 > {
   pub in_npm_pkg_checker: TInNpmPackageChecker,
-  pub node_resolver: NodeResolverRc<
+  pub simien_node_resolver: NodeResolverRc<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
     TNpmPackageFolderResolver,
@@ -411,7 +411,7 @@ pub type NpmReqResolverRc<
   TIsBuiltInNodeModuleChecker,
   TNpmPackageFolderResolver,
   TSys,
-> = deno_maybe_sync::MaybeArc<
+> = simien_maybe_sync::MaybeArc<
   NpmReqResolver<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
@@ -429,7 +429,7 @@ pub struct NpmReqResolver<
 > {
   sys: TSys,
   in_npm_pkg_checker: TInNpmPackageChecker,
-  node_resolver: NodeResolverRc<
+  simien_node_resolver: NodeResolverRc<
     TInNpmPackageChecker,
     TIsBuiltInNodeModuleChecker,
     TNpmPackageFolderResolver,
@@ -462,7 +462,7 @@ impl<
     Self {
       sys: options.sys,
       in_npm_pkg_checker: options.in_npm_pkg_checker,
-      node_resolver: options.node_resolver,
+      simien_node_resolver: options.simien_node_resolver,
       npm_resolver: options.npm_resolver,
     }
   }
@@ -529,7 +529,7 @@ impl<
         inner,
       })?;
     let resolution_result =
-      self.node_resolver.resolve_package_subpath_from_deno_module(
+      self.simien_node_resolver.resolve_package_subpath_from_deno_module(
         &package_folder,
         sub_path,
         Some(referrer),
@@ -563,7 +563,7 @@ impl<
     resolution_mode: ResolutionMode,
     resolution_kind: NodeResolutionKind,
   ) -> Result<Option<NodeResolution>, ResolveIfForNpmPackageError> {
-    let resolution_result = self.node_resolver.resolve(
+    let resolution_result = self.simien_node_resolver.resolve(
       specifier,
       referrer,
       resolution_mode,
@@ -576,7 +576,7 @@ impl<
         // as an npm package first -- if found, the npm package takes
         // precedence over the built-in, matching Node.js behavior where
         // node_modules packages shadow built-ins.
-        match self.node_resolver.resolve_package(
+        match self.simien_node_resolver.resolve_package(
           specifier,
           referrer,
           resolution_mode,

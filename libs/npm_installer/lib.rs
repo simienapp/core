@@ -13,9 +13,9 @@ use simien_npm::registry::NpmRegistryPackageInfoLoadError;
 use simien_npm::resolution::UnmetPeerDepDiagnostic;
 use simien_npm_cache::NpmCache;
 use simien_npm_cache::NpmCacheHttpClient;
-use deno_resolver::lockfile::LockfileLock;
-use deno_resolver::npm::managed::NpmResolutionCell;
-use deno_resolver::workspace::WorkspaceNpmLinkPackagesRc;
+use simien_resolver::lockfile::LockfileLock;
+use simien_resolver::npm::managed::NpmResolutionCell;
+use simien_resolver::workspace::WorkspaceNpmLinkPackagesRc;
 use simien_semver::package::PackageNv;
 use simien_semver::package::PackageReq;
 
