@@ -6,7 +6,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use simien_boxed_error::Boxed;
-use deno_config::workspace::Workspace;
+use crate::workspace::Workspace;
 use simien_npmrc::NpmRc;
 use simien_npmrc::NpmRegistryUrl;
 use simien_npmrc::RegistryConfigWithUrl;
@@ -58,8 +58,8 @@ pub struct NpmRcOptionsResolveError {
   source: simien_npmrc::ResolveError,
 }
 
-/// Discover `.npmrc` file - currently we only support it next to `package.json`,
-/// next to `deno.json`, or in the user's home directory.
+/// Discover `.npmrc` file - currently we only support it next to the root
+/// `package.json` or in the user's home directory.
 ///
 /// In the future we will need to support it in the global directory
 /// as per https://docs.npmjs.com/cli/v10/configuring-npm/npmrc#files.
@@ -67,16 +67,10 @@ pub fn discover_npmrc_from_workspace<TSys: EnvVar + EnvHomeDir + FsRead>(
   sys: &TSys,
   workspace: &Workspace,
 ) -> Result<(ResolvedNpmRc, Option<PathBuf>), NpmRcDiscoverError> {
-  let root_folder = workspace.root_folder_configs();
   discover_npmrc(
     sys,
-    root_folder.pkg_json.as_ref().map(|p| p.path.clone()),
-    match &root_folder.deno_json {
-      Some(cf) if cf.specifier.scheme() == "file" => {
-        Some(simien_path_util::url_to_file_path(&cf.specifier)?)
-      }
-      _ => None,
-    },
+    workspace.root_pkg_json().map(|p| p.path.clone()),
+    None,
   )
 }
 

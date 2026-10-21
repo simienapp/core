@@ -9,7 +9,7 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_config::deno_json::NodeModulesLinkerMode;
+use crate::workspace::NodeModulesLinkerMode;
 use simien_npm::NpmPackageCacheFolderId;
 use simien_npm::NpmPackageId;
 use simien_npm::NpmSystemInfo;

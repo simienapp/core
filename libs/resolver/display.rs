@@ -360,8 +360,27 @@ mod tests {
 
   fn run_test(diff_text1: &str, diff_text2: &str, expected_output: &str) {
     assert_eq!(
-      test_util::strip_ansi_codes(&diff(diff_text1, diff_text2,)),
+      strip_ansi_codes(&diff(diff_text1, diff_text2,)),
       expected_output,
     );
+  }
+
+  /// Removes SGR colour sequences (ESC [ ... m), which is all `diff` emits.
+  /// Upstream uses Deno's test_util for this.
+  fn strip_ansi_codes(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut chars = text.chars();
+    while let Some(c) = chars.next() {
+      if c == '\u{1b}' {
+        for c in chars.by_ref() {
+          if c == 'm' {
+            break;
+          }
+        }
+      } else {
+        out.push(c);
+      }
+    }
+    out
   }
 }

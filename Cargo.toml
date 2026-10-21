@@ -35,6 +35,7 @@ members = [
   "libs/package_json",
   "libs/npmrc",
   "libs/maybe_sync",
+  "libs/resolver",
   "libs/deno_semver",
   "libs/deno_media_type",
   "libs/sys_traits",
@@ -123,6 +124,7 @@ simien_maybe_sync = { version = "0.1.1", path = "./libs/maybe_sync" }
 simien_npm = { version = "0.1.1", path = "./libs/npm" }
 simien_npm_cache = { version = "0.1.1", path = "./libs/npm_cache" }
 simien_npm_installer = { version = "0.1.1", path = "./libs/npm_installer" }
+simien_resolver = { version = "0.1.1", path = "./libs/resolver" }
 simien_npmrc = { version = "0.1.1", path = "./libs/npmrc" }
 simien_ops = { version = "0.1.1", path = "./libs/ops" }
 simien_package_json = { version = "0.1.1", path = "./libs/package_json", default-features = false }

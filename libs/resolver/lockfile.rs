@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use anyhow::Context;
 use anyhow::Error as AnyError;
 use simien_capacity_builder::StringBuilder;
-use deno_config::workspace::Workspace;
+use crate::workspace::Workspace;
 use simien_error::JsErrorBox;
 use simien_lockfile::Lockfile;
 use simien_lockfile::NpmPackageInfoProvider;
@@ -225,35 +225,11 @@ impl<TSys: LockfileSys> LockfileLock<TSys> {
     }
   }
 
-  /// Creates an adapter for the lockfile that can be provided to deno_graph.
-  #[cfg(feature = "graph")]
-  pub fn as_deno_graph_locker(&self) -> DenoGraphLocker<'_, TSys> {
-    DenoGraphLocker(self)
-  }
-
   pub fn set_workspace_config(
     &self,
     options: simien_lockfile::SetWorkspaceConfigOptions,
   ) {
     self.lockfile.lock().set_workspace_config(options);
-  }
-
-  #[cfg(feature = "graph")]
-  pub fn fill_graph(&self, graph: &mut deno_graph::ModuleGraph) {
-    let lockfile = self.lockfile.lock();
-    graph.fill_from_lockfile(deno_graph::FillFromLockfileOptions {
-      redirects: lockfile
-        .content
-        .redirects
-        .iter()
-        .map(|(from, to)| (from.as_str(), to.as_str())),
-      package_specifiers: lockfile
-        .content
-        .packages
-        .specifiers
-        .iter()
-        .map(|(dep, id)| (dep, id.as_str())),
-    });
   }
 
   pub fn overwrite(&self) -> bool {
@@ -297,7 +273,6 @@ impl<TSys: LockfileSys> LockfileLock<TSys> {
     sys: TSys,
     flags: LockfileFlags,
     workspace: &Workspace,
-    maybe_external_import_map: Option<&serde_json::Value>,
     api: &dyn NpmPackageInfoProvider,
   ) -> Result<Option<Self>, AnyError> {
     fn pkg_json_deps(
@@ -342,19 +317,9 @@ impl<TSys: LockfileSys> LockfileLock<TSys> {
     }
     let file_path = match flags.lock {
       Some(path) => path,
-      None => match workspace.resolve_lockfile_path()? {
-        Some(path) => path,
-        None => return Ok(None),
-      },
+      None => workspace.lockfile_path(),
     };
-    let root_folder = workspace.root_folder_configs();
-    let frozen = flags.frozen_lockfile.unwrap_or_else(|| {
-      root_folder
-        .deno_json
-        .as_ref()
-        .and_then(|c| c.to_lock_config().ok().flatten().map(|c| c.frozen()))
-        .unwrap_or(false)
-    });
+    let frozen = flags.frozen_lockfile.unwrap_or(false);
     let lockfile = Self::read_from_path(
       sys,
       LockfileReadFromPathOptions {
@@ -366,61 +331,27 @@ impl<TSys: LockfileSys> LockfileLock<TSys> {
       api,
     )
     .await?;
-    let root_url = workspace.root_dir_url();
     let config = simien_lockfile::WorkspaceConfig {
       root: WorkspaceMemberConfig {
         package_json_deps: pkg_json_deps(
-          root_folder.pkg_json.as_deref(),
+          workspace.root_pkg_json().map(|p| p.as_ref()),
           workspace.catalogs(),
         ),
-        dependencies: if let Some(map) = maybe_external_import_map {
-          deno_config::import_map::import_map_deps_from_value(map)
-            .collect::<HashSet<_>>()
-        } else {
-          root_folder
-            .deno_json
-            .as_deref()
-            .map(|d| d.dependencies(workspace.catalogs()))
-            .unwrap_or_default()
-        },
+        dependencies: Default::default(),
       },
       members: workspace
-        .config_folders()
-        .iter()
-        .filter(|(folder_url, _)| *folder_url != root_url)
-        .filter_map(|(folder_url, folder)| {
-          Some((
-            {
-              // should never be None here, but just ignore members that
-              // do fail for this
-              let mut relative_path = root_url.make_relative(folder_url)?;
-              if relative_path.ends_with('/') {
-                // make it slightly cleaner by removing the trailing slash
-                relative_path.pop();
-              }
-              relative_path
-            },
-            {
-              let config = WorkspaceMemberConfig {
-                package_json_deps: pkg_json_deps(
-                  folder.pkg_json.as_deref(),
-                  workspace.catalogs(),
-                ),
-                dependencies: folder
-                  .deno_json
-                  .as_deref()
-                  .map(|d| d.dependencies(workspace.catalogs()))
-                  .unwrap_or_default(),
-              };
-              if config.package_json_deps.is_empty()
-                && config.dependencies.is_empty()
-              {
-                // exclude empty workspace members
-                return None;
-              }
-              config
-            },
-          ))
+        .members()
+        .filter_map(|(dir, pkg_json)| {
+          let config = WorkspaceMemberConfig {
+            package_json_deps: pkg_json_deps(
+              Some(pkg_json.as_ref()),
+              workspace.catalogs(),
+            ),
+            dependencies: Default::default(),
+          };
+          // exclude empty workspace members
+          (!config.package_json_deps.is_empty())
+            .then(|| (dir.to_string(), config))
         })
         .collect(),
       links: workspace
@@ -475,26 +406,6 @@ impl<TSys: LockfileSys> LockfileLock<TSys> {
           };
           Some((key, value))
         })
-        .chain(workspace.link_deno_jsons().filter_map(|deno_json| {
-          let name = deno_json.json.name.as_ref()?;
-          let key = StringBuilder::<String>::build(|builder| {
-            builder.append("jsr:");
-            builder.append(name);
-            if let Some(version) = &deno_json.json.version {
-              builder.append('@');
-              builder.append(version);
-            }
-          })
-          .unwrap();
-          let value = simien_lockfile::LockfileLinkContent {
-            // not this workspace's catalogs, so don't resolve against them
-            dependencies: deno_json.dependencies(&Default::default()),
-            optional_dependencies: Default::default(),
-            peer_dependencies: Default::default(),
-            peer_dependencies_meta: Default::default(),
-          };
-          Some((key, value))
-        }))
         .collect(),
       npm_overrides: workspace
         .npm_overrides()
@@ -668,65 +579,3 @@ async fn try_import_npm_lockfile<TSys: LockfileSys>(
   Ok(None)
 }
 
-/// An adapter to use the lockfile with `deno_graph`.
-#[cfg(feature = "graph")]
-pub struct DenoGraphLocker<'a, TSys: LockfileSys>(&'a LockfileLock<TSys>);
-
-#[cfg(feature = "graph")]
-impl<TSys: LockfileSys> deno_graph::source::Locker
-  for DenoGraphLocker<'_, TSys>
-{
-  fn get_remote_checksum(
-    &self,
-    specifier: &url::Url,
-  ) -> Option<deno_graph::source::LoaderChecksum> {
-    self
-      .0
-      .lock()
-      .remote()
-      .get(specifier.as_str())
-      .map(|s| deno_graph::source::LoaderChecksum::new(s.clone()))
-  }
-
-  fn has_remote_checksum(&self, specifier: &url::Url) -> bool {
-    self.0.lock().remote().contains_key(specifier.as_str())
-  }
-
-  fn set_remote_checksum(
-    &mut self,
-    specifier: &url::Url,
-    checksum: deno_graph::source::LoaderChecksum,
-  ) {
-    self
-      .0
-      .lock()
-      .insert_remote(specifier.to_string(), checksum.into_string())
-  }
-
-  fn get_pkg_manifest_checksum(
-    &self,
-    package_nv: &PackageNv,
-  ) -> Option<deno_graph::source::LoaderChecksum> {
-    self
-      .0
-      .lock()
-      .content
-      .packages
-      .jsr
-      .get(package_nv)
-      .map(|s| deno_graph::source::LoaderChecksum::new(s.integrity.clone()))
-  }
-
-  fn set_pkg_manifest_checksum(
-    &mut self,
-    package_nv: &PackageNv,
-    checksum: deno_graph::source::LoaderChecksum,
-  ) {
-    // a value would only exist in here if two workers raced
-    // to insert the same package manifest checksum
-    self
-      .0
-      .lock()
-      .insert_package(package_nv.clone(), checksum.into_string());
-  }
-}

@@ -153,6 +153,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-once-cell"
+version = "0.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4288f83726785267c6f2ef073a3d83dc3f9b81464e9f99898240cced85fce35a"
+
+[[package]]
 name = "async-task"
 version = "4.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -650,6 +656,12 @@ checksum = "77745e017f5edba1a9c1d854f6f3a52dac8a12dd5af5d2f54aecf61e43d80d30"
 dependencies = [
  "libm",
 ]
+
+[[package]]
+name = "countme"
+version = "3.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7704b5fdd17b18ae31c4c1da5a2e0305a2bf17b5249300a9ee9ed7b72114c636"
 
 [[package]]
 name = "cpubits"
@@ -2276,6 +2288,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb56e1aa765b4b4f3aadfab769793b7087bb03a4ea4920644a6d238e2df5b9ed"
 
 [[package]]
+name = "imara-diff"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f01d462f766df78ab820dd06f5eb700233c51f0f4c2e846520eaf4ba6aa5c5c"
+dependencies = [
+ "hashbrown 0.15.5",
+ "memchr",
+]
+
+[[package]]
 name = "indexmap"
 version = "2.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2395,6 +2417,15 @@ dependencies = [
  "futures-util",
  "once_cell",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "jsonc-parser"
+version = "0.32.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "840785e1a8b4fdb27be18440a35a81af64820dc185c3973ff8b012d4c6282512"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -3443,6 +3474,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rowan"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "417a3a9f582e349834051b8a10c8d71ca88da4211e4093528e36b9845f6b5f21"
+dependencies = [
+ "countme",
+ "hashbrown 0.14.5",
+ "rustc-hash 1.1.0",
+ "text-size",
+]
+
+[[package]]
 name = "rsa"
 version = "0.9.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4428,6 +4471,48 @@ dependencies = [
 ]
 
 [[package]]
+name = "simien_resolver"
+version = "0.1.1"
+dependencies = [
+ "anyhow",
+ "async-once-cell",
+ "async-trait",
+ "chrono",
+ "dashmap",
+ "futures",
+ "imara-diff",
+ "indexmap",
+ "jsonc-parser",
+ "log",
+ "once_cell",
+ "parking_lot",
+ "phf",
+ "rustc-hash 2.1.1",
+ "serde",
+ "serde_json",
+ "simien_boxed_error",
+ "simien_cache_dir",
+ "simien_capacity_builder",
+ "simien_error",
+ "simien_lockfile",
+ "simien_maybe_sync",
+ "simien_media_type",
+ "simien_node_resolver",
+ "simien_npm",
+ "simien_npmrc",
+ "simien_package_json",
+ "simien_path_util",
+ "simien_semver",
+ "simien_sys_traits",
+ "simien_terminal",
+ "simien_unsync",
+ "thiserror 2.0.12",
+ "twox-hash",
+ "url",
+ "yaml_parser",
+]
+
+[[package]]
 name = "simien_semver"
 version = "0.1.1"
 dependencies = [
@@ -4899,6 +4984,12 @@ dependencies = [
  "relative-path",
  "syn 2.0.117",
 ]
+
+[[package]]
+name = "text-size"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f18aa187839b2bdb1ad2fa35ead8c4c2976b64e4363c386d45ac0f7ee85c9233"
 
 [[package]]
 name = "thiserror"
@@ -6063,6 +6154,16 @@ checksum = "32e45ad4206f6d2479085147f02bc2ef834ac85886624a23575ae137c8aa8156"
 dependencies = [
  "libc",
  "rustix 1.1.5",
+]
+
+[[package]]
+name = "yaml_parser"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c422c39fd59a9dc11efa2b2be26cf9130c6ef9cb744da112a2e9e59c649e471"
+dependencies = [
+ "rowan",
+ "winnow",
 ]
 
 [[package]]
