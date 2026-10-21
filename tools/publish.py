@@ -68,7 +68,7 @@ def check():
     already on crates.io: a publish run skips it, and the published set no
     longer builds together (simien_path_util 0.1.1, #18)."""
     stale = []
-    for name, version, _ in plan():
+    for name, version, _, _ in plan():
         if name == "simien" or not on_crates_io(name, version):
             continue
         published = {d for d in published_dependencies(name, version) if d[1] != "dev"}
@@ -93,8 +93,8 @@ def plan():
             sys.exit(f"dependency cycle among {sorted(set(crates) - done)}")
         order += ready
         done |= set(ready)
-    steps = [("simien", "0.0.0", ["--manifest-path", "placeholders/simien/Cargo.toml"])]
-    steps += [(n, crates[n]["version"], ["-p", n, "--locked"]) for n in order]
+    steps = [("simien", "0.0.0", ["--manifest-path", "placeholders/simien/Cargo.toml"], set())]
+    steps += [(n, crates[n]["version"], ["-p", n, "--locked"], deps[n]) for n in order]
     return steps
 
 
@@ -107,7 +107,15 @@ def wait_from(output):
 
 
 def main():
-    for name, version, args in plan():
+    # A crate that can't be published (no trusted publisher yet, say) doesn't
+    # hold up the others: its dependents are skipped, everything else goes
+    # up, and the run still fails at the end, naming what didn't.
+    failed, skipped = [], []
+    for name, version, args, deps in plan():
+        if blocked := sorted(deps & set(failed + skipped)):
+            print(f"skip    {name} {version} (depends on {', '.join(blocked)}, which didn't publish)", flush=True)
+            skipped.append(name)
+            continue
         if on_crates_io(name, version):
             print(f"skip    {name} {version} (already on crates.io)", flush=True)
             continue
@@ -118,7 +126,9 @@ def main():
         new = not on_crates_io(name)
         if new:
             if not os.environ.get("NEW_CRATE_TOKEN"):
-                sys.exit(f"publish {name} {version}: a new crate, and NEW_CRATE_TOKEN is not set")
+                print(f"publish {name} {version}: a new crate, and NEW_CRATE_TOKEN is not set", flush=True)
+                failed.append(name)
+                continue
             env["CARGO_REGISTRY_TOKEN"] = os.environ["NEW_CRATE_TOKEN"]
         if DRY:
             print(f"publish {name} {version}" + (" (new crate)" if new else ""), flush=True)
@@ -135,7 +145,11 @@ def main():
                 time.sleep(seconds)
                 continue
             print(out, file=sys.stderr)
-            sys.exit(f"publish {name} {version}: failed")
+            print(f"publish {name} {version}: failed", flush=True)
+            failed.append(name)
+            break
+    if failed or skipped:
+        sys.exit(f"not published: {', '.join(failed)}" + (f"; skipped because of them: {', '.join(skipped)}" if skipped else ""))
 
 
 if __name__ == "__main__":
