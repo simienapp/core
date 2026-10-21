@@ -38,5 +38,8 @@ jobs:
         with:
           node-version: 24
       - run: node tools/strip-types.mjs --check
+      # A crate whose dependencies changed must not keep a version that's
+      # already on crates.io: publishing skips it and the set stops building.
+      - run: python3 tools/publish.py --check
       # No `cargo fmt --check`: the code keeps upstream's line breaks so ported
       # Deno patches still apply line for line (tools/port-upstream.sh).
