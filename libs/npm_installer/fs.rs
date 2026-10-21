@@ -146,7 +146,7 @@ mod test {
   use simien_sys_traits::FsRead;
   use simien_sys_traits::FsSymlinkDir;
   use simien_sys_traits::FsWrite;
-  use test_util::TempDir;
+  use crate::test_temp_dir::TempDir;
 
   use super::*;
 

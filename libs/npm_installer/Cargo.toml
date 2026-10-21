@@ -21,16 +21,15 @@ bincode.workspace = true
 simien_boxed_error.workspace = true
 simien_capacity_builder.workspace = true
 simien_cache_dir.workspace = true
-deno_config.workspace = true
 simien_error.workspace = true
-deno_graph.workspace = true
 simien_lockfile.workspace = true
+simien_maybe_sync.workspace = true
 simien_npm.workspace = true
 simien_npm_cache.workspace = true
 simien_npmrc.workspace = true
 simien_package_json.workspace = true
 simien_path_util.workspace = true
-simien_resolver = { workspace = true, features = ["graph", "sync"] }
+simien_resolver = { workspace = true, features = ["sync"] }
 simien_semver.workspace = true
 simien_terminal.workspace = true
 simien_unsync.workspace = true
@@ -61,5 +60,5 @@ tokio.workspace = true
 windows-sys = { workspace = true, features = ["Win32_Foundation"] }
 
 [dev-dependencies]
+tempfile.workspace = true
 simien_sys_traits = { workspace = true, features = ["memory", "real", "serde_json"] }
-test_util.workspace = true

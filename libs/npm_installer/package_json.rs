@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use deno_config::workspace::Workspace;
+use simien_resolver::workspace::Workspace;
 use simien_package_json::PackageJsonDepValue;
 use simien_package_json::PackageJsonDepValueParseError;
 use simien_package_json::PackageJsonDepWorkspaceReq;
@@ -11,11 +11,9 @@ use simien_semver::SmallStackString;
 use simien_semver::StackString;
 use simien_semver::Version;
 use simien_semver::VersionReq;
-use simien_semver::npm::NpmPackageReqReference;
 use simien_semver::package::PackageName;
 use simien_semver::package::PackageNv;
 use simien_semver::package::PackageReq;
-use serde_json;
 use thiserror::Error;
 use url::Url;
 
@@ -172,81 +170,8 @@ impl NpmInstallDepsProvider {
     let mut workspace_member_version_errors = Vec::new();
     let workspace_npm_pkgs = workspace.npm_packages();
 
-    for (folder_url, folder) in workspace.config_folders() {
-      let is_root = folder_url == workspace.root_dir_url();
-      // deal with the deno.json first because it takes precedence during resolution
-      if let Some(deno_json) = &folder.deno_json {
-        // don't bother with externally referenced import maps as users
-        // should inline their import map to get this behaviour
-        if let Some(serde_json::Value::Object(obj)) = &deno_json.json.imports {
-          let mut pkg_pkgs = Vec::with_capacity(obj.len());
-          for (alias, value) in obj {
-            let serde_json::Value::String(specifier) = value else {
-              continue;
-            };
-            let pkg_req = if let Some(catalog_name) =
-              specifier.strip_prefix("catalog:")
-            {
-              // `catalog:`/`catalog:<name>` entries resolve to the version
-              // requirement defined in the workspace root's catalog
-              let catalog_name = if catalog_name.is_empty() {
-                "default"
-              } else {
-                catalog_name
-              };
-              let name = alias.strip_suffix('/').unwrap_or(alias);
-              let Some(version_req_str) = workspace
-                .catalogs()
-                .get(catalog_name)
-                .and_then(|catalog| catalog.get(name))
-              else {
-                continue;
-              };
-              let Ok(version_req) = VersionReq::parse_from_npm(version_req_str)
-              else {
-                continue;
-              };
-              PackageReq {
-                name: PackageName::from_str(name),
-                version_req,
-              }
-            } else {
-              let Ok(npm_req_ref) = NpmPackageReqReference::from_str(specifier)
-              else {
-                continue;
-              };
-              npm_req_ref.into_inner().req
-            };
-
-            if skip_types && pkg_req.name.starts_with("@types/") {
-              continue;
-            }
-
-            let workspace_pkg = workspace_npm_pkgs
-              .iter()
-              .find(|pkg| pkg.matches_req_including_pre(&pkg_req));
-
-            if let Some(pkg) = workspace_pkg {
-              local_pkgs.push(InstallLocalPkg {
-                alias: None,
-                target_dir: pkg.pkg_json.dir_path().to_path_buf(),
-              });
-            } else {
-              pkg_pkgs.push(InstallNpmRemotePkg {
-                alias: None,
-                base_dir: deno_json.dir_path(),
-                req: pkg_req,
-              });
-            }
-          }
-
-          // sort within each package (more like npm resolution)
-          pkg_pkgs.sort_by(|a, b| a.req.cmp(&b.req));
-          remote_pkgs.extend(pkg_pkgs);
-        }
-      }
-
-      if let Some(pkg_json) = &folder.pkg_json {
+    for (is_root, pkg_json) in workspace.package_jsons() {
+      {
         let deps = pkg_json.resolve_local_package_json_deps();
         let mut pkg_pkgs = Vec::with_capacity(
           deps.dependencies.len() + deps.dev_dependencies.len(),

@@ -24,7 +24,9 @@ use simien_npm_cache::NpmCacheHttpClient;
 use simien_npm_cache::NpmCacheSys;
 use simien_npm_cache::RegistryInfoProvider;
 use simien_resolver::display::DisplayTreeNode;
-use simien_resolver::factory::NpmVersionResolverRc;
+#[allow(clippy::disallowed_types, reason = "definition")]
+pub type NpmVersionResolverRc =
+  simien_maybe_sync::MaybeArc<simien_npm::resolution::NpmVersionResolver>;
 use simien_resolver::lockfile::LockfileLock;
 use simien_resolver::lockfile::LockfileSys;
 use simien_resolver::npm::managed::NpmResolutionCell;

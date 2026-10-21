@@ -298,7 +298,7 @@ mod test {
   use std::time::Duration;
 
   use parking_lot::Mutex;
-  use test_util::TempDir;
+  use crate::test_temp_dir::TempDir;
   use tokio::sync::Notify;
 
   use super::*;

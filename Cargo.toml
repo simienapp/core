@@ -36,6 +36,7 @@ members = [
   "libs/npmrc",
   "libs/maybe_sync",
   "libs/resolver",
+  "libs/npm_installer",
   "libs/deno_semver",
   "libs/deno_media_type",
   "libs/sys_traits",

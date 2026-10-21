@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use deno_config::deno_json::NodeModulesLinkerMode;
+use simien_resolver::workspace::NodeModulesLinkerMode;
 use simien_error::JsErrorBox;
 use simien_npm::NpmSystemInfo;
 use simien_npm::registry::NpmPackageInfo;
@@ -21,11 +21,9 @@ use simien_semver::package::PackageReq;
 
 mod bin_entries;
 mod extra_info;
-mod factory;
 mod flag;
 mod fs;
 mod global;
-pub mod graph;
 mod hoisted;
 pub mod initializer;
 pub mod lifecycle_scripts;
@@ -34,6 +32,8 @@ pub mod package_json;
 pub mod process_state;
 pub mod resolution;
 mod rt;
+#[cfg(test)]
+mod test_temp_dir;
 
 pub use bin_entries::BinEntries;
 use simien_terminal::colors;
@@ -42,15 +42,28 @@ use simien_unsync::sync::TaskQueue;
 use parking_lot::Mutex;
 use rustc_hash::FxHashSet;
 
+/// Everything that reports install progress: resolution, tarball downloads
+/// and node_modules setup. Upstream's version also required deno_graph's
+/// reporter.
+pub trait InstallReporter:
+  simien_npm::resolution::Reporter
+  + simien_npm_cache::TarballCacheReporter
+  + crate::InstallProgressReporter
+{
+}
+
+impl<
+  T: simien_npm::resolution::Reporter
+    + simien_npm_cache::TarballCacheReporter
+    + crate::InstallProgressReporter,
+> InstallReporter for T
+{
+}
+
 pub use self::extra_info::CachedNpmPackageExtraInfoProvider;
 pub use self::extra_info::ExpectedExtraInfo;
 pub use self::extra_info::NpmPackageExtraInfoProvider;
 use self::extra_info::NpmPackageExtraInfoProviderSys;
-pub use self::factory::InstallReporter;
-pub use self::factory::NpmCacheServices;
-pub use self::factory::NpmInstallerFactory;
-pub use self::factory::NpmInstallerFactoryOptions;
-pub use self::factory::NpmInstallerFactorySys;
 use self::global::GlobalNpmPackageInstaller;
 use self::hoisted::HoistedNpmPackageInstaller;
 use self::initializer::NpmResolutionInitializer;

@@ -272,6 +272,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7dfdb4953a096c551ce9ace855a604d702e6e62d77fac690575ae347571717f5"
 
 [[package]]
+name = "bincode"
+version = "1.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "bindgen"
 version = "0.70.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2906,6 +2915,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ecba01bf2678719532c5e3059e0b5f0811273d94b397088b82e3bd0a78c78fdd"
 
 [[package]]
+name = "pathdiff"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
+
+[[package]]
 name = "pem-rfc7468"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4405,6 +4420,48 @@ dependencies = [
  "thiserror 2.0.12",
  "tokio",
  "url",
+]
+
+[[package]]
+name = "simien_npm_installer"
+version = "0.1.1"
+dependencies = [
+ "anyhow",
+ "async-once-cell",
+ "async-trait",
+ "bincode",
+ "futures",
+ "lazy-regex",
+ "libc",
+ "log",
+ "once_cell",
+ "parking_lot",
+ "pathdiff",
+ "rustc-hash 2.1.1",
+ "serde",
+ "serde_json",
+ "simien_boxed_error",
+ "simien_cache_dir",
+ "simien_capacity_builder",
+ "simien_error",
+ "simien_lockfile",
+ "simien_maybe_sync",
+ "simien_npm",
+ "simien_npm_cache",
+ "simien_npmrc",
+ "simien_package_json",
+ "simien_path_util",
+ "simien_resolver",
+ "simien_semver",
+ "simien_sys_traits",
+ "simien_terminal",
+ "simien_unsync",
+ "tempfile",
+ "thiserror 2.0.12",
+ "tokio",
+ "twox-hash",
+ "url",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

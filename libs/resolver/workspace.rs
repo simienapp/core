@@ -21,6 +21,8 @@ use simien_semver::SmallStackString;
 use simien_semver::StackString;
 use simien_semver::Version;
 use simien_semver::package::PackageName;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
 use simien_sys_traits::FsDirEntry;
 use simien_sys_traits::FsRead;
 use simien_sys_traits::FsReadDir;
@@ -120,7 +122,7 @@ impl Workspace {
     let mut catalogs = IndexMap::new();
     if let Some(root) = &root_pkg_json {
       if let Some(catalog) = &root.catalog {
-        catalogs.insert(String::new(), catalog.clone());
+        catalogs.insert("default".to_string(), catalog.clone());
       }
       if let Some(named) = &root.catalogs {
         for (name, catalog) in named {
@@ -155,11 +157,38 @@ impl Workspace {
     self.members.iter().map(|(dir, pkg_json)| (dir.as_str(), pkg_json))
   }
 
+  /// The root package.json (when there is one) and each member's, with
+  /// whether it is the root.
+  pub fn package_jsons(&self) -> impl Iterator<Item = (bool, &PackageJsonRc)> {
+    self
+      .root_pkg_json
+      .iter()
+      .map(|p| (true, p))
+      .chain(self.members.iter().map(|(_, p)| (false, p)))
+  }
+
+  /// Every package in the workspace with a name and a valid version, which
+  /// dependencies on it resolve to instead of the registry.
+  pub fn npm_packages(&self) -> Vec<NpmPackageConfig> {
+    self
+      .package_jsons()
+      .filter_map(|(_, pkg_json)| {
+        Some(NpmPackageConfig {
+          nv: PackageNv {
+            name: StackString::from(pkg_json.name.as_ref()?.as_str()),
+            version: Version::parse_from_npm(pkg_json.version.as_ref()?).ok()?,
+          },
+          pkg_json: pkg_json.clone(),
+        })
+      })
+      .collect()
+  }
+
   pub fn link_pkg_jsons(&self) -> impl Iterator<Item = &PackageJsonRc> {
     self.links.iter()
   }
 
-  /// `catalog` (the default, named "") and `catalogs` from the root
+  /// `catalog` (the default, named "default") and `catalogs` from the root
   /// package.json, as bun and pnpm write them.
   pub fn catalogs(&self) -> &IndexMap<String, IndexMap<String, String>> {
     &self.catalogs
@@ -174,6 +203,56 @@ impl Workspace {
 
   pub fn lockfile_path(&self) -> PathBuf {
     self.root_dir.join(LOCKFILE_NAME)
+  }
+}
+
+/// A workspace package other packages can depend on. From deno_config,
+/// without its workspace directory handle.
+#[derive(Debug, Clone)]
+pub struct NpmPackageConfig {
+  pub nv: PackageNv,
+  pub pkg_json: PackageJsonRc,
+}
+
+impl NpmPackageConfig {
+  pub fn matches_req(&self, req: &PackageReq) -> bool {
+    self.matches_name_and_version_req(&req.name, &req.version_req)
+  }
+
+  pub fn matches_name_and_version_req(
+    &self,
+    name: &str,
+    version_req: &simien_semver::VersionReq,
+  ) -> bool {
+    if name != self.nv.name {
+      return false;
+    }
+    match version_req.inner() {
+      simien_semver::RangeSetOrTag::RangeSet(set) => set.satisfies(&self.nv.version),
+      simien_semver::RangeSetOrTag::Tag(tag) => tag == "workspace",
+    }
+  }
+
+  /// Like [`Self::matches_req`], but also matches prerelease versions that
+  /// fall within the requirement's range bounds.
+  pub fn matches_req_including_pre(&self, req: &PackageReq) -> bool {
+    self.matches_name_and_version_req_including_pre(&req.name, &req.version_req)
+  }
+
+  pub fn matches_name_and_version_req_including_pre(
+    &self,
+    name: &str,
+    version_req: &simien_semver::VersionReq,
+  ) -> bool {
+    if name != self.nv.name {
+      return false;
+    }
+    version_req_matches_including_pre(version_req, &self.nv.version)
+      || matches!(version_req.inner(), simien_semver::RangeSetOrTag::Tag(tag) if tag == "workspace")
+  }
+
+  pub fn matches_name(&self, name: &str) -> bool {
+    name == self.nv.name
   }
 }
 
@@ -434,7 +513,7 @@ mod test {
         .collect::<Vec<_>>(),
       ["lib"],
     );
-    assert_eq!(workspace.catalogs()[""]["react"], "^19.0.0");
+    assert_eq!(workspace.catalogs()["default"]["react"], "^19.0.0");
     assert_eq!(workspace.catalogs()["test"]["vitest"], "^3.0.0");
     assert!(workspace.npm_overrides().unwrap().contains_key("left-pad"));
     assert_eq!(workspace.lockfile_path(), Path::new("/app/simien.lock"));
