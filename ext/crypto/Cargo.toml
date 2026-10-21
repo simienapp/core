@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "Web Cryptography API for the Simien runtime. Forked from Deno's simien_crypto 0.273.0."
+description = "Web Cryptography API for the Simien runtime. Forked from Deno's deno_crypto 0.273.0."
 
 [lib]
 path = "lib.rs"

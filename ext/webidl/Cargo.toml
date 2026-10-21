@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "WebIDL conversions for Simien's web APIs. Forked from Deno's simien_webidl 0.259.0."
+description = "WebIDL conversions for Simien's web APIs. Forked from Deno's deno_webidl 0.259.0."
 
 [lib]
 path = "lib.rs"

@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository.workspace = true
-description = "Benchmark and profiling helpers for the simien_* crates. Forked from Deno's simien_bench_util 0.253.0."
+description = "Benchmark and profiling helpers for the simien_* crates. Forked from Deno's deno_bench_util 0.253.0."
 
 [lib]
 path = "lib.rs"

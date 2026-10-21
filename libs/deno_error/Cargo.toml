@@ -1,7 +1,7 @@
 [package]
 name = "simien_error"
 version = "0.1.1"
-description = "Error representation to JavaScript for simien_core. Forked from Deno's simien_error 0.7.1."
+description = "Error representation to JavaScript for simien_core. Forked from Deno's deno_error 0.7.1."
 repository = "https://github.com/simienapp/core"
 documentation = "https://docs.rs/deno_error"
 authors = ["the Deno authors", "the Simien authors"]

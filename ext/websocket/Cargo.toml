@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "WebSocket for the Simien runtime. Forked from Deno's simien_websocket 0.264.0."
+description = "WebSocket for the Simien runtime. Forked from Deno's deno_websocket 0.264.0."
 
 [lib]
 path = "lib.rs"

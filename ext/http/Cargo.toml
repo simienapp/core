@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "HTTP server for the Simien runtime. Forked from Deno's simien_http 0.257.0."
+description = "HTTP server for the Simien runtime. Forked from Deno's deno_http 0.257.0."
 
 [features]
 default = ["default_property_extractor"]

@@ -6,7 +6,7 @@ authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 repository = "https://github.com/simienapp/core"
-description = "Cryptography provider for simien_crypto. Forked from Deno's simien_crypto_provider 0.53.0."
+description = "Cryptography provider for simien_crypto. Forked from Deno's deno_crypto_provider 0.53.0."
 
 [lib]
 path = "lib.rs"

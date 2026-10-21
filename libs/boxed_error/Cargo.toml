@@ -1,6 +1,6 @@
 [package]
 name = "simien_boxed_error"
-description = "Macro for easily boxing an error. Forked from Deno's simien_boxed_error 0.2.3."
+description = "Macro for easily boxing an error. Forked from Deno's boxed_error 0.2.3."
 version = "0.1.1"
 edition = "2021"
 authors = ["the Deno authors", "the Simien authors"]

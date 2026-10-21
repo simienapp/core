@@ -8,7 +8,7 @@ edition.workspace = true
 license.workspace = true
 readme = "README.md"
 repository = "https://github.com/simienapp/core"
-description = "Proc macros for writing simien_core ops. Forked from Deno's simien_ops 0.288.0."
+description = "Proc macros for writing simien_core ops. Forked from Deno's deno_ops 0.288.0."
 
 [lib]
 path = "./lib.rs"

@@ -1,6 +1,6 @@
 [package]
 name = "simien_native_certs"
-description = "Loads the native certificate store for simien_tls. Forked from Deno's simien_native_certs 0.3.1."
+description = "Loads the native certificate store for simien_tls. Forked from Deno's deno_native_certs 0.3.1."
 version = "0.1.1"
 edition = "2021"
 authors = ["the Deno authors", "the Simien authors"]
