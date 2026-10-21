@@ -428,9 +428,8 @@ pub fn format_unmet_peer_dep_warning(
     "\nThese packages were resolved to a version that does not satisfy a peer \
      dependency constraint, which can cause runtime errors. To silence this \
      warning, install a compatible version or add an \"overrides\" entry to \
-     your package.json or deno.json.\n",
+     your package.json.",
   );
-  text.push_str("Learn more: https://docs.deno.com/go/peer-deps");
   text
 }
 
