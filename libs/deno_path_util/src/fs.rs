@@ -6,15 +6,15 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
-use sys_traits::FsCanonicalize;
-use sys_traits::FsCreateDirAll;
-use sys_traits::FsMetadata;
-use sys_traits::FsOpen;
-use sys_traits::FsRemoveFile;
-use sys_traits::FsRename;
-use sys_traits::OpenOptions;
-use sys_traits::SystemRandom;
-use sys_traits::ThreadSleep;
+use simien_sys_traits::FsCanonicalize;
+use simien_sys_traits::FsCreateDirAll;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsOpen;
+use simien_sys_traits::FsRemoveFile;
+use simien_sys_traits::FsRename;
+use simien_sys_traits::OpenOptions;
+use simien_sys_traits::SystemRandom;
+use simien_sys_traits::ThreadSleep;
 
 use crate::get_atomic_path;
 
@@ -59,7 +59,7 @@ pub fn canonicalize_path_maybe_not_exists(
   }
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait AtomicWriteFileWithRetriesSys:
   AtomicWriteFileSys + ThreadSleep
 {
@@ -88,7 +88,7 @@ pub fn atomic_write_file_with_retries<TSys: AtomicWriteFileWithRetriesSys>(
   }
 }
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait AtomicWriteFileSys:
   FsCreateDirAll + FsMetadata + FsOpen + FsRemoveFile + FsRename + SystemRandom
 {
@@ -174,14 +174,14 @@ mod test {
   use std::path::Path;
   use std::path::PathBuf;
 
-  use sys_traits::EnvCurrentDir;
-  use sys_traits::EnvSetCurrentDir;
-  use sys_traits::FsCanonicalize;
-  use sys_traits::FsCreateDirAll;
-  use sys_traits::FsRead;
-  use sys_traits::FsSymlinkDir;
-  use sys_traits::impls::InMemorySys;
-  use sys_traits::impls::RealSys;
+  use simien_sys_traits::EnvCurrentDir;
+  use simien_sys_traits::EnvSetCurrentDir;
+  use simien_sys_traits::FsCanonicalize;
+  use simien_sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsRead;
+  use simien_sys_traits::FsSymlinkDir;
+  use simien_sys_traits::impls::InMemorySys;
+  use simien_sys_traits::impls::RealSys;
 
   use super::atomic_write_file_with_retries;
   use super::canonicalize_path_maybe_not_exists;

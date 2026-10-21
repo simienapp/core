@@ -24,7 +24,9 @@ jobs:
   publish:
     runs-on: ubuntu-24.04
     environment: release
-    timeout-minutes: 60
+    # Brand-new crates are rate limited (a burst, then about one every ten
+    # minutes); tools/publish.py waits it out.
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: rustup show active-toolchain || rustup toolchain install

@@ -15,9 +15,9 @@ use std::os::unix::io::RawFd;
 use std::task::Context;
 
 #[cfg(windows)]
-use sys_traits::BaseFsMetadata;
+use simien_sys_traits::BaseFsMetadata;
 #[cfg(windows)]
-use sys_traits::impls::RealSys;
+use simien_sys_traits::impls::RealSys;
 
 use super::UV_EBADF;
 use super::UV_EOF;

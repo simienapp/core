@@ -15,3 +15,13 @@ ext/http
 libs/http_h1
 ext/net
 ext/websocket
+libs/npm
+libs/npm_installer
+libs/npm_cache
+libs/cache_dir
+libs/node_resolver
+libs/lockfile
+libs/package_json
+libs/npmrc
+libs/maybe_sync
+libs/resolver

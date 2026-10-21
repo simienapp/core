@@ -3,7 +3,7 @@
 //! Every lazily loaded module of simien_webidl, simien_web and simien_fetch
 //! evaluates in a real isolate. Nothing else here runs this JavaScript, so
 //! without this an import of an extension that isn't part of simienapp/core
-//! (deno_net, deno_telemetry) only fails in an embedder, as it did in 0.1.0.
+//! (simien_net, deno_telemetry) only fails in an embedder, as it did in 0.1.0.
 
 use simien_core::JsRuntime;
 use simien_core::RuntimeOptions;

@@ -8,7 +8,7 @@ const {
   op_fetch_tls_key_static,
 } = core.ops;
 
-// Upstream loaded this from deno_net (02_tls.js); simien_fetch carries the
+// Upstream loaded this from simien_net (02_tls.js); simien_fetch carries the
 // part createHttpClient needs: a PEM cert and key, or no client certificate.
 function loadTlsKeyPair(api, { keyFormat, cert, key }) {
   if (keyFormat !== undefined && keyFormat !== "pem") {

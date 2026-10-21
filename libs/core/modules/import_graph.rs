@@ -20,7 +20,7 @@
 
 // This module is a developer-facing instrumentation knob gated entirely on
 // env vars set by humans running snapshot builds or debugging startup time
-// (`DENO_SNAPSHOT_IMPORT_GRAPH`, `DENO_LOG_LAZY_LOAD`). Using `sys_traits`
+// (`DENO_SNAPSHOT_IMPORT_GRAPH`, `DENO_LOG_LAZY_LOAD`). Using `simien_sys_traits`
 // here would force every embedder to plumb a Sys through, for zero benefit
 // since this code never runs except when those env vars are set. Same for
 // stderr: this is a debug print to a human, not user-facing CLI output.

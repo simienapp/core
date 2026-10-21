@@ -851,7 +851,7 @@ pub struct CreateHttpClientArgs {
 }
 
 /// The TLS key pair for `Deno.createHttpClient({ cert, key })`. Upstream took
-/// these two ops from deno_net, which simien_fetch doesn't depend on.
+/// these two ops from simien_net, which simien_fetch doesn't depend on.
 #[op2]
 #[cppgc]
 pub fn op_fetch_tls_key_null() -> TlsKeysHolder {

@@ -1,0 +1,17 @@
+[package]
+name = "simien_sys_traits_macros"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Macros for simien_sys_traits. Forked from sys_traits_macros 0.1.0."
+edition = "2021"
+license = "MIT"
+
+[lib]
+path = "lib.rs"
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full"] }

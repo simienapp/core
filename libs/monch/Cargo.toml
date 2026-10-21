@@ -1,0 +1,15 @@
+[package]
+name = "simien_monch"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "Parser combinators, for Simien. Forked from monch 0.6.0."
+edition = "2024"
+license = "MIT"
+
+[dev-dependencies]
+divan = "0.1"
+
+[[bench]]
+name = "combinators"
+harness = false

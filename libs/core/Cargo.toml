@@ -54,7 +54,7 @@ simien_serde_v8 = { workspace = true, default-features = false }
 smallvec.workspace = true
 sourcemap.workspace = true
 static_assertions.workspace = true
-sys_traits = { workspace = true, features = ["real"] }
+simien_sys_traits = { workspace = true, features = ["real"] }
 thiserror.workspace = true
 tokio.workspace = true
 url.workspace = true

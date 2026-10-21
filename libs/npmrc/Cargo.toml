@@ -1,0 +1,24 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_npmrc"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = ".npmrc parsing for Simien. Forked from deno_npmrc 0.20.0."
+edition.workspace = true
+license = "MIT"
+
+[lib]
+path = "./lib.rs"
+
+[dependencies]
+log.workspace = true
+simien_monch.workspace = true
+simien_sys_traits = { workspace = true }
+thiserror.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+simien_sys_traits = { workspace = true, features = ["memory"] }

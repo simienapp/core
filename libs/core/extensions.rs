@@ -1142,7 +1142,7 @@ mod tests {
       const ID: u32;
     }
 
-    /// Resembles the generic ops in `deno_node`/`deno_http`: the parameter is
+    /// Resembles the generic ops in `deno_node`/`simien_http`: the parameter is
     /// named in the op's turbofish and reached through the op body.
     #[op2(fast)]
     fn op_generic_probe<P: TestParam + 'static>() -> u32 {

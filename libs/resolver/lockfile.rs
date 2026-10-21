@@ -1,0 +1,581 @@
+// Copyright 2018-2026 the Deno authors. MIT license.
+
+use std::collections::HashSet;
+use std::path::PathBuf;
+
+use anyhow::Context;
+use anyhow::Error as AnyError;
+use simien_capacity_builder::StringBuilder;
+use crate::workspace::Workspace;
+use simien_error::JsErrorBox;
+use simien_lockfile::Lockfile;
+use simien_lockfile::NpmPackageInfoProvider;
+use simien_lockfile::WorkspaceMemberConfig;
+use simien_maybe_sync::MaybeSend;
+use simien_maybe_sync::MaybeSync;
+use simien_npm::registry::NpmRegistryApi;
+use simien_npm::resolution::DefaultTarballUrlProvider;
+use simien_npm::resolution::NpmRegistryDefaultTarballUrlProvider;
+use simien_package_json::PackageJsonDepValue;
+use simien_path_util::fs::atomic_write_file_with_retries;
+use simien_semver::VersionReq;
+use simien_semver::jsr::JsrDepPackageReq;
+use simien_semver::package::PackageNv;
+use simien_semver::package::PackageReq;
+use futures::TryStreamExt;
+use futures::stream::FuturesOrdered;
+use indexmap::IndexMap;
+use simien_node_resolver::PackageJson;
+use parking_lot::Mutex;
+use parking_lot::MutexGuard;
+
+use crate::bun_lockfile_import::bun_lock_to_deno_lock_v5;
+use crate::npm_lockfile_import::package_lock_to_deno_lock_v5;
+use crate::pnpm_lockfile_import::pnpm_lock_to_deno_lock_v5;
+use crate::workspace::WorkspaceNpmLinkPackagesRc;
+use crate::yarn_lockfile_import::yarn_lock_to_deno_lock_v5;
+
+pub trait NpmRegistryApiEx: NpmRegistryApi + MaybeSend + MaybeSync {}
+
+impl<T> NpmRegistryApiEx for T where T: NpmRegistryApi + MaybeSend + MaybeSync {}
+
+#[allow(clippy::disallowed_types, reason = "definition")]
+type NpmRegistryApiRc = simien_maybe_sync::MaybeArc<dyn NpmRegistryApiEx>;
+
+pub struct LockfileNpmPackageInfoApiAdapter {
+  api: NpmRegistryApiRc,
+  workspace_link_packages: WorkspaceNpmLinkPackagesRc,
+}
+
+impl LockfileNpmPackageInfoApiAdapter {
+  pub fn new(
+    api: NpmRegistryApiRc,
+    workspace_link_packages: WorkspaceNpmLinkPackagesRc,
+  ) -> Self {
+    Self {
+      api,
+      workspace_link_packages,
+    }
+  }
+
+  async fn get_infos(
+    &self,
+    values: &[PackageNv],
+  ) -> Result<
+    Vec<simien_lockfile::Lockfile5NpmInfo>,
+    Box<dyn std::error::Error + Send + Sync>,
+  > {
+    let futs = values
+      .iter()
+      .map(|v| async move {
+        let info = self.api.package_info(v.name.as_str()).await?;
+        let version_info =
+          info.version_info(v, &self.workspace_link_packages.0)?;
+        Ok::<_, Box<dyn std::error::Error + Send + Sync>>(
+          simien_lockfile::Lockfile5NpmInfo {
+            tarball_url: version_info.dist.as_ref().and_then(|d| {
+              let tarball_url_provider = NpmRegistryDefaultTarballUrlProvider;
+              if d.tarball == tarball_url_provider.default_tarball_url(v) {
+                None
+              } else {
+                Some(d.tarball.clone())
+              }
+            }),
+            optional_dependencies: version_info
+              .optional_dependencies
+              .iter()
+              .map(|(k, v)| (k.to_string(), v.to_string()))
+              .collect::<std::collections::BTreeMap<_, _>>(),
+            cpu: version_info.cpu.iter().map(|s| s.to_string()).collect(),
+            os: version_info.os.iter().map(|s| s.to_string()).collect(),
+            deprecated: version_info.deprecated.is_some(),
+            bin: version_info.bin.is_some(),
+            scripts: version_info.has_install_script.unwrap_or(false)
+              || version_info.scripts.contains_key("preinstall")
+              || version_info.scripts.contains_key("install")
+              || version_info.scripts.contains_key("postinstall"),
+            optional_peers: version_info
+              .peer_dependencies_meta
+              .iter()
+              .filter_map(|(k, v)| {
+                if v.optional {
+                  version_info
+                    .peer_dependencies
+                    .get(k)
+                    .map(|v| (k.to_string(), v.to_string()))
+                } else {
+                  None
+                }
+              })
+              .collect::<std::collections::BTreeMap<_, _>>(),
+          },
+        )
+      })
+      .collect::<FuturesOrdered<_>>();
+    let package_infos = futs.try_collect::<Vec<_>>().await?;
+    Ok(package_infos)
+  }
+}
+
+#[async_trait::async_trait(?Send)]
+impl simien_lockfile::NpmPackageInfoProvider
+  for LockfileNpmPackageInfoApiAdapter
+{
+  async fn get_npm_package_info(
+    &self,
+    values: &[PackageNv],
+  ) -> Result<
+    Vec<simien_lockfile::Lockfile5NpmInfo>,
+    Box<dyn std::error::Error + Send + Sync>,
+  > {
+    let package_infos = self.get_infos(values).await;
+
+    match package_infos {
+      Ok(package_infos) => Ok(package_infos),
+      Err(err) => {
+        if self.api.mark_force_reload() {
+          self.get_infos(values).await
+        } else {
+          Err(err)
+        }
+      }
+    }
+  }
+}
+
+#[derive(Debug)]
+pub struct LockfileReadFromPathOptions {
+  pub file_path: PathBuf,
+  pub frozen: bool,
+  /// Causes the lockfile to only be read from, but not written to.
+  pub skip_write: bool,
+  /// If true and `file_path` does not exist, attempt to seed the lockfile by
+  /// translating a sibling `package-lock.json`.
+  pub import_npm_lockfile: bool,
+}
+
+#[simien_sys_traits::auto_impl]
+pub trait LockfileSys:
+  simien_path_util::fs::AtomicWriteFileWithRetriesSys
+  + simien_sys_traits::FsRead
+  + simien_sys_traits::FsCanonicalize
+  + std::fmt::Debug
+{
+}
+
+pub struct Guard<'a, T> {
+  guard: MutexGuard<'a, T>,
+}
+
+impl<T> std::ops::Deref for Guard<'_, T> {
+  type Target = T;
+
+  fn deref(&self) -> &Self::Target {
+    &self.guard
+  }
+}
+
+impl<T> std::ops::DerefMut for Guard<'_, T> {
+  fn deref_mut(&mut self) -> &mut Self::Target {
+    &mut self.guard
+  }
+}
+
+#[derive(Debug, Clone)]
+pub struct LockfileFlags {
+  pub no_lock: bool,
+  pub frozen_lockfile: Option<bool>,
+  pub lock: Option<PathBuf>,
+  pub skip_write: bool,
+  pub no_config: bool,
+  pub no_npm: bool,
+  /// When no `deno.lock` exists in the workspace, attempt to seed one by
+  /// translating a sibling `package-lock.json`. Currently only set by
+  /// `deno install`.
+  pub import_npm_lockfile: bool,
+}
+
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
+pub enum LockfileWriteError {
+  #[class(inherit)]
+  #[error(transparent)]
+  Changed(JsErrorBox),
+  #[class(inherit)]
+  #[error("Failed writing lockfile")]
+  Io(#[source] std::io::Error),
+}
+
+#[allow(clippy::disallowed_types, reason = "definition")]
+pub type LockfileLockRc<TSys> = simien_maybe_sync::MaybeArc<LockfileLock<TSys>>;
+
+#[derive(Debug)]
+pub struct LockfileLock<TSys: LockfileSys> {
+  sys: TSys,
+  lockfile: Mutex<Lockfile>,
+  pub filename: PathBuf,
+  frozen: bool,
+  skip_write: bool,
+}
+
+impl<TSys: LockfileSys> LockfileLock<TSys> {
+  /// Get the inner simien_lockfile::Lockfile.
+  pub fn lock(&self) -> Guard<'_, Lockfile> {
+    Guard {
+      guard: self.lockfile.lock(),
+    }
+  }
+
+  pub fn set_workspace_config(
+    &self,
+    options: simien_lockfile::SetWorkspaceConfigOptions,
+  ) {
+    self.lockfile.lock().set_workspace_config(options);
+  }
+
+  pub fn overwrite(&self) -> bool {
+    self.lockfile.lock().overwrite
+  }
+
+  pub fn write_if_changed(&self) -> Result<(), LockfileWriteError> {
+    if self.skip_write {
+      return Ok(());
+    }
+
+    self
+      .error_if_changed()
+      .map_err(LockfileWriteError::Changed)?;
+    let mut lockfile = self.lockfile.lock();
+    let Some(bytes) = lockfile.resolve_write_bytes() else {
+      return Ok(()); // nothing to do
+    };
+    // If the lockfile path is a symlink, resolve it to its target so the
+    // atomic write below replaces the target file rather than clobbering the
+    // symlink with a freshly created regular file. This matches how the
+    // deno.json/package.json writes follow symlinks (they write in place).
+    let write_path = if self.sys.fs_is_symlink_no_err(&lockfile.filename) {
+      self
+        .sys
+        .fs_canonicalize(&lockfile.filename)
+        .unwrap_or_else(|_| lockfile.filename.clone())
+    } else {
+      lockfile.filename.clone()
+    };
+    // do an atomic write to reduce the chance of multiple deno
+    // processes corrupting the file
+    const CACHE_PERM: u32 = 0o644;
+    atomic_write_file_with_retries(&self.sys, &write_path, &bytes, CACHE_PERM)
+      .map_err(LockfileWriteError::Io)?;
+    lockfile.has_content_changed = false;
+    Ok(())
+  }
+
+  pub async fn discover(
+    sys: TSys,
+    flags: LockfileFlags,
+    workspace: &Workspace,
+    api: &dyn NpmPackageInfoProvider,
+  ) -> Result<Option<Self>, AnyError> {
+    fn pkg_json_deps(
+      maybe_pkg_json: Option<&PackageJson>,
+      catalogs: &IndexMap<String, IndexMap<String, String>>,
+    ) -> HashSet<JsrDepPackageReq> {
+      let Some(pkg_json) = maybe_pkg_json else {
+        return Default::default();
+      };
+      let deps = pkg_json.resolve_local_package_json_deps();
+
+      deps
+        .dependencies
+        .iter()
+        .chain(deps.dev_dependencies.iter())
+        .filter_map(|(alias, dep)| dep.as_ref().ok().map(|d| (alias, d)))
+        .filter_map(|(alias, dep)| match dep {
+          PackageJsonDepValue::File(_) => {
+            // ignored because this will have its own separate lockfile
+            None
+          }
+          PackageJsonDepValue::Req(req) => {
+            Some(JsrDepPackageReq::npm(req.clone()))
+          }
+          PackageJsonDepValue::Workspace { .. } => None,
+          PackageJsonDepValue::Catalog(catalog_name) => {
+            let catalog = catalogs.get(catalog_name.as_str())?;
+            let version_req_str = catalog.get(alias.as_str())?;
+            let version_req =
+              VersionReq::parse_from_npm(version_req_str).ok()?;
+            Some(JsrDepPackageReq::npm(PackageReq {
+              name: alias.clone(),
+              version_req,
+            }))
+          }
+        })
+        .collect()
+    }
+
+    if flags.no_lock {
+      return Ok(None);
+    }
+    let file_path = match flags.lock {
+      Some(path) => path,
+      None => workspace.lockfile_path(),
+    };
+    let frozen = flags.frozen_lockfile.unwrap_or(false);
+    let lockfile = Self::read_from_path(
+      sys,
+      LockfileReadFromPathOptions {
+        file_path,
+        frozen,
+        skip_write: flags.skip_write,
+        import_npm_lockfile: flags.import_npm_lockfile,
+      },
+      api,
+    )
+    .await?;
+    let config = simien_lockfile::WorkspaceConfig {
+      root: WorkspaceMemberConfig {
+        package_json_deps: pkg_json_deps(
+          workspace.root_pkg_json().map(|p| p.as_ref()),
+          workspace.catalogs(),
+        ),
+        dependencies: Default::default(),
+      },
+      members: workspace
+        .members()
+        .filter_map(|(dir, pkg_json)| {
+          let config = WorkspaceMemberConfig {
+            package_json_deps: pkg_json_deps(
+              Some(pkg_json.as_ref()),
+              workspace.catalogs(),
+            ),
+            dependencies: Default::default(),
+          };
+          // exclude empty workspace members
+          (!config.package_json_deps.is_empty())
+            .then(|| (dir.to_string(), config))
+        })
+        .collect(),
+      links: workspace
+        .link_pkg_jsons()
+        .filter_map(|pkg_json| {
+          fn collect_deps(
+            deps: Option<&IndexMap<String, String>>,
+          ) -> HashSet<JsrDepPackageReq> {
+            deps
+              .map(|i| {
+                i.iter()
+                  .filter_map(|(k, v)| PackageJsonDepValue::parse(k, v).ok())
+                  .filter_map(|dep| match dep {
+                    PackageJsonDepValue::Req(req) => {
+                      Some(JsrDepPackageReq::npm(req.clone()))
+                    }
+                    // not supported
+                    PackageJsonDepValue::File(_)
+                    | PackageJsonDepValue::Workspace { .. }
+                    | PackageJsonDepValue::Catalog(_) => None,
+                  })
+                  .collect()
+              })
+              .unwrap_or_default()
+          }
+
+          let name = pkg_json.name.as_ref()?;
+          let key = StringBuilder::<String>::build(|builder| {
+            builder.append("npm:");
+            builder.append(name);
+            if let Some(version) = &pkg_json.version {
+              builder.append('@');
+              builder.append(version);
+            }
+          })
+          .unwrap();
+          // anything that affects npm resolution should go here in order to bust
+          // the npm resolution when it changes
+          let value = simien_lockfile::LockfileLinkContent {
+            dependencies: collect_deps(pkg_json.dependencies.as_ref()),
+            optional_dependencies: collect_deps(
+              pkg_json.optional_dependencies.as_ref(),
+            ),
+            peer_dependencies: collect_deps(
+              pkg_json.peer_dependencies.as_ref(),
+            ),
+            peer_dependencies_meta: pkg_json
+              .peer_dependencies_meta
+              .clone()
+              .and_then(|v| serde_json::from_value(v).ok())
+              .unwrap_or_default(),
+          };
+          Some((key, value))
+        })
+        .collect(),
+      npm_overrides: workspace
+        .npm_overrides()
+        .map(|m| serde_json::Value::Object(m.clone())),
+    };
+    lockfile.set_workspace_config(simien_lockfile::SetWorkspaceConfigOptions {
+      no_npm: flags.no_npm,
+      no_config: flags.no_config,
+      config,
+    });
+    Ok(Some(lockfile))
+  }
+
+  pub async fn read_from_path(
+    sys: TSys,
+    opts: LockfileReadFromPathOptions,
+    api: &dyn simien_lockfile::NpmPackageInfoProvider,
+  ) -> Result<LockfileLock<TSys>, AnyError> {
+    let lockfile = match sys.fs_read_to_string(&opts.file_path) {
+      Ok(text) => {
+        Lockfile::new(
+          simien_lockfile::NewLockfileOptions {
+            file_path: opts.file_path,
+            content: &text,
+            overwrite: false,
+          },
+          api,
+        )
+        .await?
+      }
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+        // Box the seeding future so its (multi-candidate) size stays off the
+        // stack of every caller that awaits a lockfile read, which would
+        // otherwise trip clippy's `large_futures` lint.
+        if opts.import_npm_lockfile
+          && let Some(seeded) =
+            Box::pin(try_import_npm_lockfile(&sys, &opts.file_path, api))
+              .await?
+        {
+          seeded
+        } else {
+          Lockfile::new_empty(opts.file_path, false)
+        }
+      }
+      Err(err) => {
+        return Err(err).with_context(|| {
+          format!("Failed reading lockfile '{}'", opts.file_path.display())
+        });
+      }
+    };
+    Ok(LockfileLock {
+      sys,
+      filename: lockfile.filename.clone(),
+      lockfile: Mutex::new(lockfile),
+      frozen: opts.frozen,
+      skip_write: opts.skip_write,
+    })
+  }
+
+  pub fn error_if_changed(&self) -> Result<(), JsErrorBox> {
+    if !self.frozen {
+      return Ok(());
+    }
+    let lockfile = self.lockfile.lock();
+    if lockfile.has_content_changed {
+      let contents = self
+        .sys
+        .fs_read_to_string(&lockfile.filename)
+        .unwrap_or_default();
+      let new_contents = lockfile.as_json_string();
+      let diff = crate::display::diff(&contents, &new_contents);
+      // has an extra newline at the end
+      let diff = diff.trim_end();
+      const MAX_DIFF_LINES: usize = 50;
+      let truncated_diff = {
+        let lines: Vec<&str> = diff.lines().collect();
+        if lines.len() > MAX_DIFF_LINES {
+          let shown: String = lines[..MAX_DIFF_LINES].join("\n");
+          let remaining = lines.len() - MAX_DIFF_LINES;
+          format!("{shown}\n... {remaining} more lines omitted ...")
+        } else {
+          diff.to_string()
+        }
+      };
+      Err(JsErrorBox::generic(format!(
+        "The lockfile is out of date. Run `deno install --frozen=false`, or rerun with `--frozen=false` to update it.\nchanges:\n{truncated_diff}"
+      )))
+    } else {
+      Ok(())
+    }
+  }
+}
+
+/// Attempt to translate a sibling `package-lock.json`, `pnpm-lock.yaml`,
+/// `yarn.lock`, or `bun.lock` into a seed `Lockfile`. Returns `Ok(None)` when
+/// no usable lockfile is present (so the caller falls back to creating an empty
+/// lockfile). The returned lockfile is flagged as changed so the next write
+/// persists it to disk.
+///
+/// When several are present, the first in the order
+/// `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lock` wins.
+async fn try_import_npm_lockfile<TSys: LockfileSys>(
+  sys: &TSys,
+  deno_lock_path: &std::path::Path,
+  api: &dyn simien_lockfile::NpmPackageInfoProvider,
+) -> Result<Option<Lockfile>, AnyError> {
+  let Some(parent) = deno_lock_path.parent() else {
+    return Ok(None);
+  };
+
+  type Translator = fn(&str) -> Result<String, String>;
+  let candidates: [(&str, Translator); 4] = [
+    ("package-lock.json", |s| {
+      package_lock_to_deno_lock_v5(s).map_err(|e| e.to_string())
+    }),
+    ("pnpm-lock.yaml", |s| {
+      pnpm_lock_to_deno_lock_v5(s).map_err(|e| e.to_string())
+    }),
+    ("yarn.lock", |s| {
+      yarn_lock_to_deno_lock_v5(s).map_err(|e| e.to_string())
+    }),
+    ("bun.lock", |s| {
+      bun_lock_to_deno_lock_v5(s).map_err(|e| e.to_string())
+    }),
+  ];
+
+  for (file_name, translate) in candidates {
+    let path = parent.join(file_name);
+    let text = match sys.fs_read_to_string(&path) {
+      Ok(text) => text,
+      Err(err) if err.kind() == std::io::ErrorKind::NotFound => continue,
+      Err(err) => {
+        return Err(err)
+          .with_context(|| format!("Failed reading '{}'", path.display()));
+      }
+    };
+    let deno_lock_text = match translate(&text) {
+      Ok(text) => text,
+      Err(err) => {
+        log::warn!(
+          "Failed to import {} at {}: {}. Trying the next candidate.",
+          file_name,
+          path.display(),
+          err
+        );
+        continue;
+      }
+    };
+    let mut lockfile = Lockfile::new(
+      simien_lockfile::NewLockfileOptions {
+        file_path: deno_lock_path.to_path_buf(),
+        content: &deno_lock_text,
+        overwrite: false,
+      },
+      api,
+    )
+    .await?;
+    // Only announce the import when the translation actually produced
+    // content. A foreign lockfile whose deps are all unsupported (e.g. only
+    // `file:`/`link:` entries) translates to an empty lockfile, and claiming
+    // we seeded it would be misleading.
+    if !lockfile.content.is_empty() {
+      log::info!("Seeded deno.lock from {}", path.display());
+    }
+    // Force write on first save so the imported state is persisted even if
+    // no subsequent resolution mutates the lockfile.
+    lockfile.has_content_changed = true;
+    return Ok(Some(lockfile));
+  }
+
+  Ok(None)
+}
+

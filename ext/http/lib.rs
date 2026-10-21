@@ -1,6 +1,6 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-//! The HTTP server behind `Deno.serve`, forked from Deno's deno_http for the
+//! The HTTP server behind `Deno.serve`, forked from Deno's simien_http for the
 //! Simien runtime. The embedder decides where connections come from through
 //! [`HttpPropertyExtractor`]; the default one serves connections a Rust
 //! embedder accepts and hands over through a [`connection_inbox`].

@@ -1,0 +1,46 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_node_resolver"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+repository = "https://github.com/simienapp/core"
+description = "package.json exports/imports and condition resolution for Simien's module loader. Forked from node_resolver 0.97.0."
+edition.workspace = true
+license = "MIT"
+readme = "README.md"
+
+[lib]
+path = "lib.rs"
+
+[features]
+sync = ["simien_maybe_sync/sync", "simien_package_json/sync"]
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+simien_boxed_error.workspace = true
+simien_capacity_builder.workspace = true
+simien_error.workspace = true
+simien_maybe_sync.workspace = true
+simien_media_type.workspace = true
+simien_package_json.workspace = true
+simien_path_util.workspace = true
+simien_semver.workspace = true
+futures.workspace = true
+lazy-regex.workspace = true
+log.workspace = true
+once_cell.workspace = true
+path-clean.workspace = true
+percent-encoding.workspace = true
+pretty_assertions.workspace = true
+regex.workspace = true
+rustc-hash.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+simien_sys_traits.workspace = true
+thiserror.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+simien_sys_traits = { workspace = true, features = ["memory"] }

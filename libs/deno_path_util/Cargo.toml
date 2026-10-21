@@ -12,13 +12,13 @@ repository = "https://github.com/simienapp/core"
 [dependencies]
 percent-encoding = "2.3.0"
 thiserror = "2"
-sys_traits.workspace = true
+simien_sys_traits.workspace = true
 simien_error = { workspace = true, features = ["url"] }
 url = "2.5.1"
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
-sys_traits = { workspace = true, features = ["getrandom", "memory", "real"] }
+simien_sys_traits = { workspace = true, features = ["getrandom", "memory", "real"] }
 tempfile = "3.4.0"
 divan = "0.1.21"
 

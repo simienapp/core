@@ -33,7 +33,7 @@ def load_map():
 def compile_map(pairs):
     names = {old: new for old, new in pairs}
     pattern = re.compile(r"(?<![\w/-])(" + "|".join(re.escape(o) for o, _ in pairs) + r")(?!\w)")
-    keep = re.compile(r"github\.com/denoland|deno\.land|denoland/")
+    keep = re.compile(r"github\.com/denoland|deno\.land|denoland/|Forked from")
 
     def rename_line(line):
         if keep.search(line):

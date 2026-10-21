@@ -595,7 +595,7 @@
   }
 
   // Some "extensions" rely on "BadResource", "Interrupted", "NotCapable"
-  // errors in the JS code (eg. "deno_net") so they are provided in "Deno.core"
+  // errors in the JS code (eg. "simien_net") so they are provided in "Deno.core"
   // but later reexported on "Deno.errors"
   class BadResource extends Error {
     constructor(msg, options) {

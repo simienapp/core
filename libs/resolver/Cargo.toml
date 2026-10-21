@@ -1,0 +1,65 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_resolver"
+version = "0.1.1"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+readme = "README.md"
+repository = "https://github.com/simienapp/core"
+description = "npm resolution for Simien: lockfiles (and bun, npm, pnpm and yarn lockfile import), npm resolvers and .npmrc discovery. Forked from the npm parts of deno_resolver 0.90.0."
+
+[lib]
+path = "lib.rs"
+
+[features]
+sync = [
+  "dashmap",
+  "simien_maybe_sync/sync",
+  "simien_package_json/sync",
+  "simien_node_resolver/sync",
+  "simien_cache_dir/sync",
+]
+
+[dependencies]
+anyhow.workspace = true
+async-once-cell.workspace = true
+async-trait.workspace = true
+simien_boxed_error.workspace = true
+simien_capacity_builder.workspace = true
+chrono.workspace = true
+dashmap = { workspace = true, optional = true }
+simien_cache_dir.workspace = true
+simien_error.workspace = true
+simien_lockfile.workspace = true
+simien_maybe_sync.workspace = true
+simien_media_type.workspace = true
+simien_npm.workspace = true
+simien_npmrc.workspace = true
+simien_package_json.workspace = true
+simien_path_util.workspace = true
+simien_semver.workspace = true
+simien_terminal.workspace = true
+simien_unsync.workspace = true
+futures.workspace = true
+imara-diff.workspace = true
+indexmap.workspace = true
+jsonc-parser.workspace = true
+log.workspace = true
+simien_node_resolver.workspace = true
+once_cell.workspace = true
+parking_lot.workspace = true
+phf = { workspace = true, features = ["macros"] }
+rustc-hash.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+simien_sys_traits.workspace = true
+thiserror.workspace = true
+twox-hash.workspace = true
+url.workspace = true
+yaml_parser.workspace = true
+
+[dev-dependencies]
+simien_node_resolver.workspace = true
+simien_sys_traits = { workspace = true, features = ["memory", "real", "serde_json"] }
