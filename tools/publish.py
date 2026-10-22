@@ -14,8 +14,9 @@ goes first.
 In CI CARGO_REGISTRY_TOKEN comes from crates.io trusted publishing
 (publish.yml). Trusted publishing can't create a crate, so a crate crates.io
 doesn't have yet is published with NEW_CRATE_TOKEN, the release
-environment's CARGO_REGISTRY_TOKEN secret, which is only needed while a new
-crate is waiting.
+environment's CARGO_REGISTRY_TOKEN secret. So is a crate that has no trusted
+publisher on crates.io yet: when crates.io says the trusted-publishing token
+isn't valid for it, the publish is retried with NEW_CRATE_TOKEN.
 
 A trusted-publishing token lives about 30 minutes, and waiting out the
 new-crate rate limit takes longer, so in CI this mints a fresh one (as
@@ -211,6 +212,11 @@ def publish_all(trusted):
                 env["CARGO_REGISTRY_TOKEN"] = trusted.get()
             r = subprocess.run(["cargo", "publish", "--no-verify", *args], cwd=ROOT, capture_output=True, text=True, env=env)
             out = r.stdout + r.stderr
+            if not new and "not valid for crate" in out and os.environ.get("NEW_CRATE_TOKEN"):
+                print(f"publish {name} {version}: no trusted publisher on crates.io yet, using NEW_CRATE_TOKEN", flush=True)
+                new = True
+                env["CARGO_REGISTRY_TOKEN"] = os.environ["NEW_CRATE_TOKEN"]
+                continue
             if r.returncode == 0:
                 print(f"publish {name} {version}: done", flush=True)
                 break
