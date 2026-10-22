@@ -2,7 +2,7 @@
 
 [package]
 name = "simien_node_runtime"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
@@ -30,6 +30,7 @@ oxc_span.workspace = true
 oxc_transformer.workspace = true
 same-file.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 simien_core.workspace = true
 simien_error.workspace = true
 simien_fetch.workspace = true
@@ -37,6 +38,7 @@ simien_fs.workspace = true
 simien_io.workspace = true
 simien_net.workspace = true
 simien_node.workspace = true
+simien_node_crypto.workspace = true
 simien_node_resolver.workspace = true
 simien_os.workspace = true
 simien_path_util.workspace = true
@@ -44,6 +46,7 @@ simien_permissions.workspace = true
 simien_process.workspace = true
 simien_resolver.workspace = true
 simien_maybe_sync.workspace = true
+simien_napi.workspace = true
 simien_sys_traits = { workspace = true, features = ["real", "libc", "winapi"] }
 simien_terminal.workspace = true
 simien_web.workspace = true
@@ -58,8 +61,10 @@ nix = { workspace = true, features = ["term"] }
 [target.'cfg(windows)'.dependencies]
 windows-sys = { workspace = true, features = ["Win32_Foundation", "Win32_System_Console", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Threading"] }
 
-[dev-dependencies]
+[build-dependencies]
 simien_napi.workspace = true
+
+[dev-dependencies]
 simien_crypto.workspace = true
 tempfile.workspace = true
 tokio = { workspace = true, features = ["rt", "macros"] }

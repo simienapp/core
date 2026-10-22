@@ -1150,34 +1150,46 @@ fn op_napi_open<'scope>(
 }
 
 #[allow(clippy::print_stdout, reason = "cargo build script output")]
+/// What an embedder's build script exports Node-API's symbols from.
+pub enum LinkTarget<'a> {
+  /// One binary, by name.
+  Bin(&'a str),
+  /// Every example of the package.
+  Examples,
+  /// Every test of the package.
+  Tests,
+}
+
+/// Exports Node-API's symbols from the binary `name`, so native addons can
+/// call them. Call it from the binary's build script.
 pub fn print_linker_flags(name: &str) {
+  print_linker_flags_for(LinkTarget::Bin(name));
+}
+
+/// [`print_linker_flags`] for any [`LinkTarget`].
+pub fn print_linker_flags_for(target: LinkTarget) {
   let symbols_path =
     include_str!(concat!(env!("OUT_DIR"), "/napi_symbol_path.txt"));
 
   #[cfg(target_os = "windows")]
-  println!("cargo:rustc-link-arg-bin={name}=/DEF:{}", symbols_path);
+  let flag = format!("/DEF:{symbols_path}");
 
   #[cfg(target_os = "macos")]
-  println!(
-    "cargo:rustc-link-arg-bin={name}=-Wl,-exported_symbols_list,{}",
-    symbols_path,
-  );
+  let flag = format!("-Wl,-exported_symbols_list,{symbols_path}");
 
   #[cfg(any(
     target_os = "linux",
     target_os = "freebsd",
-    target_os = "openbsd"
+    target_os = "openbsd",
+    target_os = "android"
   ))]
-  println!(
-    "cargo:rustc-link-arg-bin={name}=-Wl,--export-dynamic-symbol-list={}",
-    symbols_path,
-  );
+  let flag = format!("-Wl,--export-dynamic-symbol-list={symbols_path}");
 
-  #[cfg(target_os = "android")]
-  println!(
-    "cargo:rustc-link-arg-bin={name}=-Wl,--export-dynamic-symbol-list={}",
-    symbols_path,
-  );
+  match target {
+    LinkTarget::Bin(name) => println!("cargo:rustc-link-arg-bin={name}={flag}"),
+    LinkTarget::Examples => println!("cargo:rustc-link-arg-examples={flag}"),
+    LinkTarget::Tests => println!("cargo:rustc-link-arg-tests={flag}"),
+  }
 }
 
 #[cfg(test)]

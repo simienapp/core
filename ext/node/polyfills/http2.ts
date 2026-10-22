@@ -239,14 +239,14 @@ const {
   onServerStream,
 } = core.loadExtScript("ext:simien_node/internal/http2/compat.js");
 const { updateSpanFromError } = core.loadExtScript(
-  "ext:deno_telemetry/util.ts",
+  "ext:simien_node/internal/telemetry_off.js",
 );
 const {
   otelState,
   builtinTracer,
   ContextManager,
   SPAN_KEY,
-} = core.loadExtScript("ext:deno_telemetry/telemetry.ts");
+} = core.loadExtScript("ext:simien_node/internal/telemetry_off.js");
 const onClientStreamCreatedChannel = dc.channel("http2.client.stream.created");
 const onClientStreamStartChannel = dc.channel("http2.client.stream.start");
 const onClientStreamErrorChannel = dc.channel("http2.client.stream.error");

@@ -123,7 +123,7 @@ const {
   builtinTracer,
   ContextManager,
   telemetry,
-} = core.loadExtScript("ext:deno_telemetry/telemetry.ts");
+} = core.loadExtScript("ext:simien_node/internal/telemetry_off.js");
 const { channel } = core.loadExtScript("ext:simien_node/diagnostics_channel.js");
 
 const onServerRequestStartChannel = channel("http.server.request.start");
