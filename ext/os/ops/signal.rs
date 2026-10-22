@@ -15,10 +15,10 @@ use simien_core::op2;
 pub enum SignalError {
   #[class(type)]
   #[error(transparent)]
-  InvalidSignalStr(#[from] deno_signals::InvalidSignalStrError),
+  InvalidSignalStr(#[from] simien_signals::InvalidSignalStrError),
   #[class(type)]
   #[error(transparent)]
-  InvalidSignalInt(#[from] deno_signals::InvalidSignalIntError),
+  InvalidSignalInt(#[from] simien_signals::InvalidSignalIntError),
   #[class(type)]
   #[error("Binding to signal '{0}' is not allowed")]
   SignalNotAllowed(String),
@@ -39,13 +39,13 @@ impl Resource for SignalStreamResource {
   }
 
   fn close(self: Rc<Self>) {
-    deno_signals::unregister(self.signo, self.id);
+    simien_signals::unregister(self.signo, self.id);
   }
 }
 
 impl Drop for SignalStreamResource {
   fn drop(&mut self) {
-    deno_signals::unregister(self.signo, self.id);
+    simien_signals::unregister(self.signo, self.id);
   }
 }
 
@@ -55,13 +55,13 @@ pub fn op_signal_bind(
   state: &mut OpState,
   #[string] sig: &str,
 ) -> Result<ResourceId, SignalError> {
-  let signo = deno_signals::signal_str_to_int(sig)?;
-  if deno_signals::is_forbidden(signo) {
+  let signo = simien_signals::signal_str_to_int(sig)?;
+  if simien_signals::is_forbidden(signo) {
     return Err(SignalError::SignalNotAllowed(sig.to_string()));
   }
 
   let (tx, rx) = tokio::sync::watch::channel(());
-  let id = deno_signals::register(
+  let id = simien_signals::register(
     signo,
     true,
     Box::new(move || {

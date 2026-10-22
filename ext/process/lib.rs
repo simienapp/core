@@ -607,7 +607,7 @@ impl TryFrom<ExitStatus> for ChildStatus {
         success: false,
         code: 128 + signal,
         #[cfg(unix)]
-        signal: Some(deno_signals::signal_int_to_str(signal)?.to_string()),
+        signal: Some(simien_signals::signal_int_to_str(signal)?.to_string()),
         #[cfg(not(unix))]
         signal: None,
       }
@@ -1773,7 +1773,7 @@ fn op_spawn_sync(
   let kill_signal_int: i32 = match &kill_signal {
     Some(KillSignal::Number(n)) => *n,
     Some(KillSignal::String(s)) => {
-      deno_signals::signal_str_to_int(s).unwrap_or(libc::SIGTERM)
+      simien_signals::signal_str_to_int(s).unwrap_or(libc::SIGTERM)
     }
     None => libc::SIGTERM,
   };
@@ -2246,7 +2246,7 @@ mod deprecated {
   pub fn kill(pid: i32, signal: &SignalArg) -> Result<(), ProcessError> {
     let signo = match signal {
       SignalArg::Int(n) => *n,
-      SignalArg::String(s) => deno_signals::signal_str_to_int(s)
+      SignalArg::String(s) => simien_signals::signal_str_to_int(s)
         .map_err(SignalError::InvalidSignalStr)?,
     };
     use nix::sys::signal::Signal;
@@ -2315,7 +2315,7 @@ mod deprecated {
 
     let signo = match signal {
       SignalArg::Int(n) => *n,
-      SignalArg::String(s) => deno_signals::signal_str_to_int(s)
+      SignalArg::String(s) => simien_signals::signal_str_to_int(s)
         .map_err(SignalError::InvalidSignalStr)?,
     };
 
@@ -2333,7 +2333,7 @@ mod deprecated {
     // SIGABRT is 22 on Windows (CRT), unlike 6 on Unix.
     if !matches!(signo, 2 | 3 | 9 | 15 | 22) {
       return Err(
-        SignalError::InvalidSignalStr(deno_signals::InvalidSignalStrError(
+        SignalError::InvalidSignalStr(simien_signals::InvalidSignalStrError(
           format!("{signo}"),
         ))
         .into(),

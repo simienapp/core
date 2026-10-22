@@ -45,7 +45,7 @@ impl ExitCode {
 }
 
 pub fn exit(code: i32) -> ! {
-  deno_signals::run_exit();
+  simien_signals::run_exit();
   #[allow(
     clippy::disallowed_methods,
     reason = "exit is the intended behavior"

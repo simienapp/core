@@ -53,6 +53,23 @@ pub trait Policy: Send + Sync {
     port: u16,
   ) -> Result<(), PermissionDeniedError>;
 
+  /// Connecting to the Unix socket at `path`, an absolute path. A socket is
+  /// both a file and a way out to another process, so this is asked as well
+  /// as the file access.
+  fn check_net_unix_socket(
+    &self,
+    path: &Path,
+    api_name: Option<&str>,
+  ) -> Result<(), PermissionDeniedError>;
+
+  /// Connecting to `port` on the virtual machine socket `cid`.
+  fn check_net_vsock(
+    &self,
+    cid: u32,
+    port: u32,
+    api_name: Option<&str>,
+  ) -> Result<(), PermissionDeniedError>;
+
   /// Reading environment variable `name`. `None` asks for every variable.
   fn check_env(&self, name: Option<&str>) -> Result<(), PermissionDeniedError>;
 
@@ -533,6 +550,23 @@ impl PermissionsContainer {
     Ok(self.0.check_net_resolved(resolved_ip, port)?)
   }
 
+  pub fn check_net_unix_socket(
+    &self,
+    path: &Path,
+    api_name: Option<&str>,
+  ) -> Result<(), PermissionCheckError> {
+    Ok(self.0.check_net_unix_socket(path, api_name)?)
+  }
+
+  pub fn check_net_vsock(
+    &self,
+    cid: u32,
+    port: u32,
+    api_name: &str,
+  ) -> Result<(), PermissionCheckError> {
+    Ok(self.0.check_net_vsock(cid, port, Some(api_name))?)
+  }
+
   pub fn check_env(&self, var: &str) -> Result<(), PermissionCheckError> {
     Ok(self.0.check_env(Some(var))?)
   }
@@ -591,6 +625,12 @@ impl Policy for AllowAll {
     Ok(())
   }
   fn check_net_resolved(&self, _: &std::net::IpAddr, _: u16) -> Result<(), PermissionDeniedError> {
+    Ok(())
+  }
+  fn check_net_unix_socket(&self, _: &Path, _: Option<&str>) -> Result<(), PermissionDeniedError> {
+    Ok(())
+  }
+  fn check_net_vsock(&self, _: u32, _: u32, _: Option<&str>) -> Result<(), PermissionDeniedError> {
     Ok(())
   }
   fn check_env(&self, _: Option<&str>) -> Result<(), PermissionDeniedError> {

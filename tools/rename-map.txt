@@ -53,3 +53,5 @@ deno_dotenv simien_dotenv
 node_shim simien_node_shim
 deno_permissions simien_permissions
 deno_inspector_server simien_inspector_server
+deno_features simien_features
+deno_signals simien_signals

@@ -56,6 +56,8 @@ members = [
   "libs/node_shim",
   "libs/inspector_server",
   "libs/permissions",
+  "runtime/features",
+  "ext/signals",
 ]
 
 [workspace.package]
@@ -77,6 +79,8 @@ simien_dotenv = { version = "0.1.0", path = "./libs/dotenv" }
 simien_node_shim = { version = "0.1.0", path = "./libs/node_shim" }
 simien_inspector_server = { version = "0.1.0", path = "./libs/inspector_server" }
 simien_permissions = { version = "0.1.0", path = "./libs/permissions" }
+simien_features = { version = "0.1.0", path = "./runtime/features" }
+simien_signals = { version = "0.1.0", path = "./ext/signals" }
 deno_ast = { version = "=0.53.3", features = ["transpiling"] }
 
 deno_core_icudata = "0.77.0"
@@ -168,7 +172,6 @@ simien_serde_v8 = { version = "0.1.1", path = "./libs/serde_v8", default-feature
 test_macro = { }
 test_util = { }
 
-deno_tunnel = "0.8.1"
 
 # widely used libraries
 anyhow = "1.0.57"

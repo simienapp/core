@@ -1,17 +1,17 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_features"
-version = "0.56.0"
-authors.workspace = true
+name = "simien_features"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
-repository.workspace = true
-description = "Provides definitions of Deno unstable features."
+repository = "https://github.com/simienapp/core"
+description = "Unstable-feature flags for simien_net's Node ops. Forked from deno_features 0.56.0."
 
 [lib]
-name = "deno_features"
+name = "simien_features"
 path = "lib.rs"
 
 [dependencies]
-deno_core.workspace = true
+simien_core.workspace = true
