@@ -72,7 +72,7 @@ pub fn isolate(
     extensions,
     ..Default::default()
   });
-  let lifecycle = simien_node_runtime::bootstrap(&mut runtime, "simien")
+  let lifecycle = simien_node_runtime::bootstrap(&mut runtime, "simien", "0.0.0-test")
     .expect("the Node bootstrap runs");
   Isolate { runtime, lifecycle, exit_code, main_module }
 }

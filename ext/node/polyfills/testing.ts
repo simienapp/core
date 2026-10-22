@@ -3,6 +3,7 @@
 (function () {
 "use strict";
 const { core, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   ArrayIsArray,
   ArrayPrototypeForEach,
@@ -287,7 +288,7 @@ function getPathForSnapshot() {
 let _fileSnapshotUpdateMode = undefined;
 function isFileSnapshotUpdateMode() {
   if (_fileSnapshotUpdateMode !== undefined) return _fileSnapshotUpdateMode;
-  const denoInternal = globalThis.Deno?.[globalThis.Deno.internal];
+  const denoInternal = Deno?.[Deno.internal];
   const op = denoInternal?.core?.ops?.op_test_snapshot_in_update_mode;
   if (typeof op === "function") {
     try {
@@ -299,7 +300,7 @@ function isFileSnapshotUpdateMode() {
   }
   let nodeOptions = "";
   try {
-    nodeOptions = globalThis.Deno?.env?.get("NODE_OPTIONS") || "";
+    nodeOptions = Deno?.env?.get("NODE_OPTIONS") || "";
   } catch { /* permission denied */ }
   if (
     nodeOptions &&
@@ -594,7 +595,7 @@ const skippedSymbol = Symbol("skipped");
 // spawns another using Node-style flags. Reading the env var here keeps the
 // detection self-contained and avoids new Rust plumbing.
 function detectNodeTestReporter() {
-  const env = globalThis.Deno?.env;
+  const env = Deno?.env;
   if (!env) return null;
   let value = null;
   try {
@@ -651,7 +652,7 @@ function getTapCurrentSuite() {
 // filter tests Node-style. A bare string is interpreted as a regex source;
 // `/.../flags` is a regex literal.
 function parsePatternFlag(flag) {
-  const env = globalThis.Deno?.env;
+  const env = Deno?.env;
   if (!env) return null;
   let nodeOptions = "";
   try {
@@ -696,7 +697,7 @@ function getTestSkipPatterns() {
 let testOnlyFlagCache;
 function isTestOnlyFlagSet() {
   if (testOnlyFlagCache !== undefined) return testOnlyFlagCache;
-  const env = globalThis.Deno?.env;
+  const env = Deno?.env;
   if (!env) {
     testOnlyFlagCache = false;
     return false;
@@ -950,7 +951,7 @@ async function runTapTop() {
   }
   if (tapStats.fail > 0 || tapStats.cancelled > 0) {
     try {
-      globalThis.Deno?.exit?.(1);
+      Deno?.exit?.(1);
     } catch { /* exit unavailable */ }
   }
 }

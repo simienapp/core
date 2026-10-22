@@ -5,6 +5,7 @@
 // They have to be split this way to prevent a circular dependency
 (function () {
 const { core, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   Error,
   ObjectGetOwnPropertyNames,
@@ -258,9 +259,8 @@ const versions = {
   nghttp3: "",
   sqlite: "3.53.1",
   // Will be filled when calling "__bootstrapNodeProcess()",
-  deno: "",
+  simien: "",
   v8: "",
-  typescript: "",
 };
 
 return {

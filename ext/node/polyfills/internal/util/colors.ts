@@ -2,6 +2,7 @@
 // Copyright Node.js contributors. All rights reserved. MIT License.
 (function () {
 const { core } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const io = core.loadExtScript("ext:simien_io/12_io.js");
 
 let blue = "";

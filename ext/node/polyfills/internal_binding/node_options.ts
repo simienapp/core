@@ -1,6 +1,7 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 (function () {
 const { primordials } = __bootstrap;
+const { Deno } = __bootstrap.core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   SafeMap,
   ArrayPrototypeForEach,

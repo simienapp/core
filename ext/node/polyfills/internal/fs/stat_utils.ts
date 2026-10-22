@@ -2,6 +2,7 @@
 
 import { core, primordials } from "ext:core/mod.js";
 import { BigIntStats, Stats } from "ext:simien_node/internal/fs/utils.mjs";
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const { isWindows } = core.loadExtScript("ext:simien_node/_util/os.ts");
 
 const {

@@ -2,12 +2,14 @@
 
 // Simien's bootstrap for isolates granted dangerouslyUseNode (APS 2, option
 // A), built from the parts of upstream's 99_main.js that simien_node needs:
-// - the Deno namespace (90_deno_ns.js) becomes a hidden global: not
-//   enumerable, not writable, not configurable. simien_node reads it as
-//   `Deno.*`; every call goes through Simien's permissions (APS 3).
+// - the Deno namespace (90_deno_ns.js) fills simien_node's private
+//   `internal/deno_ns.js` object, which simien_node reads as `Deno.*`; every
+//   call goes through Simien's permissions (APS 3). It is never a global:
+//   Simien doesn't present itself as Deno, and core's bootstrap `Deno`
+//   (`Deno.core`) is removed from the global too.
 // - Node itself starts on first use, as upstream defers it: the arguments are
 //   stashed for node:process and node:module to pick up.
-// The embedder calls `globalThis.__simienBootstrapNode(argv0)` once, before
+// The embedder calls `globalThis.__simienBootstrapNode(argv0, versions)` once, before
 // any app code runs; the function removes itself and returns the lifecycle
 // hooks the embedder runs the program with.
 
@@ -23,6 +25,7 @@ import {
 import { denoNs } from "ext:runtime/90_deno_ns.js";
 const { errors } = core.loadExtScript("ext:runtime/01_errors.js");
 const os = core.loadExtScript("ext:simien_os/30_os.js");
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 
 const {
   ObjectAssign,
@@ -186,7 +189,8 @@ noopTest.ignore.each = noopTestEach;
 let pid;
 let args;
 
-function bootstrapNode(argv0) {
+// `versions` is `{ simien, v8 }`: what `process.versions` adds to Node's.
+function bootstrapNode(argv0, versions) {
   delete globalThis.__simienBootstrapNode;
   captureHexMethods();
   // `Deno.build` and node:process's arch and platform; set once per isolate.
@@ -195,16 +199,19 @@ function bootstrapNode(argv0) {
   }
 
   // Built without spreading denoNs, so its lazy getters stay lazy.
-  const finalDenoNs = ObjectDefineProperties(
-    {
-      internal: internalSymbol,
-      [internalSymbol]: internals,
-      test: noopTest,
-      bench: () => {},
-    },
-    getSafeOwnPropertyDescriptors(denoNs),
-  );
-  ObjectDefineProperties(finalDenoNs, {
+  ObjectDefineProperties(Deno, {
+    internal: core.propReadOnly(internalSymbol),
+    [internalSymbol]: core.propReadOnly(internals),
+    test: core.propReadOnly(noopTest),
+    bench: core.propReadOnly(() => {}),
+  });
+  ObjectDefineProperties(Deno, getSafeOwnPropertyDescriptors(denoNs));
+  ObjectDefineProperties(Deno, {
+    version: core.propReadOnly(ObjectFreeze({
+      __proto__: null,
+      simien: versions.simien,
+      v8: versions.v8,
+    })),
     pid: core.propGetterOnly(() => pid ??= op_bootstrap_pid()),
     // `ppid` should not be memoized.
     ppid: core.propGetterOnly(() => op_ppid()),
@@ -221,14 +228,7 @@ function bootstrapNode(argv0) {
       },
     },
   });
-
-  ObjectDefineProperty(globalThis, "Deno", {
-    __proto__: null,
-    value: finalDenoNs,
-    enumerable: false,
-    writable: false,
-    configurable: false,
-  });
+  delete globalThis.Deno;
 
   // Node's globals: only isolates granted dangerouslyUseNode get them.
   // `console` is node:console's (the same object), not the embedder's.
@@ -260,8 +260,8 @@ function bootstrapNode(argv0) {
     nodeDebug: "",
     nodeClusterUniqueId: undefined,
     nodeClusterSchedPolicy: undefined,
-    denoArgs: finalDenoNs.args,
-    denoVersion: finalDenoNs.version,
+    denoArgs: Deno.args,
+    denoVersion: Deno.version,
   };
 
   registerErrorClasses();

@@ -16,6 +16,7 @@ import {
   op_fs_read_dir_async_next,
   op_fs_read_dir_sync,
 } from "ext:core/ops";
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const lazyPath = core.createLazyLoader("node:path");
 
 const {

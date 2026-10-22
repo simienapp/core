@@ -115,7 +115,7 @@ fn run_program(
 }
 
 #[test]
-fn node_modules_work_and_deno_is_hidden() {
+fn node_modules_work_and_there_is_no_deno() {
   let dir = tempfile::tempdir().unwrap();
   let file = dir.path().join("hello.txt");
   let code = format!(
@@ -143,14 +143,17 @@ fn node_modules_work_and_deno_is_hidden() {
     let missing;
     try {{ fs.statSync({file:?} + ".missing"); }} catch (e) {{ missing = e; }}
     check("a missing file is ENOENT", missing?.code, "ENOENT");
-    let notFound;
-    try {{ Deno.lstatSync({file:?} + ".missing"); }} catch (e) {{ notFound = e; }}
-    check("op errors keep their class", notFound instanceof Deno.errors.NotFound, true);
+    // node:fs maps op errors by class (`instanceof Deno.errors.NotFound`).
+    let inaccessible;
+    try {{ fs.accessSync({file:?} + ".missing"); }} catch (e) {{ inaccessible = e; }}
+    check("op errors keep their class", inaccessible?.message.startsWith("ENOENT: no such file or directory, access"), true);
     await new Promise((resolve) => setImmediate(resolve));
     check("setTimeout returns a Timeout", typeof setTimeout(() => {{}}, 0).unref, "function");
-    check("Deno is usable", typeof Deno.readTextFile, "function");
-    check("Deno is hidden", Object.keys(globalThis).includes("Deno"), false);
-    check("Deno is fixed", Object.getOwnPropertyDescriptor(globalThis, "Deno").writable, false);
+    check("no Deno", typeof Deno, "undefined");
+    check("no Deno property", "Deno" in globalThis, false);
+    check("process.versions.simien", process.versions.simien, "0.0.0-test");
+    check("process.versions.v8", /^\d+\.\d+/.test(process.versions.v8), true);
+    check("no process.versions.deno", "deno" in process.versions, false);
     "#,
     file = file.display().to_string(),
   );

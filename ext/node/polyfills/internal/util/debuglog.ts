@@ -8,6 +8,7 @@
 // in compiled binaries run as Windows services or detached processes).
 (function () {
 const { primordials } = __bootstrap;
+const { Deno } = __bootstrap.core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   MathFloor,
   Number,
