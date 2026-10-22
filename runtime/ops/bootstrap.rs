@@ -14,6 +14,7 @@ simien_core::extension!(
   simien_bootstrap,
   ops = [
     op_bootstrap_args,
+    op_bootstrap_exec_args,
     op_bootstrap_target,
     op_bootstrap_pid,
     op_bootstrap_log_level,
@@ -48,6 +49,11 @@ pub fn op_bootstrap_target() -> String {
 #[op2]
 pub fn op_bootstrap_args(state: &mut OpState) -> Vec<String> {
   state.borrow::<BootstrapOptions>().args.clone()
+}
+
+#[op2]
+pub fn op_bootstrap_exec_args(state: &mut OpState) -> Vec<String> {
+  state.borrow::<BootstrapOptions>().exec_args.clone()
 }
 
 #[op2(fast)]

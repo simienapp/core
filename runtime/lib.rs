@@ -44,6 +44,12 @@ use crate::loader::Sys;
 pub struct BootstrapOptions {
   /// `Deno.args` and Node's `process.argv` after the script.
   pub args: Vec<String>,
+  /// How this program starts another one like it: when it spawns
+  /// `process.execPath` (`child_process.fork()`, `spawn(process.execPath,
+  /// [script])`), these arguments go before Node's own, so the embedder runs
+  /// the child its way (Simien: `__node-program --project … <rules>`). Empty:
+  /// upstream's translation to Deno's command line.
+  pub exec_args: Vec<String>,
   /// `0` off to `5` trace, as upstream's `WorkerLogLevel`.
   pub log_level: i32,
   pub color_level: ColorLevel,
@@ -53,6 +59,7 @@ impl Default for BootstrapOptions {
   fn default() -> Self {
     Self {
       args: Vec::new(),
+      exec_args: Vec::new(),
       log_level: 1,
       color_level: simien_terminal::colors::get_color_level(),
     }

@@ -20,6 +20,7 @@ import {
   op_bootstrap_pid,
   op_bootstrap_target,
   op_main_module,
+  op_node_has_child_ipc_pipe,
   op_ppid,
 } from "ext:core/ops";
 import { denoNs } from "ext:runtime/90_deno_ns.js";
@@ -266,6 +267,14 @@ function bootstrapNode(argv0, versions) {
 
   registerErrorClasses();
   makeGlobalAnEventTarget();
+  // A child started with fork(): its channel to the parent (process.send,
+  // process.on("message")). Upstream connects it in node:module's
+  // initialize(), which deferred startup never runs, so it's done here.
+  if (op_node_has_child_ipc_pipe()) {
+    lazyProcess();
+    core.loadExtScript("ext:simien_node/child_process.ts");
+    internals.__setupChildProcessIpcChannel();
+  }
   return lifecycle;
 }
 

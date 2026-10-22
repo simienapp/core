@@ -188,7 +188,12 @@ function fork(
     String,
   );
 
-  if (Deno.build.standalone) {
+  if (core.ops.op_bootstrap_exec_args?.().length > 0) {
+    // Simien: the embedder starts the child its way (BootstrapOptions::
+    // exec_args, added in spawn's buildCommand) and takes Node's own
+    // arguments as they are.
+    args = nodeArgs;
+  } else if (Deno.build.standalone) {
     // In standalone (compiled) binaries, skip Node-to-Deno arg translation.
     // The binary already has permissions and unstable config baked in.
     // Translating would inject "run -A --unstable-..." which the compiled

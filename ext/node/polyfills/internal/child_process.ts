@@ -1736,7 +1736,17 @@ function buildCommand(
   env,
 ) {
   let includeNpmProcessState = false;
-  if (file === Deno.execPath() && !Deno.build.standalone) {
+  // Simien: another Node program like this one starts the embedder's way
+  // (BootstrapOptions::exec_args), then gets Node's own arguments.
+  const execArgs = file === Deno.execPath()
+    ? core.ops.op_bootstrap_exec_args?.() ?? []
+    : [];
+  if (execArgs.length > 0) {
+    args = [
+      ...new SafeArrayIterator(execArgs),
+      ...new SafeArrayIterator(ArrayPrototypeMap(args, (arg) => String(arg))),
+    ];
+  } else if (file === Deno.execPath() && !Deno.build.standalone) {
     // Ensure all args are strings (Node allows numbers in args array)
     args = ArrayPrototypeMap(args, (arg) => String(arg));
 
