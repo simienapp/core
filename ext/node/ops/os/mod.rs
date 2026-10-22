@@ -2,17 +2,17 @@
 
 use std::mem::MaybeUninit;
 
-use deno_core::OpState;
-use deno_core::ToV8;
-use deno_core::op2;
-use deno_permissions::PermissionCheckError;
-use deno_permissions::PermissionsContainer;
-use sys_traits::EnvHomeDir;
+use simien_core::OpState;
+use simien_core::ToV8;
+use simien_core::op2;
+use simien_permissions::PermissionCheckError;
+use simien_permissions::PermissionsContainer;
+use simien_sys_traits::EnvHomeDir;
 
 mod cpus;
 pub mod priority;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum OsError {
   #[class(inherit)]
   #[error(transparent)]
@@ -311,7 +311,7 @@ pub fn op_homedir(
   }
 
   Ok(
-    sys_traits::impls::RealSys
+    simien_sys_traits::impls::RealSys
       .env_home_dir()
       .map(|path| path.to_string_lossy().into_owned()),
   )

@@ -59,9 +59,9 @@ const {
 } = primordials;
 
 import net from "node:net";
-const { ok: assert } = core.loadExtScript("ext:deno_node/assert.ts");
+const { ok: assert } = core.loadExtScript("ext:simien_node/assert.ts");
 const { kEmptyObject, once } = core.loadExtScript(
-  "ext:deno_node/internal/util.mjs",
+  "ext:simien_node/internal/util.mjs",
 );
 import {
   _checkInvalidHeaderChar as checkInvalidHeaderChar,
@@ -80,11 +80,11 @@ import {
 } from "node:_http_outgoing";
 import httpAgent from "node:_http_agent";
 import httpProxy from "node:_http_proxy";
-const { Buffer } = core.loadExtScript("ext:deno_node/internal/buffer.mjs");
+const { Buffer } = core.loadExtScript("ext:simien_node/internal/buffer.mjs");
 const { urlToHttpOptions } = core.loadExtScript(
-  "ext:deno_node/internal/url.ts",
+  "ext:simien_node/internal/url.ts",
 );
-const { kOutHeaders } = core.loadExtScript("ext:deno_node/internal/http.ts");
+const { kOutHeaders } = core.loadExtScript("ext:simien_node/internal/http.ts");
 const {
   connResetException,
   ERR_HTTP_HEADERS_SENT,
@@ -93,23 +93,23 @@ const {
   ERR_INVALID_PROTOCOL,
   ERR_INVALID_URL,
   ERR_UNESCAPED_CHARACTERS,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
 const {
   validateBoolean,
   validateInteger,
-} = core.loadExtScript("ext:deno_node/internal/validators.mjs");
+} = core.loadExtScript("ext:simien_node/internal/validators.mjs");
 const { getTimerDuration } = core.loadExtScript(
-  "ext:deno_node/internal/timers.mjs",
+  "ext:simien_node/internal/timers.mjs",
 );
 import { addAbortSignal, finished } from "node:stream";
-const { nextTick } = core.loadExtScript("ext:deno_node/_next_tick.ts");
+const { nextTick } = core.loadExtScript("ext:simien_node/_next_tick.ts");
 const { defaultTriggerAsyncIdScope } = core.loadExtScript(
-  "ext:deno_node/internal/async_hooks.ts",
+  "ext:simien_node/internal/async_hooks.ts",
 );
-const { kNeedDrain } = core.loadExtScript("ext:deno_node/internal/http.ts");
-const { channel } = core.loadExtScript("ext:deno_node/diagnostics_channel.js");
+const { kNeedDrain } = core.loadExtScript("ext:simien_node/internal/http.ts");
+const { channel } = core.loadExtScript("ext:simien_node/diagnostics_channel.js");
 const { enqueueNodePerformanceEntry } = core.loadExtScript(
-  "ext:deno_node/perf_hooks.js",
+  "ext:simien_node/perf_hooks.js",
 );
 
 const onClientRequestCreatedChannel = channel("http.client.request.created");

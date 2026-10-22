@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
 
-use sys_traits::BaseEnvVar;
-use sys_traits::FsRead;
+use simien_sys_traits::BaseEnvVar;
+use simien_sys_traits::FsRead;
 use thiserror::Error;
 
 const CHAR_NL: u8 = b'\n';
@@ -64,13 +64,13 @@ pub fn find_path_and_content(
   ) -> Result<Option<(PathBuf, Cow<'static, str>)>, FindPathAndContentError> {
     match sys.fs_read_to_string(&file_path) {
       Ok(content) => Ok(Some((
-        deno_path_util::normalize_path(file_path).into_owned(),
+        simien_path_util::normalize_path(file_path).into_owned(),
         content,
       ))),
       Err(err) => {
         if err.kind() != std::io::ErrorKind::NotFound {
           Err(FindPathAndContentError {
-            path: deno_path_util::normalize_path(file_path).into_owned(),
+            path: simien_path_util::normalize_path(file_path).into_owned(),
             source: err,
           })
         } else {
@@ -574,10 +574,10 @@ mod tests {
   use std::collections::BTreeMap;
   use std::collections::HashMap;
 
-  use sys_traits::EnvSetVar;
-  use sys_traits::FsCreateDirAll;
-  use sys_traits::FsWrite;
-  use sys_traits::impls::InMemorySys;
+  use simien_sys_traits::EnvSetVar;
+  use simien_sys_traits::FsCreateDirAll;
+  use simien_sys_traits::FsWrite;
+  use simien_sys_traits::impls::InMemorySys;
 
   use super::*;
 
@@ -916,7 +916,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_variable_in_parenthesis_surrounded_by_quotes() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"
@@ -929,7 +929,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_substitute_undefined_variables_to_empty_string() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"KEY=">$KEY1<>${KEY2}<""#,
@@ -939,7 +939,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_do_not_substitute_variables_with_dollar_escaped() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"KEY=>\$KEY1<>\${KEY2}<"#,
@@ -949,7 +949,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_do_not_substitute_variables_in_strong_quotes() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       "KEY='>${KEY1}<>$KEY2<'",
@@ -959,7 +959,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_same_variable_reused() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"
@@ -972,7 +972,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_variable_without_parenthesis_is_substituted_before_separators() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"
@@ -994,7 +994,7 @@ u4QuUoobAgMBAAE=
   #[test]
   fn test_underscore_is_part_of_unbraced_variable_name() {
     // https://github.com/denoland/deno/issues/26581
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"
@@ -1007,7 +1007,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_substitute_variable_from_env_variable() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     sys.env_set_var("DENO_DOTENV_TEST_KEY11", "overriden from process env");
 
     assert_parsed_eq_with_substitution(
@@ -1019,7 +1019,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_substitute_variable_env_variable_overrides_dotenv_in_substitution() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     sys.env_set_var("DENO_DOTENV_TEST_KEY11", "overriden from process env");
 
     assert_parsed_eq_with_substitution(
@@ -1037,7 +1037,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_consequent_substitutions() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"
@@ -1055,7 +1055,7 @@ u4QuUoobAgMBAAE=
 
   #[test]
   fn test_consequent_substitutions_with_one_missing() {
-    let sys = sys_traits::impls::InMemorySys::default();
+    let sys = simien_sys_traits::impls::InMemorySys::default();
     assert_parsed_eq_with_substitution(
       &sys,
       r#"

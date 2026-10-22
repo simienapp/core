@@ -42,10 +42,10 @@ const {
   Uint8Array,
 } = primordials;
 
-const { nextTick } = core.loadExtScript("ext:deno_node/_next_tick.ts");
-const { listen: denoListen } = core.loadExtScript("ext:deno_net/01_net.js");
+const { nextTick } = core.loadExtScript("ext:simien_node/_next_tick.ts");
+const { listen: denoListen } = core.loadExtScript("ext:simien_net/01_net.js");
 const { ERR_SOCKET_CLOSED } = core.loadExtScript(
-  "ext:deno_node/internal/errors.ts",
+  "ext:simien_node/internal/errors.ts",
 );
 
 // Has the process-global override been consumed by some server yet?
@@ -387,7 +387,7 @@ async function sniffConnection(conn) {
 // node:http internals).
 let lazyHttp2;
 function loadHttp2() {
-  lazyHttp2 ??= core.loadExtScript("ext:deno_node/http2.ts");
+  lazyHttp2 ??= core.loadExtScript("ext:simien_node/http2.ts");
   return lazyHttp2;
 }
 

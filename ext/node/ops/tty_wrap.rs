@@ -1,29 +1,29 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_core::CppgcInherits;
-use deno_core::GarbageCollected;
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::uv_compat::UV_EADDRINUSE;
-use deno_core::uv_compat::UV_EAGAIN;
-use deno_core::uv_compat::UV_EBADF;
-use deno_core::uv_compat::UV_EBUSY;
-use deno_core::uv_compat::UV_ECANCELED;
-use deno_core::uv_compat::UV_ECONNREFUSED;
-use deno_core::uv_compat::UV_EINVAL;
-use deno_core::uv_compat::UV_ENOBUFS;
-use deno_core::uv_compat::UV_ENOTCONN;
-use deno_core::uv_compat::UV_ENOTSUP;
-use deno_core::uv_compat::UV_EPIPE;
-use deno_core::uv_compat::uv_guess_handle;
-use deno_core::uv_compat::uv_handle_type;
-use deno_core::uv_compat::uv_loop_t;
-use deno_core::uv_compat::uv_tty_get_winsize;
-use deno_core::uv_compat::uv_tty_init;
-use deno_core::uv_compat::uv_tty_mode_t;
-use deno_core::uv_compat::uv_tty_set_mode;
-use deno_core::uv_compat::uv_tty_t;
-use deno_core::v8;
+use simien_core::CppgcInherits;
+use simien_core::GarbageCollected;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::uv_compat::UV_EADDRINUSE;
+use simien_core::uv_compat::UV_EAGAIN;
+use simien_core::uv_compat::UV_EBADF;
+use simien_core::uv_compat::UV_EBUSY;
+use simien_core::uv_compat::UV_ECANCELED;
+use simien_core::uv_compat::UV_ECONNREFUSED;
+use simien_core::uv_compat::UV_EINVAL;
+use simien_core::uv_compat::UV_ENOBUFS;
+use simien_core::uv_compat::UV_ENOTCONN;
+use simien_core::uv_compat::UV_ENOTSUP;
+use simien_core::uv_compat::UV_EPIPE;
+use simien_core::uv_compat::uv_guess_handle;
+use simien_core::uv_compat::uv_handle_type;
+use simien_core::uv_compat::uv_loop_t;
+use simien_core::uv_compat::uv_tty_get_winsize;
+use simien_core::uv_compat::uv_tty_init;
+use simien_core::uv_compat::uv_tty_mode_t;
+use simien_core::uv_compat::uv_tty_set_mode;
+use simien_core::uv_compat::uv_tty_t;
+use simien_core::v8;
 
 /// Map a uv error code to (name, message) matching libuv's uv_err_name/uv_strerror.
 fn uv_error_info(err: i32) -> (&'static str, &'static str) {
@@ -43,7 +43,7 @@ fn uv_error_info(err: i32) -> (&'static str, &'static str) {
   }
 }
 
-use deno_permissions::PermissionsContainer;
+use simien_permissions::PermissionsContainer;
 
 use crate::ops::handle_wrap::AsyncWrap;
 use crate::ops::handle_wrap::Handle;
@@ -58,7 +58,7 @@ use crate::ops::stream_wrap::LibUvStreamWrap;
 pub fn op_tty_check_fd_permission(
   state: &mut OpState,
   fd: i32,
-) -> Result<(), deno_permissions::PermissionCheckError> {
+) -> Result<(), simien_permissions::PermissionCheckError> {
   if fd > 2 {
     state
       .borrow_mut::<PermissionsContainer>()
@@ -84,7 +84,7 @@ unsafe impl GarbageCollected for TTY {
     c"TTY"
   }
 
-  fn trace(&self, visitor: &mut deno_core::v8::cppgc::Visitor) {
+  fn trace(&self, visitor: &mut simien_core::v8::cppgc::Visitor) {
     self.base.trace(visitor);
   }
 }
@@ -99,7 +99,7 @@ impl TTY {
   pub fn new(
     _obj: v8::Local<v8::Object>,
     fd: i32,
-    op_state: &mut deno_core::OpState,
+    op_state: &mut simien_core::OpState,
   ) -> (Self, i32) {
     // todo: this should really not be a Box<uv_loop_t> because of uniqueness guarantees.
     // instead it should be a custom wrapper around a raw pointer

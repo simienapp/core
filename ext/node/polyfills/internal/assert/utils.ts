@@ -5,14 +5,14 @@
 (function () {
 const { core, primordials } = __bootstrap;
 const { AssertionError } = core.loadExtScript(
-  "ext:deno_node/internal/assert/assertion_error.js",
+  "ext:simien_node/internal/assert/assertion_error.js",
 );
-const { isError } = core.loadExtScript("ext:deno_node/internal/util.mjs");
+const { isError } = core.loadExtScript("ext:simien_node/internal/util.mjs");
 const { isErrorStackTraceLimitWritable } = core.loadExtScript(
-  "ext:deno_node/internal/errors.ts",
+  "ext:simien_node/internal/errors.ts",
 );
 const { getErrorSourceExpression } = core.loadExtScript(
-  "ext:deno_node/internal/errors/error_source.ts",
+  "ext:simien_node/internal/errors/error_source.ts",
 );
 
 const {

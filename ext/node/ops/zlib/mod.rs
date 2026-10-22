@@ -10,10 +10,10 @@ use brotli::enc::encode::BrotliEncoderOperation;
 use brotli::enc::encode::BrotliEncoderParameter;
 use brotli::enc::encode::BrotliEncoderStateStruct;
 use brotli::ffi;
-use deno_core::op2;
-use deno_core::v8;
-use deno_core::v8_static_strings;
-use deno_error::JsErrorBox;
+use simien_core::op2;
+use simien_core::v8;
+use simien_core::v8_static_strings;
+use simien_error::JsErrorBox;
 use libc::c_ulong;
 use zlib::*;
 
@@ -325,15 +325,15 @@ pub struct Zlib {
 }
 
 // SAFETY: we're sure this can be GCed
-unsafe impl deno_core::GarbageCollected for Zlib {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for Zlib {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"Zlib"
   }
 }
 
-impl deno_core::Resource for Zlib {
+impl simien_core::Resource for Zlib {
   fn name(&self) -> Cow<'_, str> {
     "zlib".into()
   }
@@ -531,7 +531,7 @@ impl Zlib {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ZlibError {
   #[class(type)]
   #[error("zlib not initialized")]
@@ -604,8 +604,8 @@ pub struct BrotliEncoder {
 }
 
 // SAFETY: we're sure this can be GCed
-unsafe impl deno_core::GarbageCollected for BrotliEncoder {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for BrotliEncoder {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"BrotliEncoder"
@@ -819,8 +819,8 @@ pub struct BrotliDecoder {
 }
 
 // SAFETY: we're sure this can be GCed
-unsafe impl deno_core::GarbageCollected for BrotliDecoder {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for BrotliDecoder {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"BrotliDecoder"
@@ -1047,8 +1047,8 @@ pub struct ZstdCompress {
 }
 
 // SAFETY: we're sure this can be GCed
-unsafe impl deno_core::GarbageCollected for ZstdCompress {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for ZstdCompress {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"ZstdCompress"
@@ -1339,8 +1339,8 @@ pub struct ZstdDecompress {
 }
 
 // SAFETY: we're sure this can be GCed
-unsafe impl deno_core::GarbageCollected for ZstdDecompress {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for ZstdDecompress {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"ZstdDecompress"

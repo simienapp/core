@@ -16,23 +16,23 @@ use std::sync::OnceLock;
 use std::task::Poll;
 use std::thread;
 
-use deno_core::InspectorMsg;
-use deno_core::InspectorSessionChannels;
-use deno_core::InspectorSessionKind;
-use deno_core::InspectorSessionProxy;
-use deno_core::JsRuntimeInspector;
-use deno_core::futures::channel::mpsc;
-use deno_core::futures::channel::mpsc::UnboundedReceiver;
-use deno_core::futures::channel::mpsc::UnboundedSender;
-use deno_core::futures::channel::oneshot;
-use deno_core::futures::future;
-use deno_core::futures::prelude::*;
-use deno_core::futures::stream::StreamExt;
-use deno_core::parking_lot::Mutex;
-use deno_core::serde_json;
-use deno_core::serde_json::Value;
-use deno_core::serde_json::json;
-use deno_core::unsync::spawn;
+use simien_core::InspectorMsg;
+use simien_core::InspectorSessionChannels;
+use simien_core::InspectorSessionKind;
+use simien_core::InspectorSessionProxy;
+use simien_core::JsRuntimeInspector;
+use simien_core::futures::channel::mpsc;
+use simien_core::futures::channel::mpsc::UnboundedReceiver;
+use simien_core::futures::channel::mpsc::UnboundedSender;
+use simien_core::futures::channel::oneshot;
+use simien_core::futures::future;
+use simien_core::futures::prelude::*;
+use simien_core::futures::stream::StreamExt;
+use simien_core::parking_lot::Mutex;
+use simien_core::serde_json;
+use simien_core::serde_json::Value;
+use simien_core::serde_json::json;
+use simien_core::unsync::spawn;
 use fastwebsockets::Frame;
 use fastwebsockets::OpCode;
 use fastwebsockets::WebSocket;
@@ -285,7 +285,7 @@ pub fn notify_restart() {
   let _ = sender.send(()); // Ignore error if no receivers
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum InspectorServerError {
   #[class(inherit)]
   #[error(transparent)]
@@ -680,7 +680,7 @@ async fn server(
   let json_version_response = json!({
     "Browser": name,
     "Protocol-Version": "1.3",
-    "V8-Version": deno_core::v8::VERSION_STRING,
+    "V8-Version": simien_core::v8::VERSION_STRING,
   });
 
   let mut reset_rx_server = reset_rx.resubscribe();
@@ -762,7 +762,7 @@ async fn server(
         },
       );
 
-      deno_core::unsync::spawn(async move {
+      simien_core::unsync::spawn(async move {
         let server = hyper::server::conn::http1::Builder::new();
 
         let mut conn =

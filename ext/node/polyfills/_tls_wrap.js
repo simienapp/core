@@ -52,22 +52,22 @@ const {
   ArrayIsArray,
   ObjectAssign,
   StringPrototypeReplace,
-} = core.loadExtScript("ext:deno_node/internal/primordials.mjs");
+} = core.loadExtScript("ext:simien_node/internal/primordials.mjs");
 const assert = core.loadExtScript(
-  "ext:deno_node/internal/assert.mjs",
+  "ext:simien_node/internal/assert.mjs",
 );
 const net = core.createLazyLoader("node:net")().default;
 const {
   createSecureContext,
   translatePeerCertificate,
-} = core.loadExtScript("ext:deno_node/_tls_common.ts");
+} = core.loadExtScript("ext:simien_node/_tls_common.ts");
 const { JSStreamSocket } = core.loadExtScript(
-  "ext:deno_node/internal/js_stream_socket.js",
+  "ext:simien_node/internal/js_stream_socket.js",
 );
 const { convertALPNProtocols } = core.loadExtScript(
-  "ext:deno_node/internal/tls_common.js",
+  "ext:simien_node/internal/tls_common.js",
 );
-const { Buffer } = core.loadExtScript("ext:deno_node/internal/buffer.mjs");
+const { Buffer } = core.loadExtScript("ext:simien_node/internal/buffer.mjs");
 const {
   connResetException,
   ERR_INVALID_ARG_TYPE,
@@ -77,49 +77,49 @@ const {
   ERR_TLS_CERT_ALTNAME_INVALID,
   ERR_TLS_REQUIRED_SERVER_NAME,
   ERR_TLS_SNI_FROM_SERVER,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
 const { debuglog } = core.loadExtScript(
-  "ext:deno_node/internal/util/debuglog.ts",
+  "ext:simien_node/internal/util/debuglog.ts",
 );
 const {
   constants: TCPConstants,
   TCP,
-} = core.loadExtScript("ext:deno_node/internal_binding/tcp_wrap.ts");
+} = core.loadExtScript("ext:simien_node/internal_binding/tcp_wrap.ts");
 const { kMaybeDestroy } = core.loadExtScript(
-  "ext:deno_node/internal/stream_base_commons.ts",
+  "ext:simien_node/internal/stream_base_commons.ts",
 );
 const { kReinitializeHandle } = core.loadExtScript(
-  "ext:deno_node/internal/net.ts",
+  "ext:simien_node/internal/net.ts",
 );
 const {
   constants: PipeConstants,
   Pipe,
-} = core.loadExtScript("ext:deno_node/internal_binding/pipe_wrap.ts");
+} = core.loadExtScript("ext:simien_node/internal_binding/pipe_wrap.ts");
 const { kEmptyObject } = core.loadExtScript(
-  "ext:deno_node/internal/util.mjs",
+  "ext:simien_node/internal/util.mjs",
 );
-const { nextTick } = core.loadExtScript("ext:deno_node/_next_tick.ts");
+const { nextTick } = core.loadExtScript("ext:simien_node/_next_tick.ts");
 const { domainToASCII } = core.loadExtScript(
-  "ext:deno_node/internal/idna.ts",
+  "ext:simien_node/internal/idna.ts",
 );
 const {
   validateFunction,
   validateInt32,
   validateNumber,
   validateObject,
-} = core.loadExtScript("ext:deno_node/internal/validators.mjs");
+} = core.loadExtScript("ext:simien_node/internal/validators.mjs");
 const { isArrayBufferView, isTypedArray } = core.loadExtScript(
-  "ext:deno_node/internal/util/types.ts",
+  "ext:simien_node/internal/util/types.ts",
 );
 const { op_tls_canonicalize_ipv4_address } = core.ops;
 const { default: tlsWrap } = core.loadExtScript(
-  "ext:deno_node/internal_binding/tls_wrap.ts",
+  "ext:simien_node/internal_binding/tls_wrap.ts",
 );
 const { ownerSymbol } = core.loadExtScript(
-  "ext:deno_node/internal_binding/symbols.ts",
+  "ext:simien_node/internal_binding/symbols.ts",
 );
 const { X509Certificate } = core.loadExtScript(
-  "ext:deno_node/internal/crypto/x509.ts",
+  "ext:simien_node/internal/crypto/x509.ts",
 );
 
 const lazyTls = core.createLazyLoader("node:tls");

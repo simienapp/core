@@ -7,13 +7,13 @@ use std::future::Future;
 use std::rc::Rc;
 
 use aws_lc_rs::signature::Ed25519KeyPair;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::StringOrBuffer;
-use deno_core::convert::Uint8Array;
-use deno_core::op2;
-use deno_core::unsync::spawn_blocking;
-use deno_error::JsErrorBox;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::StringOrBuffer;
+use simien_core::convert::Uint8Array;
+use simien_core::op2;
+use simien_core::unsync::spawn_blocking;
+use simien_error::JsErrorBox;
 use elliptic_curve::sec1::ToEncodedPoint;
 use hkdf::Hkdf;
 use keys::AsymmetricPrivateKey;
@@ -54,8 +54,8 @@ pub mod x509;
 
 use self::digest::match_fixed_digest_with_eager_block_buffer;
 
-deno_core::extension!(
-  deno_node_crypto,
+simien_core::extension!(
+  simien_node_crypto,
   ops = [
     op_node_check_prime_async,
     op_node_check_prime_bytes_async,
@@ -292,7 +292,7 @@ pub fn op_node_hash_clone(
   hasher.clone_inner(output_length.map(|l| l as usize))
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum PrivateEncryptDecryptError {
   #[class(generic)]
   #[error(transparent)]
@@ -850,13 +850,13 @@ impl ErrorCode {
   }
 }
 
-impl From<ErrorCode> for deno_error::PropertyValue {
+impl From<ErrorCode> for simien_error::PropertyValue {
   fn from(code: ErrorCode) -> Self {
-    deno_error::PropertyValue::from(code.as_str().to_string())
+    simien_error::PropertyValue::from(code.as_str().to_string())
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum Pbkdf2Error {
   #[class(type)]
   #[error("Invalid digest: {0}")]
@@ -954,7 +954,7 @@ pub async fn op_node_fill_random_async(#[smi] len: i32) -> Uint8Array {
   .unwrap()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum HkdfError {
   #[class(type)]
   #[error("expected secret key")]
@@ -1128,7 +1128,7 @@ pub fn op_node_scrypt_sync(
   )
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ScryptAsyncError {
   #[class(inherit)]
   #[error(transparent)]
@@ -1167,7 +1167,7 @@ pub async fn op_node_scrypt_async(
   .await?
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum EcdhEncodePubKey {
   #[class(type)]
   #[error("Invalid public key")]
@@ -1318,7 +1318,7 @@ pub fn op_node_ecdh_generate_keys(
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum EcdhError {
   #[class("ERR_CRYPTO_ECDH_INVALID_PUBLIC_KEY")]
   #[error("Public key is not valid for specified curve")]
@@ -1647,7 +1647,7 @@ fn gen_prime(
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum GeneratePrimeError {
   #[class("ERR_OUT_OF_RANGE")]
   #[error("invalid options.add")]
@@ -1702,7 +1702,7 @@ pub async fn op_node_gen_prime_async(
     .await?
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum DiffieHellmanError {
   #[class(type)]
   #[error("Expected private key")]
@@ -1807,7 +1807,7 @@ pub fn op_node_diffie_hellman(
       AsymmetricPrivateKey::X448(private),
       AsymmetricPublicKey::X448(public),
     ) => {
-      let shared = deno_crypto_provider::x448::x448(private, public);
+      let shared = simien_crypto_provider::x448::x448(private, public);
       if shared.iter().all(|b| *b == 0) {
         return Err(DiffieHellmanError::FailedDuringDerivation);
       }
@@ -1856,7 +1856,7 @@ pub fn op_node_diffie_hellman(
   Ok(res)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum SignEd25519Error {
   #[error("Expected private key")]
@@ -1889,7 +1889,7 @@ pub fn op_node_sign_ed25519(
   Ok(())
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum VerifyEd25519Error {
   #[error("Expected public key")]
@@ -1923,7 +1923,7 @@ pub fn op_node_verify_ed25519(
   Ok(verified)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum SignEd448Error {
   #[error("Expected private key")]
@@ -1953,7 +1953,7 @@ pub fn op_node_sign_ed448(
   Ok(())
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum VerifyEd448Error {
   #[error("Expected public key")]
@@ -1985,7 +1985,7 @@ pub fn op_node_verify_ed448(
   Ok(ed448.verify_raw(&sig, data).is_ok())
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum SpkacError {
   #[error("spkac is too large")]
   #[property("code" = "ERR_OUT_OF_RANGE")]
@@ -2001,7 +2001,7 @@ pub fn op_node_verify_spkac(
     return Err(SpkacError::BufferOutOfRange);
   }
 
-  Ok(deno_crypto_provider::spki::verify_spkac(spkac))
+  Ok(simien_crypto_provider::spki::verify_spkac(spkac))
 }
 
 #[op2]
@@ -2012,7 +2012,7 @@ pub fn op_node_cert_export_public_key(
     return Err(SpkacError::BufferOutOfRange);
   }
 
-  Ok(deno_crypto_provider::spki::export_public_key(spkac).map(Into::into))
+  Ok(simien_crypto_provider::spki::export_public_key(spkac).map(Into::into))
 }
 
 #[op2]
@@ -2023,5 +2023,5 @@ pub fn op_node_cert_export_challenge(
     return Err(SpkacError::BufferOutOfRange);
   }
 
-  Ok(deno_crypto_provider::spki::export_challenge(spkac).map(Into::into))
+  Ok(simien_crypto_provider::spki::export_challenge(spkac).map(Into::into))
 }

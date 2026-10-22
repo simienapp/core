@@ -41,17 +41,17 @@ pub use std::ptr;
 use std::rc::Rc;
 use std::thread_local;
 
-use deno_core::ExternalOpsTracker;
-use deno_core::OpState;
-use deno_core::V8CrossThreadTaskSpawner;
-use deno_core::V8TaskSpawner;
-use deno_core::op2;
-use deno_core::parking_lot::RwLock;
-use deno_core::url::Url;
+use simien_core::ExternalOpsTracker;
+use simien_core::OpState;
+use simien_core::V8CrossThreadTaskSpawner;
+use simien_core::V8TaskSpawner;
+use simien_core::op2;
+use simien_core::parking_lot::RwLock;
+use simien_core::url::Url;
 // Expose common stuff for ease of use.
-// `use deno_napi::*`
-pub use deno_core::v8;
-use deno_permissions::PermissionCheckError;
+// `use simien_napi::*`
+pub use simien_core::v8;
+use simien_permissions::PermissionCheckError;
 pub use denort_helper::DenoRtNativeAddonLoader;
 pub use denort_helper::DenoRtNativeAddonLoaderRc;
 #[cfg(unix)]
@@ -81,7 +81,7 @@ fn fmt_lib_load_source(err: &libloading::Error) -> String {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum NApiError {
   #[class(type)]
   #[error("Invalid path")]
@@ -881,7 +881,7 @@ fn report_finalizer_exception(
   );
 }
 
-deno_core::extension!(deno_napi,
+simien_core::extension!(simien_napi,
   ops = [
     op_napi_open
   ],
@@ -940,7 +940,7 @@ fn op_napi_open<'scope>(
   ) = {
     let mut op_state = op_state.borrow_mut();
     let permissions =
-      op_state.borrow_mut::<deno_permissions::PermissionsContainer>();
+      op_state.borrow_mut::<simien_permissions::PermissionsContainer>();
     let path = permissions.check_ffi(Cow::Borrowed(Path::new(path)))?;
     let napi_state = op_state.borrow::<NapiState>();
     (
@@ -962,10 +962,10 @@ fn op_napi_open<'scope>(
   {
     let op_state = op_state.borrow();
     if let Some(uv_loop) =
-      op_state.try_borrow::<Box<deno_core::uv_compat::UvLoop>>()
+      op_state.try_borrow::<Box<simien_core::uv_compat::UvLoop>>()
     {
       let loop_ptr =
-        &**uv_loop as *const deno_core::uv_compat::UvLoop as *mut _;
+        &**uv_loop as *const simien_core::uv_compat::UvLoop as *mut _;
       crate::uv::register_default_uv_loop(loop_ptr);
     }
   }

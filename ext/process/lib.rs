@@ -32,27 +32,27 @@ use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 
-use deno_core::AsyncMutFuture;
-use deno_core::AsyncRefCell;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::ToV8;
-use deno_core::convert::Uint8Array;
-use deno_core::op2;
-use deno_core::serde_json;
-use deno_error::JsErrorBox;
-use deno_io::ChildProcessStdio;
-use deno_io::ChildStderrResource;
-use deno_io::ChildStdinResource;
-use deno_io::ChildStdoutResource;
-use deno_io::IntoRawIoHandle;
-use deno_os::SignalError;
-use deno_permissions::PathQueryDescriptor;
-use deno_permissions::PermissionsContainer;
-use deno_permissions::RunQueryDescriptor;
+use simien_core::AsyncMutFuture;
+use simien_core::AsyncRefCell;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::ToV8;
+use simien_core::convert::Uint8Array;
+use simien_core::op2;
+use simien_core::serde_json;
+use simien_error::JsErrorBox;
+use simien_io::ChildProcessStdio;
+use simien_io::ChildStderrResource;
+use simien_io::ChildStdinResource;
+use simien_io::ChildStdoutResource;
+use simien_io::IntoRawIoHandle;
+use simien_os::SignalError;
+use simien_permissions::PathQueryDescriptor;
+use simien_permissions::PermissionsContainer;
+use simien_permissions::RunQueryDescriptor;
 #[cfg(windows)]
 use deno_subprocess_windows::Child as AsyncChild;
 #[cfg(windows)]
@@ -70,7 +70,7 @@ use ipc::IpcRefTracker;
 
 pub const UNSTABLE_FEATURE_NAME: &str = "process";
 #[cfg(unix)]
-use deno_io::DENO_EXTRA_STDIO_FDS_ENV_VAR;
+use simien_io::DENO_EXTRA_STDIO_FDS_ENV_VAR;
 
 #[cfg(unix)]
 fn clear_nonblocking(fd: i32) -> std::io::Result<()> {
@@ -323,10 +323,10 @@ impl StdioOrFd {
 
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type NpmProcessStateProviderRc =
-  deno_fs::sync::MaybeArc<dyn NpmProcessStateProvider>;
+  simien_fs::sync::MaybeArc<dyn NpmProcessStateProvider>;
 
 pub trait NpmProcessStateProvider:
-  std::fmt::Debug + deno_fs::sync::MaybeSend + deno_fs::sync::MaybeSync
+  std::fmt::Debug + simien_fs::sync::MaybeSend + simien_fs::sync::MaybeSync
 {
   /// Gets a string containing the serialized npm state of the process.
   ///
@@ -344,8 +344,8 @@ pub struct EmptyNpmProcessStateProvider;
 
 impl NpmProcessStateProvider for EmptyNpmProcessStateProvider {}
 
-deno_core::extension!(
-  deno_process,
+simien_core::extension!(
+  simien_process,
   ops = [
     op_spawn_child,
     op_node_spawn_child,
@@ -361,7 +361,7 @@ deno_core::extension!(
   lazy_loaded_js = ["40_process.js"],
   options = { get_npm_process_state: Option<NpmProcessStateProviderRc>  },
   state = |state, options| {
-    state.put::<NpmProcessStateProviderRc>(options.get_npm_process_state.unwrap_or(deno_fs::sync::MaybeArc::new(EmptyNpmProcessStateProvider)));
+    state.put::<NpmProcessStateProviderRc>(options.get_npm_process_state.unwrap_or(simien_fs::sync::MaybeArc::new(EmptyNpmProcessStateProvider)));
   },
 );
 
@@ -490,7 +490,7 @@ impl std::fmt::Display for ChildIpcSerialization {
 }
 
 #[cfg(unix)]
-deno_error::js_error_wrapper!(nix::Error, JsNixError, |err| {
+simien_error::js_error_wrapper!(nix::Error, JsNixError, |err| {
   match err {
     nix::Error::ECHILD => "NotFound",
     nix::Error::EINVAL => "TypeError",
@@ -508,7 +508,7 @@ deno_error::js_error_wrapper!(nix::Error, JsNixError, |err| {
   }
 });
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ProcessError {
   #[class(inherit)]
   #[error("Failed to spawn '{command}': {error}")]
@@ -530,19 +530,19 @@ pub enum ProcessError {
   FailedResolvingCwd(#[source] std::io::Error),
   #[class(inherit)]
   #[error(transparent)]
-  Permission(#[from] deno_permissions::PermissionCheckError),
+  Permission(#[from] simien_permissions::PermissionCheckError),
   #[class(inherit)]
   #[error(transparent)]
   RunPermission(#[from] CheckRunPermissionError),
   #[class(inherit)]
   #[error(transparent)]
-  Resource(deno_core::error::ResourceError),
+  Resource(simien_core::error::ResourceError),
   #[class(generic)]
   #[error(transparent)]
   BorrowMut(std::cell::BorrowMutError),
   #[class(generic)]
   #[error(transparent)]
-  Which(deno_permissions::which::Error),
+  Which(simien_permissions::which::Error),
   #[class(type)]
   #[error("Child process has already terminated.")]
   ChildProcessAlreadyTerminated,
@@ -639,12 +639,12 @@ type CreateCommand = (
   Command,
   Option<ResourceId>,
   Vec<Option<i64>>,
-  Vec<deno_io::RawBiPipeHandle>,
+  Vec<simien_io::RawBiPipeHandle>,
 );
 
 pub fn npm_process_state_tempfile(
   contents: &[u8],
-) -> Result<deno_io::RawIoHandle, std::io::Error> {
+) -> Result<simien_io::RawIoHandle, std::io::Error> {
   let mut temp_file = tempfile::tempfile()?;
   temp_file.write_all(contents)?;
   let handle = temp_file.into_raw_io_handle();
@@ -841,7 +841,7 @@ fn create_command(
     if let Some(ipc) = args.ipc
       && ipc >= 0
     {
-      let (ipc_fd1, ipc_fd2) = deno_io::bi_pipe_pair_raw()?;
+      let (ipc_fd1, ipc_fd2) = simien_io::bi_pipe_pair_raw()?;
       fds_to_dup.push((ipc_fd2, ipc, false));
       fds_to_close.push(ipc_fd2);
       /* One end returned to parent process (this) */
@@ -878,7 +878,7 @@ fn create_command(
       let target_fd = (i + 3) as i32;
       match stdio {
         StdioOrFd::Stdio(Stdio::Piped) => {
-          let (fd1, fd2) = deno_io::bi_pipe_pair_raw()?;
+          let (fd1, fd2) = simien_io::bi_pipe_pair_raw()?;
           fds_to_dup.push((fd2, target_fd, false));
           fds_to_close.push(fd2);
           child_extra_stdio_fds.push(target_fd);
@@ -972,7 +972,7 @@ fn create_command(
     if let Some(ipc) = args.ipc
       && ipc >= 0
     {
-      let (hd1, hd2) = deno_io::bi_pipe_pair_raw()?;
+      let (hd1, hd2) = simien_io::bi_pipe_pair_raw()?;
 
       /* One end returned to parent process (this) */
       let pipe_rid = match args.serialization {
@@ -1011,7 +1011,7 @@ fn create_command(
       let target_fd = (i + 3) as i32;
       match stdio {
         StdioOrFd::Stdio(Stdio::Piped) => {
-          let (fd1, fd2) = match deno_io::bi_pipe_pair_raw() {
+          let (fd1, fd2) = match simien_io::bi_pipe_pair_raw() {
             Ok(fds) => fds,
             Err(e) => {
               log::warn!(
@@ -1214,8 +1214,8 @@ fn spawn_child(
     .map(|maybe_fd| {
       maybe_fd
         .map(|fd| {
-          let resource = deno_io::BiPipeResource::from_raw_handle(
-            fd as deno_io::RawBiPipeHandle,
+          let resource = simien_io::BiPipeResource::from_raw_handle(
+            fd as simien_io::RawBiPipeHandle,
           )?;
           Ok(state.resource_table.add(resource))
         })
@@ -1434,7 +1434,7 @@ fn compute_run_env(
       let arg_path = Path::new(cwd_arg);
       if arg_path.is_absolute() {
         (
-          deno_path_util::normalize_path(Cow::Borrowed(arg_path)).into_owned(),
+          simien_path_util::normalize_path(Cow::Borrowed(arg_path)).into_owned(),
           true,
         )
       } else {
@@ -1476,7 +1476,7 @@ fn resolve_cmd(cmd: &str, env: &RunEnv) -> Result<PathBuf, ProcessError> {
   if is_path {
     let cmd_path = Path::new(cmd);
     if cmd_path.is_absolute() {
-      Ok(deno_path_util::normalize_path(Cow::Borrowed(cmd_path)).into_owned())
+      Ok(simien_path_util::normalize_path(Cow::Borrowed(cmd_path)).into_owned())
     } else if !env.set_cwd_on_command {
       // Relative cmd path can't be resolved without a known cwd.
       Err(ProcessError::FailedResolvingCwd(std::io::Error::from(
@@ -1492,14 +1492,14 @@ fn resolve_cmd(cmd: &str, env: &RunEnv) -> Result<PathBuf, ProcessError> {
     // unqualified names that fall back to a cwd-relative search this is a
     // best-effort lookup that will simply miss when the parent's cwd has
     // been unlinked.
-    match deno_permissions::which::which_in(
-      sys_traits::impls::RealSys,
+    match simien_permissions::which::which_in(
+      simien_sys_traits::impls::RealSys,
       cmd,
       path.cloned(),
       env.cwd.clone(),
     ) {
       Ok(cmd) => Ok(cmd),
-      Err(deno_permissions::which::Error::CannotFindBinaryPath) => {
+      Err(simien_permissions::which::Error::CannotFindBinaryPath) => {
         Err(std::io::Error::from(std::io::ErrorKind::NotFound).into())
       }
       Err(err) => Err(ProcessError::Which(err)),
@@ -1508,14 +1508,14 @@ fn resolve_cmd(cmd: &str, env: &RunEnv) -> Result<PathBuf, ProcessError> {
 }
 
 fn resolve_path(path: &str, cwd: &Path) -> PathBuf {
-  deno_path_util::normalize_path(Cow::Owned(cwd.join(path))).into_owned()
+  simien_path_util::normalize_path(Cow::Owned(cwd.join(path))).into_owned()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum CheckRunPermissionError {
   #[class(inherit)]
   #[error(transparent)]
-  Permission(#[from] deno_permissions::PermissionCheckError),
+  Permission(#[from] simien_permissions::PermissionCheckError),
   #[class(inherit)]
   #[error("{0}")]
   Other(JsErrorBox),
@@ -1604,7 +1604,7 @@ fn op_spawn_child(
   )?;
   let child = spawn_child(state, command, pipe_rid, extra_pipe_fds, detached);
   for handle in handles_to_close {
-    deno_io::close_raw_handle(handle);
+    simien_io::close_raw_handle(handle);
   }
   #[cfg(unix)]
   if matches!(&child, Err(err) if err.is_enoexec()) {
@@ -1614,7 +1614,7 @@ fn op_spawn_child(
     )?;
     let child = spawn_child(state, command, pipe_rid, extra_pipe_fds, detached);
     for handle in handles_to_close {
-      deno_io::close_raw_handle(handle);
+      simien_io::close_raw_handle(handle);
     }
     return child;
   }
@@ -1641,7 +1641,7 @@ fn op_node_spawn_child(
   let child =
     spawn_child_node(state, command, pipe_rid, extra_pipe_fds, detached);
   for handle in handles_to_close {
-    deno_io::close_raw_handle(handle);
+    simien_io::close_raw_handle(handle);
   }
   #[cfg(unix)]
   if matches!(&child, Err(err) if err.is_enoexec()) {
@@ -1652,7 +1652,7 @@ fn op_node_spawn_child(
     let child =
       spawn_child_node(state, command, pipe_rid, extra_pipe_fds, detached);
     for handle in handles_to_close {
-      deno_io::close_raw_handle(handle);
+      simien_io::close_raw_handle(handle);
     }
     return child;
   }
@@ -2031,7 +2031,7 @@ fn op_spawn_kill(
 fn op_spawn_child_unref(
   state: &mut OpState,
   #[smi] rid: ResourceId,
-) -> Result<(), deno_core::error::ResourceError> {
+) -> Result<(), simien_core::error::ResourceError> {
   let resource = state.resource_table.get::<ChildResource>(rid)?;
   resource.kill_on_drop.set(false);
   Ok(())
@@ -2043,14 +2043,14 @@ fn op_spawn_child_unref(
 fn op_spawn_child_ref(
   state: &mut OpState,
   #[smi] rid: ResourceId,
-) -> Result<(), deno_core::error::ResourceError> {
+) -> Result<(), simien_core::error::ResourceError> {
   let resource = state.resource_table.get::<ChildResource>(rid)?;
   resource.kill_on_drop.set(true);
   Ok(())
 }
 
 mod deprecated {
-  use deno_core::FromV8;
+  use simien_core::FromV8;
   #[cfg(windows)]
   use deno_subprocess_windows::Child;
   #[cfg(not(windows))]

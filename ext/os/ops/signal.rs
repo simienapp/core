@@ -3,15 +3,15 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use deno_core::AsyncRefCell;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::error::ResourceError;
-use deno_core::op2;
+use simien_core::AsyncRefCell;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::error::ResourceError;
+use simien_core::op2;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum SignalError {
   #[class(type)]
   #[error(transparent)]

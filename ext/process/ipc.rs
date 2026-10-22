@@ -5,14 +5,14 @@ use std::rc::Rc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicUsize;
 
-use deno_core::AsyncRefCell;
-use deno_core::CancelHandle;
-use deno_core::ExternalOpsTracker;
-use deno_core::RcRef;
-use deno_core::serde_json;
-use deno_io::BiPipe;
-use deno_io::BiPipeRead;
-use deno_io::BiPipeWrite;
+use simien_core::AsyncRefCell;
+use simien_core::CancelHandle;
+use simien_core::ExternalOpsTracker;
+use simien_core::RcRef;
+use simien_core::serde_json;
+use simien_io::BiPipe;
+use simien_io::BiPipeRead;
+use simien_io::BiPipeWrite;
 use memchr::memchr;
 use tokio::io::AsyncWriteExt;
 
@@ -142,7 +142,7 @@ pub struct IpcJsonStreamResource {
   pub ref_tracker: IpcRefTracker,
 }
 
-impl deno_core::Resource for IpcJsonStreamResource {
+impl simien_core::Resource for IpcJsonStreamResource {
   fn close(self: Rc<Self>) {
     self.cancel.cancel();
   }
@@ -296,7 +296,7 @@ impl ReadBuffer {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum IpcJsonStreamError {
   #[class(inherit)]
   #[error("{0}")]
@@ -306,7 +306,7 @@ pub enum IpcJsonStreamError {
   Json(#[source] serde_json::Error),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum IpcAdvancedStreamError {
   #[class(inherit)]
   #[error("{0}")]
@@ -471,7 +471,7 @@ impl IpcAdvancedStreamResource {
   }
 }
 
-impl deno_core::Resource for IpcAdvancedStreamResource {
+impl simien_core::Resource for IpcAdvancedStreamResource {
   fn close(self: Rc<Self>) {
     self.cancel.cancel();
   }
@@ -579,8 +579,8 @@ impl IpcJsonStream {
 mod tests {
   use std::rc::Rc;
 
-  use deno_core::RcRef;
-  use deno_core::serde_json::json;
+  use simien_core::RcRef;
+  use simien_core::serde_json::json;
 
   use super::IpcJsonStreamResource;
 
@@ -695,8 +695,8 @@ mod tests {
     Ok(())
   }
 
-  fn json_to_bytes(v: deno_core::serde_json::Value) -> Vec<u8> {
-    let mut buf = deno_core::serde_json::to_vec(&v).unwrap();
+  fn json_to_bytes(v: simien_core::serde_json::Value) -> Vec<u8> {
+    let mut buf = simien_core::serde_json::to_vec(&v).unwrap();
     buf.push(b'\n');
     buf
   }

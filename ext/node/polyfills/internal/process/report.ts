@@ -11,7 +11,7 @@ const {
 } = primordials;
 
 const { arch, versions } = core.loadExtScript(
-  "ext:deno_node/_process/process.ts",
+  "ext:simien_node/_process/process.ts",
 );
 const lazyOs = core.createLazyLoader("node:os");
 

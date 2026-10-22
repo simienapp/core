@@ -28,7 +28,7 @@ disallowed-methods = [
   { path = "std::fs::write", reason = "File system operations should be done using FileSystem trait" },
   { path = "std::fs::DirBuilder::new", reason = "File system operations should be done using FileSystem trait" },
   { path = "std::fs::OpenOptions::new", reason = "File system operations should be done using FileSystem trait" },
-  { path = "url::Url::to_file_path", reason = "Use deno_path_util instead" },
-  { path = "url::Url::from_file_path", reason = "Use deno_path_util instead" },
-  { path = "url::Url::from_directory_path", reason = "Use deno_path_util instead" },
+  { path = "url::Url::to_file_path", reason = "Use simien_path_util instead" },
+  { path = "url::Url::from_file_path", reason = "Use simien_path_util instead" },
+  { path = "url::Url::from_directory_path", reason = "Use simien_path_util instead" },
 ]

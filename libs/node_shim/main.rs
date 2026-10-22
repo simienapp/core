@@ -7,13 +7,13 @@
 use std::env;
 use std::process::{self};
 
-use node_shim::TranslateOptions;
-use node_shim::translate_to_deno_args;
+use simien_node_shim::TranslateOptions;
+use simien_node_shim::translate_to_deno_args;
 
 fn main() {
   let args = env::args().skip(1).collect::<Vec<String>>();
 
-  let parsed_args = match node_shim::parse_args(args) {
+  let parsed_args = match simien_node_shim::parse_args(args) {
     Ok(parsed_args) => parsed_args,
     Err(e) => {
       if e.len() == 1 {
@@ -48,7 +48,7 @@ fn main() {
   let mut deno_args = result.deno_args;
 
   // Handle entrypoint resolution for run commands
-  node_shim::resolve_run_entrypoint(
+  simien_node_shim::resolve_run_entrypoint(
     std::path::Path::new("deno"),
     &mut deno_args,
   );

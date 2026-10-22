@@ -33,9 +33,9 @@ const {
   charLengthAt,
   CSI,
   emitKeys,
-} = core.loadExtScript("ext:deno_node/internal/readline/utils.mjs");
+} = core.loadExtScript("ext:simien_node/internal/readline/utils.mjs");
 const { kSawKeyPress } = core.loadExtScript(
-  "ext:deno_node/internal/readline/symbols.mjs",
+  "ext:simien_node/internal/readline/symbols.mjs",
 );
 
 const {
@@ -43,7 +43,7 @@ const {
 } = CSI;
 
 const { StringDecoder } = core.loadExtScript(
-  "ext:deno_node/string_decoder.ts",
+  "ext:simien_node/string_decoder.ts",
 );
 
 const KEYPRESS_DECODER = Symbol("keypress-decoder");

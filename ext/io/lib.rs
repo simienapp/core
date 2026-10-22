@@ -21,23 +21,23 @@ use std::rc::Rc;
 #[cfg(windows)]
 use std::sync::Arc;
 
-use deno_core::AsyncMutFuture;
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::BufMutView;
-use deno_core::BufView;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceHandle;
-use deno_core::ResourceHandleFd;
-use deno_core::futures::TryFutureExt;
-use deno_core::op2;
-use deno_core::unsync::TaskQueue;
-use deno_core::unsync::spawn_blocking;
-use deno_error::JsErrorBox;
+use simien_core::AsyncMutFuture;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::BufMutView;
+use simien_core::BufView;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceHandle;
+use simien_core::ResourceHandleFd;
+use simien_core::futures::TryFutureExt;
+use simien_core::op2;
+use simien_core::unsync::TaskQueue;
+use simien_core::unsync::spawn_blocking;
+use simien_error::JsErrorBox;
 #[cfg(windows)]
 use deno_subprocess_windows::Stdio as StdStdio;
 use fs::FileResource;
@@ -85,8 +85,8 @@ pub use pipe::RawPipeHandle;
 pub use pipe::pipe;
 
 /// Env var used by the Node `child_process` spawn path to tell a Deno child
-/// which extra numeric stdio fd slots it inherited. Both `deno_process` (which
-/// sets it) and `deno_io` (which consumes it at startup) reference this single
+/// which extra numeric stdio fd slots it inherited. Both `simien_process` (which
+/// sets it) and `simien_io` (which consumes it at startup) reference this single
 /// constant so the name has one source of truth.
 pub const DENO_EXTRA_STDIO_FDS_ENV_VAR: &str = "DENO_EXTRA_STDIO_FDS";
 
@@ -270,8 +270,8 @@ fn stdio_fd(fd: i32) -> StdFile {
   unsafe { StdFile::from_raw_handle(GetStdHandle(std_handle)) }
 }
 
-deno_core::extension!(deno_io,
-  deps = [ deno_web ],
+simien_core::extension!(simien_io,
+  deps = [ simien_web ],
   lazy_loaded_js = [ "12_io.js" ],
   options = {
     stdio: Option<Stdio>,
@@ -513,7 +513,7 @@ impl Resource for ChildStdinResource {
     "childStdin".into()
   }
 
-  deno_core::impl_writable!();
+  simien_core::impl_writable!();
 
   fn shutdown(self: Rc<Self>) -> AsyncResult<()> {
     Box::pin(self.shutdown().map_err(JsErrorBox::from_err))
@@ -523,7 +523,7 @@ impl Resource for ChildStdinResource {
 pub type ChildStdoutResource = ReadOnlyResource<process::ChildStdout>;
 
 impl Resource for ChildStdoutResource {
-  deno_core::impl_readable_byob!();
+  simien_core::impl_readable_byob!();
 
   fn name(&self) -> Cow<'_, str> {
     "childStdout".into()
@@ -545,7 +545,7 @@ impl Resource for ChildStdoutResource {
 pub type ChildStderrResource = ReadOnlyResource<process::ChildStderr>;
 
 impl Resource for ChildStderrResource {
-  deno_core::impl_readable_byob!();
+  simien_core::impl_readable_byob!();
 
   fn name(&self) -> Cow<'_, str> {
     "childStderr".into()
@@ -857,7 +857,7 @@ impl StdFileResourceInner {
       )]
       let fut = self.with_inner_blocking_task(move |file| {
         let _terminal_input_guard =
-          deno_permissions::prompter::lock_terminal_input();
+          simien_permissions::prompter::lock_terminal_input();
         /* Start reading, and set the reading flag to true */
         state.lock().reading = true;
         let nread = match file.read(&mut buf) {
@@ -974,7 +974,7 @@ impl crate::fs::File for StdFileResourceInner {
         // of fd 0. Retry on WouldBlock to avoid surfacing EAGAIN to JS.
         self.with_sync(|file| {
           let _terminal_input_guard =
-            deno_permissions::prompter::lock_terminal_input();
+            simien_permissions::prompter::lock_terminal_input();
           loop {
             match file.read(buf) {
               Ok(nread) => return Ok(nread),
@@ -1055,13 +1055,13 @@ impl crate::fs::File for StdFileResourceInner {
   async fn write(
     self: Rc<Self>,
     view: BufView,
-  ) -> FsResult<deno_core::WriteOutcome> {
+  ) -> FsResult<simien_core::WriteOutcome> {
     match self.kind {
       StdFileResourceKind::File => {
         self
           .with_inner_blocking_task(|file| {
             let nwritten = file.write(&view)?;
-            Ok(deno_core::WriteOutcome::Partial { nwritten, view })
+            Ok(simien_core::WriteOutcome::Partial { nwritten, view })
           })
           .await
       }
@@ -1075,7 +1075,7 @@ impl crate::fs::File for StdFileResourceInner {
             let mut stdout = std::io::stdout().lock();
             let nwritten = stdout.write(&view)?;
             stdout.flush()?;
-            Ok(deno_core::WriteOutcome::Partial { nwritten, view })
+            Ok(simien_core::WriteOutcome::Partial { nwritten, view })
           })
           .await
       }
@@ -1086,7 +1086,7 @@ impl crate::fs::File for StdFileResourceInner {
             let mut stderr = std::io::stderr().lock();
             let nwritten = stderr.write(&view)?;
             stderr.flush()?;
-            Ok(deno_core::WriteOutcome::Partial { nwritten, view })
+            Ok(simien_core::WriteOutcome::Partial { nwritten, view })
           })
           .await
       }
@@ -1422,7 +1422,7 @@ impl crate::fs::File for StdFileResourceInner {
         self
           .with_inner_blocking_task(|file| {
             let _terminal_input_guard =
-              deno_permissions::prompter::lock_terminal_input();
+              simien_permissions::prompter::lock_terminal_input();
             loop {
               match file.read(&mut buf) {
                 Ok(nread) => return Ok((nread, buf)),

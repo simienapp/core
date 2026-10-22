@@ -45,6 +45,17 @@ members = [
   "libs/capacity_builder/macros",
   "libs/monch",
   "libs/deno_terminal",
+  "ext/node",
+  "ext/node_crypto",
+  "ext/napi",
+  "ext/fs",
+  "ext/io",
+  "ext/process",
+  "ext/os",
+  "libs/dotenv",
+  "libs/node_shim",
+  "libs/inspector_server",
+  "libs/permissions",
 ]
 
 [workspace.package]
@@ -54,6 +65,20 @@ license = "MIT"
 repository = "https://github.com/simienapp/core"
 
 [workspace.dependencies]
+# The Node layer (APS 2: Node's APIs for code granted dangerouslyUseNode).
+simien_node = { version = "0.1.0", path = "./ext/node" }
+simien_node_crypto = { version = "0.1.0", path = "./ext/node_crypto" }
+simien_napi = { version = "0.1.0", path = "./ext/napi" }
+simien_fs = { version = "0.1.0", path = "./ext/fs" }
+simien_io = { version = "0.1.0", path = "./ext/io" }
+simien_process = { version = "0.1.0", path = "./ext/process" }
+simien_os = { version = "0.1.0", path = "./ext/os" }
+simien_dotenv = { version = "0.1.0", path = "./libs/dotenv" }
+simien_node_shim = { version = "0.1.0", path = "./libs/node_shim" }
+simien_inspector_server = { version = "0.1.0", path = "./libs/inspector_server" }
+simien_permissions = { version = "0.1.0", path = "./libs/permissions" }
+deno_ast = { version = "=0.53.3", features = ["transpiling"] }
+
 deno_core_icudata = "0.77.0"
 deno_doc = "0.207.0"
 simien_error = { version = "0.1.1", path = "./libs/deno_error" }

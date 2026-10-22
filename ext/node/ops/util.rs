@@ -2,13 +2,13 @@
 
 use std::path::Path;
 
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::v8;
-use deno_dotenv::parse_env_content_hook;
-use deno_error::JsErrorBox;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::NpmPackageFolderResolver;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::v8;
+use simien_dotenv::parse_env_content_hook;
+use simien_error::JsErrorBox;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::NpmPackageFolderResolver;
 
 use crate::ExtNodeSys;
 use crate::NodeResolverRc;
@@ -32,7 +32,7 @@ pub fn op_node_guess_handle_type(_state: &mut OpState, fd: u32) -> u32 {
 
 #[cfg(unix)]
 fn guess_handle_type(fd: i32) -> HandleType {
-  use deno_core::uv_compat;
+  use simien_core::uv_compat;
   match uv_compat::uv_guess_handle(fd) {
     uv_compat::uv_handle_type::UV_TCP => HandleType::Tcp,
     uv_compat::uv_handle_type::UV_TTY => HandleType::Tty,
@@ -149,13 +149,13 @@ pub fn op_node_in_npm_package<
   state: &mut OpState,
   #[string] path: &str,
 ) -> bool {
-  let specifier = if deno_path_util::specifier_has_uri_scheme(path) {
+  let specifier = if simien_path_util::specifier_has_uri_scheme(path) {
     match url::Url::parse(path) {
       Ok(url) => url,
       Err(_) => return false,
     }
   } else {
-    match deno_path_util::url_from_file_path(Path::new(path)) {
+    match simien_path_util::url_from_file_path(Path::new(path)) {
       Ok(url) => url,
       Err(_) => return false,
     }

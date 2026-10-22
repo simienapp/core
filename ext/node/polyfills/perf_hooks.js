@@ -37,17 +37,17 @@ const {
   PerformanceEntry,
   PerformanceObserver: WebPerformanceObserver,
   PerformanceObserverEntryList,
-} = core.loadExtScript("ext:deno_web/15_performance.js");
+} = core.loadExtScript("ext:simien_web/15_performance.js");
 const { EldHistogram, BaseHistogram } = core.ops;
 const { ERR_ILLEGAL_CONSTRUCTOR, ERR_INVALID_ARG_TYPE, ERR_OUT_OF_RANGE } = core
   .loadExtScript(
-    "ext:deno_node/internal/errors.ts",
+    "ext:simien_node/internal/errors.ts",
   );
 const { customInspectSymbol } = core.loadExtScript(
-  "ext:deno_node/internal/util.mjs",
+  "ext:simien_node/internal/util.mjs",
 );
 const { inspect } = core.loadExtScript(
-  "ext:deno_node/internal/util/inspect.mjs",
+  "ext:simien_node/internal/util/inspect.mjs",
 );
 
 const constants = {

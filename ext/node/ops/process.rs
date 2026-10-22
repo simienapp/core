@@ -1,10 +1,10 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::v8;
-use deno_permissions::PermissionCheckError;
-use deno_permissions::PermissionsContainer;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::v8;
+use simien_permissions::PermissionCheckError;
+use simien_permissions::PermissionsContainer;
 #[cfg(unix)]
 use nix::unistd::Gid;
 #[cfg(unix)]
@@ -201,7 +201,7 @@ pub fn op_node_process_set_title(#[string] title: &str) {
   set_process_title(title);
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ProcessError {
   #[class(inherit)]
   #[error(transparent)]
@@ -255,7 +255,7 @@ pub fn op_node_process_kill(
   state: &mut OpState,
   #[smi] pid: i32,
   #[smi] sig: i32,
-) -> Result<i32, deno_permissions::PermissionCheckError> {
+) -> Result<i32, simien_permissions::PermissionCheckError> {
   if pid != std::process::id() as i32 {
     state
       .borrow_mut::<PermissionsContainer>()
@@ -666,7 +666,7 @@ pub mod cgroup {
 
   /// Read the cgroup memory limit from the filesystem.
   /// Returns `None` if cgroup info cannot be read or parsed.
-  pub fn cgroup_memory_limit<TSys: sys_traits::FsRead>(
+  pub fn cgroup_memory_limit<TSys: simien_sys_traits::FsRead>(
     sys: &TSys,
   ) -> Option<u64> {
     let self_cgroup = sys.fs_read_to_string("/proc/self/cgroup").ok()?;

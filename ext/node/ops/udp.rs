@@ -8,22 +8,22 @@ use std::net::SocketAddr;
 use std::rc::Rc;
 use std::str::FromStr;
 
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::op2;
-use deno_permissions::PermissionsContainer;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::op2;
+use simien_permissions::PermissionsContainer;
 use socket2::Domain;
 use socket2::Protocol;
 use socket2::Socket;
 use socket2::Type;
 use tokio::net::UdpSocket;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum NodeUdpError {
   #[class(inherit)]
   #[error("{0}")]
@@ -33,10 +33,10 @@ pub enum NodeUdpError {
   AddrParse(#[from] std::net::AddrParseError),
   #[class(inherit)]
   #[error("{0}")]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(inherit)]
   #[error("{0}")]
-  Canceled(#[from] deno_core::Canceled),
+  Canceled(#[from] simien_core::Canceled),
   #[class(generic)]
   #[error("No resolved address found")]
   NoResolvedAddress,
@@ -45,7 +45,7 @@ pub enum NodeUdpError {
   InvalidHostname(String),
   #[class(inherit)]
   #[error(transparent)]
-  Permission(#[from] deno_permissions::PermissionCheckError),
+  Permission(#[from] simien_permissions::PermissionCheckError),
 }
 
 pub struct NodeUdpSocketResource {
@@ -76,7 +76,7 @@ pub fn op_node_udp_bind(
     .borrow_mut::<PermissionsContainer>()
     .check_net(&(hostname, Some(port)), "dgram.createSocket()")?;
 
-  let addr = deno_net::resolve_addr::resolve_addr_sync(hostname, port)?
+  let addr = simien_net::resolve_addr::resolve_addr_sync(hostname, port)?
     .next()
     .ok_or(NodeUdpError::NoResolvedAddress)?;
   state
@@ -136,7 +136,7 @@ pub fn op_node_udp_join_multi_v4(
     .unwrap_or(Ipv4Addr::UNSPECIFIED);
 
   let port = resource.socket.local_addr()?.port();
-  deno_net::check_multicast_membership_permission(
+  simien_net::check_multicast_membership_permission(
     state.borrow_mut::<PermissionsContainer>(),
     std::net::IpAddr::V4(addr),
     port,
@@ -283,7 +283,7 @@ pub fn op_node_udp_join_multi_v6(
   let addr = Ipv6Addr::from_str(address)?;
   let iface = resolve_ipv6_interface(interface_addr.as_deref())?;
   let port = resource.socket.local_addr()?.port();
-  deno_net::check_multicast_membership_permission(
+  simien_net::check_multicast_membership_permission(
     state.borrow_mut::<PermissionsContainer>(),
     std::net::IpAddr::V6(addr),
     port,
@@ -597,7 +597,7 @@ pub async fn op_node_udp_send(
     .get::<NodeUdpSocketResource>(rid)?;
 
   let addr: SocketAddr =
-    deno_net::resolve_addr::resolve_addr_sync(&hostname, port)?
+    simien_net::resolve_addr::resolve_addr_sync(&hostname, port)?
       .next()
       .ok_or(NodeUdpError::NoResolvedAddress)?;
   {

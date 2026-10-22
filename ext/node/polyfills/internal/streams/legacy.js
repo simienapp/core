@@ -3,7 +3,7 @@
 
 (function () {
 const { core, primordials } = __bootstrap;
-const { EventEmitter: EE } = core.loadExtScript("ext:deno_node/_events.mjs");
+const { EventEmitter: EE } = core.loadExtScript("ext:simien_node/_events.mjs");
 
 const {
   ArrayIsArray,

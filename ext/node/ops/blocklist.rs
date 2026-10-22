@@ -5,9 +5,9 @@ use std::collections::HashSet;
 use std::net::IpAddr;
 use std::net::SocketAddr;
 
-use deno_core::OpState;
-use deno_core::ToV8;
-use deno_core::op2;
+use simien_core::OpState;
+use simien_core::ToV8;
+use simien_core::op2;
 use ipnet::IpNet;
 use ipnet::Ipv4Net;
 use ipnet::Ipv6Net;
@@ -17,8 +17,8 @@ pub struct BlockListResource {
 }
 
 // SAFETY: we're sure this can be GCed
-unsafe impl deno_core::GarbageCollected for BlockListResource {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for BlockListResource {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"BlockListResource"
@@ -28,7 +28,7 @@ unsafe impl deno_core::GarbageCollected for BlockListResource {
 #[derive(ToV8)]
 struct SocketAddressSerialization(String, String);
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 pub enum BlocklistError {
   #[error("{0}")]

@@ -6,28 +6,28 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use boxed_error::Boxed;
-use deno_core::FastString;
-use deno_core::JsRuntimeInspector;
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::url::Url;
-use deno_core::v8;
-use deno_error::JsErrorBox;
-use deno_package_json::PackageJsonRc;
-use deno_path_util::normalize_path;
-use deno_path_util::url_from_file_path;
-use deno_path_util::url_to_file_path;
-use deno_permissions::PermissionsContainer;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::NodeResolutionKind;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::ResolutionMode;
-use node_resolver::UrlOrPath;
-use node_resolver::UrlOrPathRef;
-use node_resolver::cache::NodeResolutionThreadLocalCache;
-use node_resolver::errors::PackageJsonLoadError;
-use sys_traits::FsMetadataValue;
+use simien_boxed_error::Boxed;
+use simien_core::FastString;
+use simien_core::JsRuntimeInspector;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::url::Url;
+use simien_core::v8;
+use simien_error::JsErrorBox;
+use simien_package_json::PackageJsonRc;
+use simien_path_util::normalize_path;
+use simien_path_util::url_from_file_path;
+use simien_path_util::url_to_file_path;
+use simien_permissions::PermissionsContainer;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::NodeResolutionKind;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::ResolutionMode;
+use simien_node_resolver::UrlOrPath;
+use simien_node_resolver::UrlOrPathRef;
+use simien_node_resolver::cache::NodeResolutionThreadLocalCache;
+use simien_node_resolver::errors::PackageJsonLoadError;
+use simien_sys_traits::FsMetadataValue;
 
 use crate::ExtNodeSys;
 use crate::NodeRequireLoaderRc;
@@ -50,10 +50,10 @@ fn ensure_read_permission<'a>(
   loader.ensure_read_permission(permissions, file_path)
 }
 
-#[derive(Debug, Boxed, deno_error::JsError)]
+#[derive(Debug, Boxed, simien_error::JsError)]
 pub struct RequireError(pub Box<RequireErrorKind>);
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum RequireErrorKind {
   #[class(inherit)]
   #[error(transparent)]
@@ -69,32 +69,32 @@ pub enum RequireErrorKind {
   #[properties(inherit)]
   #[error(transparent)]
   PackageExportsResolve(
-    #[from] node_resolver::errors::PackageExportsResolveError,
+    #[from] simien_node_resolver::errors::PackageExportsResolveError,
   ),
   #[class(generic)]
   #[properties(inherit)]
   #[error(transparent)]
-  PackageJsonLoad(#[from] node_resolver::errors::PackageJsonLoadError),
+  PackageJsonLoad(#[from] simien_node_resolver::errors::PackageJsonLoadError),
   #[class(generic)]
   #[properties(inherit)]
   #[error(transparent)]
   PackageImportsResolve(
-    #[from] node_resolver::errors::PackageImportsResolveError,
+    #[from] simien_node_resolver::errors::PackageImportsResolveError,
   ),
   #[class(generic)]
   #[properties(inherit)]
   #[error(transparent)]
-  FilePathConversion(#[from] deno_path_util::UrlToFilePathError),
+  FilePathConversion(#[from] simien_path_util::UrlToFilePathError),
   #[class(generic)]
   #[properties(inherit)]
   #[error(transparent)]
-  UrlConversion(#[from] deno_path_util::PathToUrlError),
+  UrlConversion(#[from] simien_path_util::PathToUrlError),
   #[class(inherit)]
   #[error(transparent)]
   Fs(
     #[from]
     #[inherit]
-    deno_io::fs::FsError,
+    simien_io::fs::FsError,
   ),
   #[class(inherit)]
   #[error(transparent)]
@@ -115,7 +115,7 @@ pub enum RequireErrorKind {
   UnableToGetCwd(UnableToGetCwdError),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[error("Unable to get CWD")]
 #[class(inherit)]
 pub struct UnableToGetCwdError(#[source] pub std::io::Error);
@@ -269,7 +269,7 @@ pub fn op_require_resolve_deno_dir<
   state: &mut OpState,
   #[string] request: &str,
   #[string] parent_filename: &str,
-) -> Result<Option<String>, deno_path_util::PathToUrlError> {
+) -> Result<Option<String>, simien_path_util::PathToUrlError> {
   let resolver = state.borrow::<NodeResolverRc<
     TInNpmPackageChecker,
     TNpmPackageFolderResolver,
@@ -350,7 +350,7 @@ pub fn op_require_is_deno_dir_package<
     TNpmPackageFolderResolver,
     TSys,
   >>();
-  match deno_path_util::url_from_file_path(Path::new(path)) {
+  match simien_path_util::url_from_file_path(Path::new(path)) {
     Ok(specifier) => resolver.in_npm_package(&specifier),
     Err(_) => false,
   }
@@ -434,7 +434,7 @@ pub fn op_require_real_path<TSys: ExtNodeSys + 'static>(
     .map_err(RequireErrorKind::Permission)?;
   let sys = state.borrow::<TSys>();
   let canonicalized_path =
-    deno_path_util::strip_unc_prefix(match sys.fs_canonicalize(&path) {
+    simien_path_util::strip_unc_prefix(match sys.fs_canonicalize(&path) {
       Ok(path) => path,
       Err(err) => {
         if path.ends_with("$deno$eval.cjs")
@@ -532,7 +532,7 @@ pub fn op_require_try_self<
   };
 
   if let Some(exports) = &pkg.exports {
-    let node_resolver = state.borrow::<NodeResolverRc<
+    let simien_node_resolver = state.borrow::<NodeResolverRc<
       TInNpmPackageChecker,
       TNpmPackageFolderResolver,
       TSys,
@@ -540,13 +540,13 @@ pub fn op_require_try_self<
     let referrer = UrlOrPathRef::from_path(&pkg.path);
     // invalidate the resolution cache in case things have changed
     NodeResolutionThreadLocalCache::clear();
-    let r = node_resolver.package_exports_resolve(
+    let r = simien_node_resolver.package_exports_resolve(
       &pkg.path,
       &expansion,
       exports,
       Some(&referrer),
       ResolutionMode::Require,
-      node_resolver.require_conditions(),
+      simien_node_resolver.require_conditions(),
       NodeResolutionKind::Execution,
     )?;
     Ok(Some(url_or_path_to_string(r)?))
@@ -573,8 +573,8 @@ pub fn op_require_read_file<TSys: ExtNodeSys + 'static>(
   // Apply load-time security mitigations for known React Server Components
   // CVEs to required (CommonJS) source. Opt in via `DENO_PATCH_REACT_CVE`.
   let sys = state.borrow::<TSys>();
-  if deno_resolver::is_react_cve_patch_enabled(sys) {
-    match deno_resolver::patch_react_cves(file_path_str, code.as_str().into()) {
+  if simien_resolver::is_react_cve_patch_enabled(sys) {
+    match simien_resolver::patch_react_cves(file_path_str, code.as_str().into()) {
       Cow::Borrowed(_) => Ok(code),
       Cow::Owned(s) => Ok(s.into()),
     }
@@ -615,7 +615,7 @@ pub fn op_require_resolve_exports<
   #[string] parent_path: &str,
 ) -> Result<Option<String>, RequireError> {
   let sys = state.borrow::<TSys>();
-  let node_resolver = state.borrow::<NodeResolverRc<
+  let simien_node_resolver = state.borrow::<NodeResolverRc<
     TInNpmPackageChecker,
     TNpmPackageFolderResolver,
     TSys,
@@ -623,8 +623,8 @@ pub fn op_require_resolve_exports<
   let pkg_json_resolver = state.borrow::<PackageJsonResolverRc<TSys>>();
 
   let modules_path = Path::new(&modules_path_str);
-  let modules_specifier = deno_path_util::url_from_file_path(modules_path)?;
-  let pkg_path = if node_resolver.in_npm_package(&modules_specifier)
+  let modules_specifier = simien_path_util::url_from_file_path(modules_path)?;
+  let pkg_path = if simien_node_resolver.in_npm_package(&modules_specifier)
     && !uses_local_node_modules_dir
   {
     Cow::Borrowed(modules_path)
@@ -651,7 +651,7 @@ pub fn op_require_resolve_exports<
     Some(PathBuf::from(parent_path))
   };
   NodeResolutionThreadLocalCache::clear();
-  let r = node_resolver.package_exports_resolve(
+  let r = simien_node_resolver.package_exports_resolve(
     &pkg.path,
     &format!(".{expansion}"),
     exports,
@@ -660,13 +660,13 @@ pub fn op_require_resolve_exports<
       .map(|r| UrlOrPathRef::from_path(r))
       .as_ref(),
     ResolutionMode::Require,
-    node_resolver.require_conditions(),
+    simien_node_resolver.require_conditions(),
     NodeResolutionKind::Execution,
   )?;
   Ok(Some(url_or_path_to_string(r)?))
 }
 
-deno_error::js_error_wrapper!(
+simien_error::js_error_wrapper!(
   PackageJsonLoadError,
   JsPackageJsonLoadError,
   "Error"
@@ -728,13 +728,13 @@ pub fn op_require_package_imports_resolve<
   };
 
   if pkg.imports.is_some() {
-    let node_resolver = state.borrow::<NodeResolverRc<
+    let simien_node_resolver = state.borrow::<NodeResolverRc<
       TInNpmPackageChecker,
       TNpmPackageFolderResolver,
       TSys,
     >>();
     NodeResolutionThreadLocalCache::clear();
-    let url = node_resolver.resolve_package_import(
+    let url = simien_node_resolver.resolve_package_import(
       request,
       Some(&UrlOrPathRef::from_path(&referrer_path)),
       Some(&pkg),
@@ -781,7 +781,7 @@ pub fn op_require_can_parse_as_esm(
 
 fn url_or_path_to_string(
   url: UrlOrPath,
-) -> Result<String, deno_path_util::UrlToFilePathError> {
+) -> Result<String, simien_path_util::UrlToFilePathError> {
   if url.is_file() {
     Ok(url.into_path()?.to_string_lossy().into_owned())
   } else {

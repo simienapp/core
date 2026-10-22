@@ -34,10 +34,10 @@ const {
 
 // deno-lint-ignore no-unused-vars
 const { HandleWrap } = core.loadExtScript(
-  "ext:deno_node/internal_binding/handle_wrap.ts",
+  "ext:simien_node/internal_binding/handle_wrap.ts",
 );
 const { AsyncWrap, providerType } = core.loadExtScript(
-  "ext:deno_node/internal_binding/async_wrap.ts",
+  "ext:simien_node/internal_binding/async_wrap.ts",
 );
 
 const enum StreamBaseStateFields {

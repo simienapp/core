@@ -29,10 +29,10 @@ disallowed-methods = [
   { path = "std::fs::write", reason = "File system operations should be done using FileSystem trait" },
   { path = "std::path::Path::canonicalize", reason = "File system operations should be done using FileSystem trait" },
   { path = "std::path::Path::exists", reason = "File system operations should be done using FileSystem trait" },
-  { path = "url::Url::to_file_path", reason = "Use deno_path_util instead" },
-  { path = "url::Url::from_file_path", reason = "Use deno_path_util instead" },
-  { path = "url::Url::from_directory_path", reason = "Use deno_path_util instead" },
+  { path = "url::Url::to_file_path", reason = "Use simien_path_util instead" },
+  { path = "url::Url::from_file_path", reason = "Use simien_path_util instead" },
+  { path = "url::Url::from_directory_path", reason = "Use simien_path_util instead" },
 ]
 disallowed-types = [
-  { path = "std::sync::Arc", reason = "use deno_maybe_sync::MaybeArc instead" },
+  { path = "std::sync::Arc", reason = "use simien_maybe_sync::MaybeArc instead" },
 ]

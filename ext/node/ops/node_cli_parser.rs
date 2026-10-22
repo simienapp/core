@@ -1,14 +1,14 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-//! Node.js CLI Argument Parser - Uses node_shim crate
+//! Node.js CLI Argument Parser - Uses simien_node_shim crate
 //!
-//! This module uses the node_shim crate to parse Node.js CLI arguments
+//! This module uses the simien_node_shim crate to parse Node.js CLI arguments
 //! and translates them to Deno CLI arguments.
 
-use deno_core::ToV8;
-use deno_core::op2;
+use simien_core::ToV8;
+use simien_core::op2;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 pub enum CliParserError {
   #[error(
@@ -17,23 +17,23 @@ pub enum CliParserError {
   ParseError { message: String },
 }
 
-pub use node_shim::DebugOptions;
-pub use node_shim::EnvironmentOptions;
-pub use node_shim::HostPort;
-pub use node_shim::InspectPublishUid;
-pub use node_shim::OptionEnvvarSettings;
-pub use node_shim::OptionType;
-pub use node_shim::OptionsParser;
-pub use node_shim::ParseResult;
-pub use node_shim::PerIsolateOptions;
-pub use node_shim::PerProcessOptions;
-pub use node_shim::TranslateOptions;
-pub use node_shim::TranslatedArgs as NodeShimTranslatedArgs;
-// Re-export types from node_shim for use elsewhere in Deno
-pub use node_shim::parse_args;
-pub use node_shim::parse_node_options_env_var;
-pub use node_shim::translate_to_deno_args as translate_to_deno_args_impl;
-pub use node_shim::wrap_eval_code;
+pub use simien_node_shim::DebugOptions;
+pub use simien_node_shim::EnvironmentOptions;
+pub use simien_node_shim::HostPort;
+pub use simien_node_shim::InspectPublishUid;
+pub use simien_node_shim::OptionEnvvarSettings;
+pub use simien_node_shim::OptionType;
+pub use simien_node_shim::OptionsParser;
+pub use simien_node_shim::ParseResult;
+pub use simien_node_shim::PerIsolateOptions;
+pub use simien_node_shim::PerProcessOptions;
+pub use simien_node_shim::TranslateOptions;
+pub use simien_node_shim::TranslatedArgs as NodeShimTranslatedArgs;
+// Re-export types from simien_node_shim for use elsewhere in Deno
+pub use simien_node_shim::parse_args;
+pub use simien_node_shim::parse_node_options_env_var;
+pub use simien_node_shim::translate_to_deno_args as translate_to_deno_args_impl;
+pub use simien_node_shim::wrap_eval_code;
 
 /// Result of translating Node.js CLI args to Deno args
 #[derive(Debug, Clone, ToV8)]
@@ -98,7 +98,7 @@ fn translate_to_deno_args(
 /// Op that parses Node.js CLI arguments and translates them to Deno CLI arguments.
 /// Returns an object with deno_args, node_options, and needs_npm_process_state.
 /// Throws an error if parsing fails - this helps identify unsupported flags
-/// so they can be added to node_shim.
+/// so they can be added to simien_node_shim.
 ///
 /// When `wrap_eval` is true, eval code is wrapped for Node.js compatibility
 /// (used for direct child_process spawning). When false, eval code is passed

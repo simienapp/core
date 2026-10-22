@@ -9,20 +9,20 @@ const {
 const {
   ArrayPrototypeJoin,
   ArrayPrototypePush,
-} = core.loadExtScript("ext:deno_node/internal/primordials.mjs");
+} = core.loadExtScript("ext:simien_node/internal/primordials.mjs");
 
 const { CSI } = core.loadExtScript(
-  "ext:deno_node/internal/readline/utils.mjs",
+  "ext:simien_node/internal/readline/utils.mjs",
 );
 const {
   validateBoolean,
   validateInteger,
-} = core.loadExtScript("ext:deno_node/internal/validators.mjs");
+} = core.loadExtScript("ext:simien_node/internal/validators.mjs");
 const { isWritable } = core.loadExtScript(
-  "ext:deno_node/internal/streams/utils.js",
+  "ext:simien_node/internal/streams/utils.js",
 );
 const { ERR_INVALID_ARG_TYPE } = core.loadExtScript(
-  "ext:deno_node/internal/errors.ts",
+  "ext:simien_node/internal/errors.ts",
 );
 
 const {

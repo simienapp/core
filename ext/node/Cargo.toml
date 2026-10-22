@@ -1,43 +1,43 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_node"
-version = "0.197.0"
-authors.workspace = true
+name = "simien_node"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "Node compatibility for Deno"
+repository = "https://github.com/simienapp/core"
+description = "Node's APIs for Simien, for code granted dangerouslyUseNode (APS 2). Forked from deno_node 0.197.0."
 
 [lib]
 path = "lib.rs"
 
 [features]
-sync_fs = ["deno_fs/sync_fs", "deno_package_json/sync", "node_resolver/sync"]
+sync_fs = ["simien_fs/sync_fs", "simien_package_json/sync", "simien_node_resolver/sync"]
 
 [dependencies]
 base64.workspace = true
-boxed_error.workspace = true
+simien_boxed_error.workspace = true
 brotli.workspace = true
 bytes.workspace = true
 deno_ast = { workspace = true, features = ["type_strip"] }
-deno_core.workspace = true
-deno_dotenv.workspace = true
-deno_error.workspace = true
-deno_fs.workspace = true
-deno_inspector_server.workspace = true
-deno_io.workspace = true
-deno_native_certs.workspace = true
-deno_net.workspace = true
-deno_node_crypto.workspace = true
-deno_os.workspace = true
-deno_package_json.workspace = true
-deno_path_util.workspace = true
-deno_permissions.workspace = true
-deno_process.workspace = true
-deno_resolver.workspace = true
-deno_tls.workspace = true
+simien_core.workspace = true
+simien_dotenv.workspace = true
+simien_error.workspace = true
+simien_fs.workspace = true
+simien_inspector_server.workspace = true
+simien_io.workspace = true
+simien_native_certs.workspace = true
+simien_net.workspace = true
+simien_node_crypto.workspace = true
+simien_os.workspace = true
+simien_package_json.workspace = true
+simien_path_util.workspace = true
+simien_permissions.workspace = true
+simien_process.workspace = true
+simien_resolver.workspace = true
+simien_tls.workspace = true
 deno_whoami.workspace = true
 filetime.workspace = true
 hdrhistogram.workspace = true
@@ -47,15 +47,15 @@ libc.workspace = true
 libnghttp2 = "1.68.0"
 libz-sys.workspace = true
 log.workspace = true
-node_resolver.workspace = true
-node_shim.workspace = true
+simien_node_resolver.workspace = true
+simien_node_shim.workspace = true
 rand.workspace = true
 rustls-tokio-stream.workspace = true
 rustls-webpki.workspace = true
 serde.workspace = true
 smallvec.workspace = true
 socket2.workspace = true
-sys_traits = { workspace = true, features = ["real", "winapi", "libc"] }
+simien_sys_traits = { workspace = true, features = ["real", "winapi", "libc"] }
 thiserror.workspace = true
 tokio.workspace = true
 tokio-eld.workspace = true

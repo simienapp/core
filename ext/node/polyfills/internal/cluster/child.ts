@@ -13,15 +13,15 @@
 const { core, primordials } = __bootstrap;
 const lazyPath = core.createLazyLoader("node:path");
 const lazyProcess = core.createLazyLoader("node:process");
-const { isWindows } = core.loadExtScript("ext:deno_node/_util/os.ts");
+const { isWindows } = core.loadExtScript("ext:simien_node/_util/os.ts");
 const { Worker } = core.loadExtScript(
-  "ext:deno_node/internal/cluster/worker.ts",
+  "ext:simien_node/internal/cluster/worker.ts",
 );
 const { internal, sendHelper } = core.loadExtScript(
-  "ext:deno_node/internal/cluster/utils.ts",
+  "ext:simien_node/internal/cluster/utils.ts",
 );
 const { ownerSymbol } = core.loadExtScript(
-  "ext:deno_node/internal/async_hooks.ts",
+  "ext:simien_node/internal/async_hooks.ts",
 );
 
 const {

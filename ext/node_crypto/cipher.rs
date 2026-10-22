@@ -11,15 +11,15 @@ use aes::cipher::KeyIvInit;
 use aes::cipher::KeySizeUser;
 use aes::cipher::StreamCipher;
 use aes::cipher::block_padding::Pkcs7;
-use deno_core::Resource;
-use deno_error::JsErrorClass;
+use simien_core::Resource;
+use simien_error::JsErrorClass;
 use digest::KeyInit;
 use digest::generic_array::GenericArray;
 use subtle::ConstantTimeEq;
 
 type Tag = Option<Vec<u8>>;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum AesWrapError {
   #[class(range)]
   #[error("Invalid key length")]
@@ -666,14 +666,14 @@ pub struct DecipherContext {
   decipher: Rc<RefCell<Decipher>>,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum CipherContextError {
   #[class(type)]
   #[error("Cipher context is already in use")]
   ContextInUse,
   #[class(inherit)]
   #[error("{0}")]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(inherit)]
   #[error(transparent)]
   Cipher(#[from] CipherError),
@@ -722,14 +722,14 @@ impl CipherContext {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum DecipherContextError {
   #[class(type)]
   #[error("Decipher context is already in use")]
   ContextInUse,
   #[class(inherit)]
   #[error("{0}")]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(inherit)]
   #[error(transparent)]
   Decipher(#[from] DecipherError),
@@ -796,7 +796,7 @@ impl Resource for DecipherContext {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum CipherError {
   #[class(type)]
   #[error("IV length must be 12 bytes")]
@@ -1203,7 +1203,7 @@ impl Cipher {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[property("library" = "Provider routines")]
 #[property("reason" = self.reason())]
 #[property("code" = self.code())]
@@ -1235,33 +1235,33 @@ pub enum DecipherError {
 }
 
 impl DecipherError {
-  fn code(&self) -> deno_error::PropertyValue {
+  fn code(&self) -> simien_error::PropertyValue {
     match self {
       Self::InvalidIvLength => {
-        deno_error::PropertyValue::String("ERR_CRYPTO_INVALID_IV_LENGTH".into())
+        simien_error::PropertyValue::String("ERR_CRYPTO_INVALID_IV_LENGTH".into())
       }
-      Self::InvalidKeyLength => deno_error::PropertyValue::String(
+      Self::InvalidKeyLength => simien_error::PropertyValue::String(
         "ERR_CRYPTO_INVALID_KEY_LENGTH".into(),
       ),
       Self::InvalidAuthTag(_) => {
-        deno_error::PropertyValue::String("ERR_CRYPTO_INVALID_AUTH_TAG".into())
+        simien_error::PropertyValue::String("ERR_CRYPTO_INVALID_AUTH_TAG".into())
       }
-      Self::InvalidFinalBlockLength => deno_error::PropertyValue::String(
+      Self::InvalidFinalBlockLength => simien_error::PropertyValue::String(
         "ERR_OSSL_WRONG_FINAL_BLOCK_LENGTH".into(),
       ),
       Self::CannotUnpadInputData => {
-        deno_error::PropertyValue::String("ERR_OSSL_EVP_BAD_DECRYPT".into())
+        simien_error::PropertyValue::String("ERR_OSSL_EVP_BAD_DECRYPT".into())
       }
-      _ => deno_error::PropertyValue::String("ERR_CRYPTO_DECIPHER".into()),
+      _ => simien_error::PropertyValue::String("ERR_CRYPTO_DECIPHER".into()),
     }
   }
 
-  fn reason(&self) -> deno_error::PropertyValue {
+  fn reason(&self) -> simien_error::PropertyValue {
     match self {
       Self::InvalidFinalBlockLength => {
-        deno_error::PropertyValue::String("wrong final block length".into())
+        simien_error::PropertyValue::String("wrong final block length".into())
       }
-      _ => deno_error::PropertyValue::String(self.get_message()),
+      _ => simien_error::PropertyValue::String(self.get_message()),
     }
   }
 }

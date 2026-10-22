@@ -5,9 +5,9 @@ use std::collections::HashMap;
 use std::ffi::c_void;
 use std::rc::Rc;
 
-use deno_core::uv_compat::uv_buf_t;
-use deno_core::uv_compat::uv_stream_t;
-use deno_core::v8;
+use simien_core::uv_compat::uv_buf_t;
+use simien_core::uv_compat::uv_stream_t;
+use simien_core::v8;
 
 #[derive(Clone, Copy)]
 pub(crate) struct ReadInterceptor {

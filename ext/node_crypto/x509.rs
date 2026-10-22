@@ -7,8 +7,8 @@ use std::net::Ipv6Addr;
 use std::ops::Deref;
 
 use base64::Engine;
-use deno_core::ToJsBuffer;
-use deno_core::op2;
+use simien_core::ToJsBuffer;
+use simien_core::op2;
 use digest::Digest;
 use x509_parser::der_parser::asn1_rs::Any;
 use x509_parser::der_parser::asn1_rs::Tag;
@@ -122,8 +122,8 @@ pub struct Certificate {
 }
 
 // SAFETY: we're sure this can be GCed
-unsafe impl deno_core::GarbageCollected for Certificate {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+unsafe impl simien_core::GarbageCollected for Certificate {
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"Certificate"
@@ -244,7 +244,7 @@ impl<'a> Deref for CertificateView<'a> {
   }
 }
 
-deno_error::js_error_wrapper!(X509Error, JsX509Error, "Error");
+simien_error::js_error_wrapper!(X509Error, JsX509Error, "Error");
 
 #[op2]
 #[cppgc]
@@ -816,7 +816,7 @@ pub fn op_node_x509_get_subject_alt_name(
   get_subject_alt_name(cert)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum X509CheckIpError {
   #[class(type)]
   #[property("code" = "ERR_INVALID_ARG_VALUE")]
@@ -945,7 +945,7 @@ pub fn op_node_x509_check_issued(
   true
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum X509CheckPrivateKeyError {
   #[class(generic)]
   #[error(transparent)]
@@ -979,7 +979,7 @@ pub fn op_node_x509_check_private_key(
   Ok(cert_spki_raw == derived_spki_der.as_ref())
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum X509VerifyError {
   #[class(generic)]
   #[error(transparent)]

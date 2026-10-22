@@ -49,19 +49,19 @@ const {
   ERR_TLS_INVALID_PROTOCOL_METHOD,
   ERR_TLS_INVALID_PROTOCOL_VERSION,
   ERR_TLS_PROTOCOL_VERSION_CONFLICT,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
 const { getOptionValue } = core.loadExtScript(
-  "ext:deno_node/internal/options.ts",
+  "ext:simien_node/internal/options.ts",
 );
 const { isArrayBufferView, isTypedArray } = core.loadExtScript(
-  "ext:deno_node/internal/util/types.ts",
+  "ext:simien_node/internal/util/types.ts",
 );
 const { validateString } = core.loadExtScript(
-  "ext:deno_node/internal/validators.mjs",
+  "ext:simien_node/internal/validators.mjs",
 );
 const { op_node_validate_crl, op_node_load_pfx } = core.ops;
 const { createPrivateKey } = core.loadExtScript(
-  "ext:deno_node/internal/crypto/keys.ts",
+  "ext:simien_node/internal/crypto/keys.ts",
 );
 
 // OpenSSL cipher names are uppercase alphanumeric with hyphens/underscores

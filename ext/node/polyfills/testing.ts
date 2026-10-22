@@ -205,8 +205,8 @@ const {
   validateObject,
   validateString,
   validateStringArray,
-} = core.loadExtScript("ext:deno_node/internal/validators.mjs");
-const nodeErrors = core.loadExtScript("ext:deno_node/internal/errors.ts");
+} = core.loadExtScript("ext:simien_node/internal/validators.mjs");
+const nodeErrors = core.loadExtScript("ext:simien_node/internal/errors.ts");
 const {
   ERR_INVALID_ARG_TYPE,
   ERR_INVALID_ARG_VALUE,
@@ -215,13 +215,13 @@ const {
 // errors module; unlike the generated codes it is not registered on `.codes`.
 const { ERR_INVALID_STATE } = nodeErrors;
 const { emitExperimentalWarning } = core.loadExtScript(
-  "ext:deno_node/internal/util.mjs",
+  "ext:simien_node/internal/util.mjs",
 );
-const { default: assert } = core.loadExtScript("ext:deno_node/assert.ts");
+const { default: assert } = core.loadExtScript("ext:simien_node/assert.ts");
 const {
   tapEscape,
   tapIndent,
-} = core.loadExtScript("ext:deno_node/internal/test/reporters.ts");
+} = core.loadExtScript("ext:simien_node/internal/test/reporters.ts");
 
 const methodsToCopy = [
   "deepEqual",
@@ -262,14 +262,14 @@ function getAssertObject() {
 let _fsForSnapshot = null;
 function getFsForSnapshot() {
   if (_fsForSnapshot === null) {
-    _fsForSnapshot = core.loadExtScript("ext:deno_node/fs.ts");
+    _fsForSnapshot = core.loadExtScript("ext:simien_node/fs.ts");
   }
   return _fsForSnapshot;
 }
 let _pathForSnapshot = null;
 function getPathForSnapshot() {
   if (_pathForSnapshot === null) {
-    _pathForSnapshot = core.loadExtScript("ext:deno_node/path/mod.ts");
+    _pathForSnapshot = core.loadExtScript("ext:simien_node/path/mod.ts");
   }
   return _pathForSnapshot;
 }
@@ -418,7 +418,7 @@ let _Readable = null;
 function getReadable() {
   if (_Readable === null) {
     _Readable = core.loadExtScript(
-      "ext:deno_node/internal/streams/readable.js",
+      "ext:simien_node/internal/streams/readable.js",
     ).Readable;
   }
   return _Readable;
@@ -426,7 +426,7 @@ function getReadable() {
 let _fsWatch = null;
 function getFsWatch() {
   if (_fsWatch === null) {
-    _fsWatch = core.loadExtScript("ext:deno_node/fs.ts").watch;
+    _fsWatch = core.loadExtScript("ext:simien_node/fs.ts").watch;
   }
   return _fsWatch;
 }
@@ -590,7 +590,7 @@ const skippedSymbol = Symbol("skipped");
 // Detect Node.js-compatible `--test-reporter=...` selection so the polyfill
 // can emit reporter output matching Node's snapshot fixtures. Deno's CLI does
 // not consume `--test-reporter`; instead, our `child_process` polyfill (via
-// node_shim) propagates the value through NODE_OPTIONS when one Deno process
+// simien_node_shim) propagates the value through NODE_OPTIONS when one Deno process
 // spawns another using Node-style flags. Reading the env var here keeps the
 // detection self-contained and avoids new Rust plumbing.
 function detectNodeTestReporter() {
@@ -633,7 +633,7 @@ function isTapMode() {
 
 function getTapSuiteALS() {
   if (tapSuiteALS !== null) return tapSuiteALS;
-  const mod = core.loadExtScript("ext:deno_node/async_hooks.ts");
+  const mod = core.loadExtScript("ext:simien_node/async_hooks.ts");
   const ALS = mod.AsyncLocalStorage;
   tapSuiteALS = new ALS();
   return tapSuiteALS;
@@ -1675,7 +1675,7 @@ let currentSuite = null;
 let testContextALS = null;
 function getTestContextALS() {
   if (testContextALS !== null) return testContextALS;
-  const mod = core.loadExtScript("ext:deno_node/async_hooks.ts");
+  const mod = core.loadExtScript("ext:simien_node/async_hooks.ts");
   const ALS = mod.AsyncLocalStorage;
   testContextALS = new ALS();
   return testContextALS;
@@ -2720,12 +2720,12 @@ class MockTimers {
 
     // Route the `node:timers` / `node:timers/promises` module functions through
     // this instance too (see `kInstallMockTimers` in `timers.ts`).
-    core.loadExtScript("ext:deno_node/timers.ts")[kInstallMockTimers](this);
+    core.loadExtScript("ext:simien_node/timers.ts")[kInstallMockTimers](this);
   }
 
   reset() {
     if (!this._enabled) return;
-    core.loadExtScript("ext:deno_node/timers.ts")[kInstallMockTimers](null);
+    core.loadExtScript("ext:simien_node/timers.ts")[kInstallMockTimers](null);
     for (
       const { 0: name, 1: original } of new SafeMapIterator(this.#originals)
     ) {
@@ -3015,7 +3015,7 @@ function getCallerUrl() {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (
-      StringPrototypeIncludes(line, "ext:deno_node/") ||
+      StringPrototypeIncludes(line, "ext:simien_node/") ||
       StringPrototypeIncludes(line, "ext:core/")
     ) {
       continue;

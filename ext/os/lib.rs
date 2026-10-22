@@ -12,14 +12,14 @@ use std::sync::MutexGuard;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 
-use deno_core::OpState;
-use deno_core::ToV8;
-use deno_core::op2;
-use deno_core::v8;
-use deno_path_util::normalize_path;
-use deno_permissions::PermissionCheckError;
-use deno_permissions::PermissionState;
-use deno_permissions::PermissionsContainer;
+use simien_core::OpState;
+use simien_core::ToV8;
+use simien_core::op2;
+use simien_core::v8;
+use simien_path_util::normalize_path;
+use simien_permissions::PermissionCheckError;
+use simien_permissions::PermissionState;
+use simien_permissions::PermissionsContainer;
 
 mod ops;
 pub mod sys_info;
@@ -87,8 +87,8 @@ pub struct WatcherExitHandle(pub v8::IsolateHandle);
 #[derive(Clone, Copy, Debug)]
 pub struct WatcherExited;
 
-deno_core::extension!(
-  deno_os,
+simien_core::extension!(
+  simien_os,
   ops = [
     op_env,
     op_exec_path,
@@ -124,7 +124,7 @@ deno_core::extension!(
   }
 );
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum OsError {
   #[class(inherit)]
   #[error(transparent)]

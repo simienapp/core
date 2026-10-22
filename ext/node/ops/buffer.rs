@@ -1,10 +1,10 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
-use deno_core::convert::Uint8Array;
-use deno_core::op2;
-use deno_core::v8;
-use deno_core::v8_static_strings;
-use deno_error::JsErrorBox;
+use simien_core::convert::Uint8Array;
+use simien_core::op2;
+use simien_core::v8;
+use simien_core::v8_static_strings;
+use simien_error::JsErrorBox;
 
 #[op2(fast)]
 pub fn op_mark_as_untransferable(
@@ -417,7 +417,7 @@ fn decode_utf16le_from_bytes<'a>(
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 enum BufferError {
   #[error(
     "Cannot create a string longer than 0x{:x} characters",

@@ -71,16 +71,16 @@ const {
   StringPrototypeIncludes,
   StringPrototypeStartsWith,
   StringPrototypeToUpperCase,
-} = core.loadExtScript("ext:deno_node/internal/primordials.mjs");
-const { default: assert } = core.loadExtScript("ext:deno_node/assert.ts");
-const { EventEmitter } = core.loadExtScript("ext:deno_node/_events.mjs");
+} = core.loadExtScript("ext:simien_node/internal/primordials.mjs");
+const { default: assert } = core.loadExtScript("ext:simien_node/assert.ts");
+const { EventEmitter } = core.loadExtScript("ext:simien_node/_events.mjs");
 const { os } = core.loadExtScript(
-  "ext:deno_node/internal_binding/constants.ts",
+  "ext:simien_node/internal_binding/constants.ts",
 );
-const { notImplemented } = core.loadExtScript("ext:deno_node/_utils.ts");
+const { notImplemented } = core.loadExtScript("ext:simien_node/_utils.ts");
 const lazyStream = core.createLazyLoader("node:stream");
-const { isWindows } = core.loadExtScript("ext:deno_node/_util/os.ts");
-const { nextTick } = core.loadExtScript("ext:deno_node/_next_tick.ts");
+const { isWindows } = core.loadExtScript("ext:simien_node/_util/os.ts");
+const { nextTick } = core.loadExtScript("ext:simien_node/_next_tick.ts");
 const {
   AbortError,
   ERR_INVALID_ARG_TYPE,
@@ -92,17 +92,17 @@ const {
   ERR_IPC_SYNC_FORK,
   ERR_MISSING_ARGS,
   ERR_UNKNOWN_SIGNAL,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
-const { Buffer } = core.loadExtScript("ext:deno_node/internal/buffer.mjs");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
+const { Buffer } = core.loadExtScript("ext:simien_node/internal/buffer.mjs");
 const { FastBuffer } = core.loadExtScript(
-  "ext:deno_node/internal/buffer.mjs",
+  "ext:simien_node/internal/buffer.mjs",
 );
 const {
   ERR_IPC_DISCONNECTED,
   errnoException,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
 const { codeMap } = core.loadExtScript(
-  "ext:deno_node/internal_binding/uv.ts",
+  "ext:simien_node/internal_binding/uv.ts",
 );
 const {
   validateBoolean,
@@ -110,41 +110,41 @@ const {
   validateObject,
   validateOneOf,
   validateString,
-} = core.loadExtScript("ext:deno_node/internal/validators.mjs");
+} = core.loadExtScript("ext:simien_node/internal/validators.mjs");
 const { kEmptyObject } = core.loadExtScript(
-  "ext:deno_node/internal/util.mjs",
+  "ext:simien_node/internal/util.mjs",
 );
 const lazyFsUtils = core.createLazyLoader(
-  "ext:deno_node/internal/fs/utils.mjs",
+  "ext:simien_node/internal/fs/utils.mjs",
 );
 const lazyProcess = core.createLazyLoader("node:process");
 const { StringPrototypeSlice } = core.loadExtScript(
-  "ext:deno_node/internal/primordials.mjs",
+  "ext:simien_node/internal/primordials.mjs",
 );
 const { Pipe, socketType } = core.loadExtScript(
-  "ext:deno_node/internal_binding/pipe_wrap.ts",
+  "ext:simien_node/internal_binding/pipe_wrap.ts",
 );
 const {
   socketType: tcpSocketType,
   TCP,
-} = core.loadExtScript("ext:deno_node/internal_binding/tcp_wrap.ts");
+} = core.loadExtScript("ext:simien_node/internal_binding/tcp_wrap.ts");
 const lazyNet = core.createLazyLoader("node:net");
 const { channel: createDiagnosticsChannel, tracingChannel } = core
   .loadExtScript(
-    "ext:deno_node/diagnostics_channel.js",
+    "ext:simien_node/diagnostics_channel.js",
   );
 const childProcessChannel = createDiagnosticsChannel("child_process");
 const childProcessSpawnChannel = tracingChannel("child_process.spawn");
 const lazyDgram = core.createLazyLoader("node:dgram");
 const lazyDgramInternal = () =>
-  core.loadExtScript("ext:deno_node/internal/dgram.ts");
+  core.loadExtScript("ext:simien_node/internal/dgram.ts");
 const lazyUdpWrap = () =>
-  core.loadExtScript("ext:deno_node/internal_binding/udp_wrap.ts");
+  core.loadExtScript("ext:simien_node/internal_binding/udp_wrap.ts");
 const {
   kNeedsNpmProcessState,
   nodeSpawnChild,
   nodeSpawnSyncChild,
-} = core.loadExtScript("ext:deno_process/40_process.js");
+} = core.loadExtScript("ext:simien_process/40_process.js");
 
 // Precompiled regular expressions (captured as SafeRegExp so the prototype
 // can't be tampered with at runtime).
@@ -2860,7 +2860,7 @@ function setupChannel(
     if (!target.channel) {
       return;
     }
-    // serde_v8 deserializes objects with null prototype, but Node.js IPC
+    // simien_serde_v8 deserializes objects with null prototype, but Node.js IPC
     // messages should have Object.prototype (as if from JSON.parse).
     if (serialization === "json") {
       restorePrototype(msg);

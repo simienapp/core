@@ -38,30 +38,30 @@ const {
   ERR_INVALID_ARG_TYPE,
   ERR_INVALID_THIS,
   ERR_MISSING_ARGS,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
 const {
   validateObject,
   validateString,
-} = core.loadExtScript("ext:deno_node/internal/validators.mjs");
+} = core.loadExtScript("ext:simien_node/internal/validators.mjs");
 const lazyProcess = core.createLazyLoader("node:process");
-const { nextTick } = core.loadExtScript("ext:deno_node/_next_tick.ts");
+const { nextTick } = core.loadExtScript("ext:simien_node/_next_tick.ts");
 const {
   Event: WebEvent,
   EventTarget: WebEventTarget,
-} = core.loadExtScript("ext:deno_web/02_event.js");
+} = core.loadExtScript("ext:simien_web/02_event.js");
 
 const {
   customInspectSymbol,
   kEmptyObject,
   kEnumerableProperty,
-} = core.loadExtScript("ext:deno_node/internal/util.mjs");
-const { inspect } = core.loadExtScript("ext:deno_node/util.ts");
+} = core.loadExtScript("ext:simien_node/internal/util.mjs");
+const { inspect } = core.loadExtScript("ext:simien_node/util.ts");
 
 const kIsEventTarget = SymbolFor("nodejs.event_target");
 const kIsNodeEventTarget = Symbol("kIsNodeEventTarget");
 
 const { kEvents, EventEmitter } = core.loadExtScript(
-  "ext:deno_node/_events.mjs",
+  "ext:simien_node/_events.mjs",
 );
 const {
   kMaxEventTargetListeners,

@@ -45,21 +45,21 @@ const moduleMap: Record<string, string> = {
   "buffer": "node:buffer",
   "stream": "node:stream",
   "string_decoder": "node:string_decoder",
-  "internal/abort_controller": "ext:deno_web/03_abort_signal.js",
+  "internal/abort_controller": "ext:simien_web/03_abort_signal.js",
   "internal/events/abort_listener":
-    "ext:deno_node/internal/events/abort_listener.mjs",
-  "internal/assert": "ext:deno_node/internal/assert.mjs",
+    "ext:simien_node/internal/events/abort_listener.mjs",
+  "internal/assert": "ext:simien_node/internal/assert.mjs",
   "internal/webstreams/adapters":
-    "ext:deno_node/internal/webstreams/adapters.js",
-  "internal/webstreams/compression": "ext:deno_web/14_compression.js",
-  "internal/webstreams/encoding": "ext:deno_web/08_text_encoding.js",
-  "internal/errors": "ext:deno_node/internal/errors.ts",
-  "internal/event_target": "ext:deno_node/internal/event_target.mjs",
-  "internal/util": "ext:deno_node/internal/util.mjs",
-  "internal/util/debuglog": "ext:deno_node/internal/util/debuglog.ts",
-  "internal/validators": "ext:deno_node/internal/validators.mjs",
-  "internal/encoding": "ext:deno_web/08_text_encoding.js",
-  "internal/blob": "ext:deno_web/09_file.js",
+    "ext:simien_node/internal/webstreams/adapters.js",
+  "internal/webstreams/compression": "ext:simien_web/14_compression.js",
+  "internal/webstreams/encoding": "ext:simien_web/08_text_encoding.js",
+  "internal/errors": "ext:simien_node/internal/errors.ts",
+  "internal/event_target": "ext:simien_node/internal/event_target.mjs",
+  "internal/util": "ext:simien_node/internal/util.mjs",
+  "internal/util/debuglog": "ext:simien_node/internal/util/debuglog.ts",
+  "internal/validators": "ext:simien_node/internal/validators.mjs",
+  "internal/encoding": "ext:simien_web/08_text_encoding.js",
+  "internal/blob": "ext:simien_web/09_file.js",
 };
 
 // Use default export for these conditional require()
@@ -77,10 +77,10 @@ const renameForDefaultExport = ["from"];
 
 const mapping = (source: string): string => {
   if (source.startsWith("internal/webstreams")) {
-    return `ext:deno_web/06_streams.js`;
+    return `ext:simien_web/06_streams.js`;
   }
   if (source.startsWith("internal/")) {
-    return `ext:deno_node/${source}.js`;
+    return `ext:simien_node/${source}.js`;
   }
   return source;
 };

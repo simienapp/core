@@ -1,23 +1,23 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_io"
-version = "0.169.0"
-authors.workspace = true
+name = "simien_io"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "IO primitives for Deno extensions"
+repository = "https://github.com/simienapp/core"
+description = "Standard streams and resources for Simien's Node layer. Forked from deno_io 0.169.0."
 
 [lib]
 path = "lib.rs"
 
 [dependencies]
 async-trait.workspace = true
-deno_core.workspace = true
-deno_error.workspace = true
-deno_permissions.workspace = true
+simien_core.workspace = true
+simien_error.workspace = true
+simien_permissions.workspace = true
 filetime.workspace = true
 log.workspace = true
 pin-project.workspace = true

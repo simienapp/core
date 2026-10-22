@@ -4,7 +4,7 @@
 (function () {
 const { core, primordials } = __bootstrap;
 const { timingSafeEqual } = core.loadExtScript(
-  "ext:deno_node/internal_binding/_timingSafeEqual.ts",
+  "ext:simien_node/internal_binding/_timingSafeEqual.ts",
 );
 
 const { Error } = primordials;

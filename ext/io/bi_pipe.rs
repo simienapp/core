@@ -2,11 +2,11 @@
 
 use std::rc::Rc;
 
-use deno_core::AsyncRefCell;
-use deno_core::AsyncResult;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::RcRef;
+use simien_core::AsyncRefCell;
+use simien_core::AsyncResult;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::RcRef;
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 
@@ -45,26 +45,26 @@ mod as_raw_handle {
   }
 }
 
-impl deno_core::Resource for BiPipeResource {
+impl simien_core::Resource for BiPipeResource {
   fn close(self: Rc<Self>) {
     self.cancel.cancel();
   }
 
-  fn backing_handle(self: Rc<Self>) -> Option<deno_core::ResourceHandle> {
+  fn backing_handle(self: Rc<Self>) -> Option<simien_core::ResourceHandle> {
     #[cfg(unix)]
     {
-      Some(deno_core::ResourceHandle::from_fd_like(&self.raw_handle))
+      Some(simien_core::ResourceHandle::from_fd_like(&self.raw_handle))
     }
     #[cfg(windows)]
     {
-      Some(deno_core::ResourceHandle::from_fd_like(
+      Some(simien_core::ResourceHandle::from_fd_like(
         &as_raw_handle::RawHandleWrap(self.raw_handle),
       ))
     }
   }
 
-  deno_core::impl_readable_byob!();
-  deno_core::impl_writable!();
+  simien_core::impl_readable_byob!();
+  simien_core::impl_writable!();
 }
 
 impl BiPipeResource {

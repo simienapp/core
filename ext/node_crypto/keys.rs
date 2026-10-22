@@ -4,13 +4,13 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 
 use base64::Engine;
-use deno_core::FromV8;
-use deno_core::GarbageCollected;
-use deno_core::ToV8;
-use deno_core::convert::Uint8Array;
-use deno_core::op2;
-use deno_core::unsync::spawn_blocking;
-use deno_error::JsErrorBox;
+use simien_core::FromV8;
+use simien_core::GarbageCollected;
+use simien_core::ToV8;
+use simien_core::convert::Uint8Array;
+use simien_core::op2;
+use simien_core::unsync::spawn_blocking;
+use simien_error::JsErrorBox;
 use digest::Digest;
 use digest::FixedOutputReset;
 use ed25519_dalek::pkcs8::BitStringRef;
@@ -75,7 +75,7 @@ pub enum KeyObjectHandle {
 
 // SAFETY: we're sure this can be GCed
 unsafe impl GarbageCollected for KeyObjectHandle {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"KeyObjectHandle"
@@ -245,9 +245,9 @@ impl AsymmetricPrivateKey {
         AsymmetricPublicKey::Ed25519(key.verifying_key())
       }
       AsymmetricPrivateKey::X448(key) => {
-        let point = deno_crypto_provider::x448::x448(
+        let point = simien_crypto_provider::x448::x448(
           key,
-          &deno_crypto_provider::x448::BASE_POINT,
+          &simien_crypto_provider::x448::BASE_POINT,
         );
         AsymmetricPublicKey::X448(point)
       }
@@ -543,7 +543,7 @@ impl<'a> TryFrom<rsa::pkcs8::der::asn1::AnyRef<'a>> for RsaPssParameters<'a> {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum X509PublicKeyError {
   #[class(generic)]
   #[error(transparent)]
@@ -580,7 +580,7 @@ pub enum X509PublicKeyError {
   UnsupportedX509KeyType,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum RsaJwkError {
   #[class(generic)]
   #[error(transparent)]
@@ -593,7 +593,7 @@ pub enum RsaJwkError {
   MissingRsaPrivateComponent,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum EcJwkError {
   #[class(generic)]
   #[error(transparent)]
@@ -603,7 +603,7 @@ pub enum EcJwkError {
   UnsupportedCurve(String),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum EdRawError {
   #[class(generic)]
   #[error(transparent)]
@@ -622,13 +622,13 @@ pub enum EdRawError {
   UnsupportedCurve,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 #[error("unsupported")]
 #[property("code" = "ERR_OSSL_UNSUPPORTED")]
 pub struct UnsupportedPrivateKeyOidError;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum AsymmetricPrivateKeyError {
   #[error("invalid PEM private key: not valid utf8 starting at byte {0}")]
@@ -708,7 +708,7 @@ pub enum AsymmetricPrivateKeyError {
   ),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum AsymmetricPublicKeyError {
   #[class(type)]
   #[error("invalid PEM private key: not valid utf8 starting at byte {0}")]
@@ -1770,7 +1770,7 @@ impl KeyObjectHandle {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum RsaPssParamsParseError {
   #[error("malformed pss private key parameters")]
@@ -1974,7 +1974,7 @@ fn bytes_to_b64(bytes: &[u8]) -> String {
   BASE64_URL_SAFE_NO_PAD.encode(bytes)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum AsymmetricPrivateKeyJwkError {
   #[error("key is not an asymmetric private key")]
@@ -1989,7 +1989,7 @@ pub enum AsymmetricPrivateKeyJwkError {
   JwkExportNotImplementedForKeyType,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum AsymmetricPublicKeyJwkError {
   #[error("key is not an asymmetric public key")]
@@ -2004,7 +2004,7 @@ pub enum AsymmetricPublicKeyJwkError {
   JwkExportNotImplementedForKeyType,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum AsymmetricPublicKeyDerError {
   #[error("key is not an asymmetric public key")]
@@ -2036,15 +2036,15 @@ pub enum AsymmetricPublicKeyDerError {
 impl AsymmetricPublicKey {
   fn export_jwk(
     &self,
-  ) -> Result<deno_core::serde_json::Value, AsymmetricPublicKeyJwkError> {
+  ) -> Result<simien_core::serde_json::Value, AsymmetricPublicKeyJwkError> {
     match self {
       AsymmetricPublicKey::Ec(key) => {
         let jwk = key.to_jwk()?;
-        Ok(deno_core::serde_json::json!(jwk))
+        Ok(simien_core::serde_json::json!(jwk))
       }
       AsymmetricPublicKey::X25519(key) => {
         let bytes = key.as_bytes();
-        let jwk = deno_core::serde_json::json!({
+        let jwk = simien_core::serde_json::json!({
             "kty": "OKP",
             "crv": "X25519",
             "x": bytes_to_b64(bytes),
@@ -2053,7 +2053,7 @@ impl AsymmetricPublicKey {
       }
       AsymmetricPublicKey::Ed25519(key) => {
         let bytes = key.to_bytes();
-        let jwk = deno_core::serde_json::json!({
+        let jwk = simien_core::serde_json::json!({
             "kty": "OKP",
             "crv": "Ed25519",
             "x": bytes_to_b64(&bytes),
@@ -2061,7 +2061,7 @@ impl AsymmetricPublicKey {
         Ok(jwk)
       }
       AsymmetricPublicKey::X448(key) => {
-        let jwk = deno_core::serde_json::json!({
+        let jwk = simien_core::serde_json::json!({
             "kty": "OKP",
             "crv": "X448",
             "x": bytes_to_b64(key),
@@ -2070,7 +2070,7 @@ impl AsymmetricPublicKey {
       }
       AsymmetricPublicKey::Ed448(key) => {
         let bytes = key.to_bytes();
-        let jwk = deno_core::serde_json::json!({
+        let jwk = simien_core::serde_json::json!({
             "kty": "OKP",
             "crv": "Ed448",
             "x": bytes_to_b64(&bytes),
@@ -2081,7 +2081,7 @@ impl AsymmetricPublicKey {
         let n = key.n();
         let e = key.e();
 
-        let jwk = deno_core::serde_json::json!({
+        let jwk = simien_core::serde_json::json!({
             "kty": "RSA",
             "n": bytes_to_b64(&n.to_bytes_be()),
             "e": bytes_to_b64(&e.to_bytes_be()),
@@ -2272,7 +2272,7 @@ impl AsymmetricPublicKey {
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum AsymmetricPrivateKeyDerError {
   #[error("key is not an asymmetric private key")]
@@ -2305,7 +2305,7 @@ pub enum AsymmetricPrivateKeyDerError {
 }
 
 // https://datatracker.ietf.org/doc/html/rfc7518#section-6.3.2
-fn rsa_private_to_jwk(key: &RsaPrivateKey) -> deno_core::serde_json::Value {
+fn rsa_private_to_jwk(key: &RsaPrivateKey) -> simien_core::serde_json::Value {
   let n = key.n();
   let e = key.e();
   let d = key.d();
@@ -2316,7 +2316,7 @@ fn rsa_private_to_jwk(key: &RsaPrivateKey) -> deno_core::serde_json::Value {
   let qi = key.crt_coefficient();
   let oth = &key.primes()[2..];
 
-  let mut obj = deno_core::serde_json::json!({
+  let mut obj = simien_core::serde_json::json!({
       "kty": "RSA",
       "n": bytes_to_b64(&n.to_bytes_be()),
       "e": bytes_to_b64(&e.to_bytes_be()),
@@ -2329,7 +2329,7 @@ fn rsa_private_to_jwk(key: &RsaPrivateKey) -> deno_core::serde_json::Value {
   });
 
   if !oth.is_empty() {
-    obj["oth"] = deno_core::serde_json::json!(
+    obj["oth"] = simien_core::serde_json::json!(
       oth.iter().map(|o| o.to_bytes_be()).collect::<Vec<_>>()
     );
   }
@@ -2340,7 +2340,7 @@ fn rsa_private_to_jwk(key: &RsaPrivateKey) -> deno_core::serde_json::Value {
 impl AsymmetricPrivateKey {
   fn export_jwk(
     &self,
-  ) -> Result<deno_core::serde_json::Value, AsymmetricPrivateKeyJwkError> {
+  ) -> Result<simien_core::serde_json::Value, AsymmetricPrivateKeyJwkError> {
     match self {
       AsymmetricPrivateKey::Rsa(key) => Ok(rsa_private_to_jwk(key)),
       AsymmetricPrivateKey::RsaPss(_) => {
@@ -2348,7 +2348,7 @@ impl AsymmetricPrivateKey {
       }
       AsymmetricPrivateKey::Ec(key) => {
         let jwk = key.to_jwk()?;
-        Ok(deno_core::serde_json::json!(jwk))
+        Ok(simien_core::serde_json::json!(jwk))
       }
       AsymmetricPrivateKey::X25519(static_secret) => {
         let bytes = static_secret.to_bytes();
@@ -2357,7 +2357,7 @@ impl AsymmetricPrivateKey {
           unreachable!();
         };
 
-        Ok(deno_core::serde_json::json!({
+        Ok(simien_core::serde_json::json!({
             "crv": "X25519",
             "x": bytes_to_b64(x.as_bytes()),
             "d": bytes_to_b64(&bytes),
@@ -2370,7 +2370,7 @@ impl AsymmetricPrivateKey {
           unreachable!();
         };
 
-        Ok(deno_core::serde_json::json!({
+        Ok(simien_core::serde_json::json!({
             "crv": "Ed25519",
             "x": bytes_to_b64(x.as_bytes()),
             "d": bytes_to_b64(&bytes),
@@ -2382,7 +2382,7 @@ impl AsymmetricPrivateKey {
           unreachable!();
         };
 
-        Ok(deno_core::serde_json::json!({
+        Ok(simien_core::serde_json::json!({
             "crv": "X448",
             "x": bytes_to_b64(&x),
             "d": bytes_to_b64(&key[..56]),
@@ -2396,7 +2396,7 @@ impl AsymmetricPrivateKey {
         };
         let x_bytes = x.to_bytes();
 
-        Ok(deno_core::serde_json::json!({
+        Ok(simien_core::serde_json::json!({
             "crv": "Ed448",
             "x": bytes_to_b64(&x_bytes),
             "d": bytes_to_b64(&bytes),
@@ -2724,11 +2724,11 @@ pub fn op_node_get_asymmetric_key_type(
 pub enum AsymmetricKeyDetails {
   Rsa {
     modulus_length: usize,
-    public_exponent: deno_core::convert::BigInt,
+    public_exponent: simien_core::convert::BigInt,
   },
   RsaPss {
     modulus_length: usize,
-    public_exponent: deno_core::convert::BigInt,
+    public_exponent: simien_core::convert::BigInt,
     hash_algorithm: &'static str,
     mgf1_hash_algorithm: &'static str,
     salt_length: u32,
@@ -2736,7 +2736,7 @@ pub enum AsymmetricKeyDetails {
   #[to_v8(rename = "rsaPss")]
   RsaPssBasic {
     modulus_length: usize,
-    public_exponent: deno_core::convert::BigInt,
+    public_exponent: simien_core::convert::BigInt,
   },
   Dsa {
     modulus_length: usize,
@@ -2920,7 +2920,7 @@ struct KeyObjectHandlePair {
 
 // SAFETY: we're sure this can be GCed
 unsafe impl GarbageCollected for KeyObjectHandlePair {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"KeyObjectHandlePair"
@@ -3003,7 +3003,7 @@ pub async fn op_node_generate_rsa_key_async(
     .unwrap()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 #[error("digest not allowed for RSA-PSS keys{}", .0.as_ref().map(|digest| format!(": {digest}")).unwrap_or_default())]
 pub struct GenerateRsaPssError(Option<String>);
@@ -3455,7 +3455,7 @@ pub async fn op_node_generate_dh_group_key_async(
     .unwrap()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum DhGenerateError {
   // Node surfaces OpenSSL's error here verbatim, as a plain `Error` with no
   // `code`, so match the message rather than reusing the
@@ -3577,7 +3577,7 @@ pub fn op_node_export_secret_key_b64url(
 #[serde]
 pub fn op_node_export_public_key_jwk(
   #[cppgc] handle: &KeyObjectHandle,
-) -> Result<deno_core::serde_json::Value, AsymmetricPublicKeyJwkError> {
+) -> Result<simien_core::serde_json::Value, AsymmetricPublicKeyJwkError> {
   let public_key = handle
     .as_public_key()
     .ok_or(AsymmetricPublicKeyJwkError::KeyIsNotAsymmetricPublicKey)?;
@@ -3585,7 +3585,7 @@ pub fn op_node_export_public_key_jwk(
   public_key.export_jwk()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ExportPublicKeyPemError {
   #[class(inherit)]
   #[error(transparent)]
@@ -3642,7 +3642,7 @@ pub fn op_node_export_public_key_der(
   public_key.export_der(typ)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ExportPrivateKeyPemError {
   #[class(inherit)]
   #[error(transparent)]
@@ -4101,7 +4101,7 @@ pub fn op_node_export_private_key_pem(
   Ok(String::from_utf8(out).expect("invalid pem is not possible"))
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ExportPrivateKeyJwkError {
   #[class(inherit)]
   #[error(transparent)]
@@ -4118,7 +4118,7 @@ pub enum ExportPrivateKeyJwkError {
 #[serde]
 pub fn op_node_export_private_key_jwk(
   #[cppgc] handle: &KeyObjectHandle,
-) -> Result<deno_core::serde_json::Value, ExportPrivateKeyJwkError> {
+) -> Result<simien_core::serde_json::Value, ExportPrivateKeyJwkError> {
   let private_key = handle
     .as_private_key()
     .ok_or(AsymmetricPrivateKeyJwkError::KeyIsNotAsymmetricPrivateKey)?;
@@ -4126,7 +4126,7 @@ pub fn op_node_export_private_key_jwk(
   Ok(private_key.export_jwk()?)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum ExportPrivateKeyDerError {
   #[class(inherit)]
   #[error(transparent)]
@@ -4261,7 +4261,7 @@ pub fn op_node_derive_public_key_from_private_key(
   ))
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum PfxLoadError {
   #[class(generic)]
   #[error("not enough data")]
@@ -4755,7 +4755,7 @@ fn verify_pkcs12_mac(
   Some(bool::from(computed.ct_eq(expected)))
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum CrlValidationError {
   #[class(generic)]
   #[error("Failed to parse CRL")]

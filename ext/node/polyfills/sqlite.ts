@@ -9,9 +9,9 @@ const {
   StatementSync,
 } = core.ops;
 const { isUint8Array } = core.loadExtScript(
-  "ext:deno_node/internal/util/types.ts",
+  "ext:simien_node/internal/util/types.ts",
 );
-const { URLPrototype } = core.loadExtScript("ext:deno_web/00_url.js");
+const { URLPrototype } = core.loadExtScript("ext:simien_web/00_url.js");
 
 const {
   Error,

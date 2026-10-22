@@ -20,16 +20,16 @@ const {
   ERR_INVALID_ARG_TYPE,
   ERR_METHOD_NOT_IMPLEMENTED,
   ERR_OUT_OF_RANGE,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
-const { kEmptyObject } = core.loadExtScript("ext:deno_node/internal/util.mjs");
-const { deprecate } = core.loadExtScript("ext:deno_node/util.ts");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
+const { kEmptyObject } = core.loadExtScript("ext:simien_node/internal/util.mjs");
+const { deprecate } = core.loadExtScript("ext:simien_node/util.ts");
 const {
   validateBoolean,
   validateFunction,
   validateInteger,
-} = core.loadExtScript("ext:deno_node/internal/validators.mjs");
+} = core.loadExtScript("ext:simien_node/internal/validators.mjs");
 const { errorOrDestroy } = core.loadExtScript(
-  "ext:deno_node/internal/streams/destroy.js",
+  "ext:simien_node/internal/streams/destroy.js",
 );
 // Resolve the CJS `node:fs` exports object (fs.ts) rather than the ESM
 // namespace (fs_esm.ts, whose `export const fsync = mod.fsync` bindings are a
@@ -37,20 +37,20 @@ const { errorOrDestroy } = core.loadExtScript(
 // monkey-patches/mocks on the `node:fs` namespace (e.g. the `flush` option's
 // fsync) are observed. `loadExtScript` caches, so repeat calls are cheap; all
 // call sites invoke `lazyFs()` at runtime, never at module-eval time.
-const lazyFs = () => core.loadExtScript("ext:deno_node/fs.ts");
-const { Buffer } = core.loadExtScript("ext:deno_node/internal/buffer.mjs");
+const lazyFs = () => core.loadExtScript("ext:simien_node/fs.ts");
+const { Buffer } = core.loadExtScript("ext:simien_node/internal/buffer.mjs");
 import {
   copyObject,
   getOptions,
   getValidatedFd,
   validatePath,
-} from "ext:deno_node/internal/fs/utils.mjs";
+} from "ext:simien_node/internal/fs/utils.mjs";
 const lazyStream = core.createLazyLoader("node:stream");
 const { toPathIfFileURL } = core.loadExtScript(
-  "ext:deno_node/internal/url.ts",
+  "ext:simien_node/internal/url.ts",
 );
-const { nextTick } = core.loadExtScript("ext:deno_node/_next_tick.ts");
-import { FileHandle, kRef, kUnref } from "ext:deno_node/internal/fs/handle.ts";
+const { nextTick } = core.loadExtScript("ext:simien_node/_next_tick.ts");
+import { FileHandle, kRef, kUnref } from "ext:simien_node/internal/fs/handle.ts";
 
 const kIoDone = Symbol("kIoDone");
 const kIsPerformingIO = Symbol("kIsPerformingIO");

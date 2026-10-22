@@ -11,22 +11,22 @@ use std::rc::Rc;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
-use deno_core::BufMutView;
-use deno_core::BufView;
-use deno_core::CancelHandle;
-use deno_core::CancelTryFuture;
-use deno_core::Canceled;
-use deno_core::OpState;
-use deno_core::ResourceHandleFd;
-use deno_core::ResourceId;
-use deno_core::error::ResourceError;
-use deno_error::JsErrorBox;
-use deno_permissions::PermissionCheckError;
+use simien_core::BufMutView;
+use simien_core::BufView;
+use simien_core::CancelHandle;
+use simien_core::CancelTryFuture;
+use simien_core::Canceled;
+use simien_core::OpState;
+use simien_core::ResourceHandleFd;
+use simien_core::ResourceId;
+use simien_core::error::ResourceError;
+use simien_error::JsErrorBox;
+use simien_permissions::PermissionCheckError;
 #[cfg(windows)]
 use deno_subprocess_windows::Stdio as StdStdio;
 use tokio::task::JoinError;
 
-#[derive(Debug, deno_error::JsError)]
+#[derive(Debug, simien_error::JsError)]
 pub enum FsError {
   #[class(inherit)]
   Io(io::Error),
@@ -268,7 +268,7 @@ pub trait File {
   async fn write(
     self: Rc<Self>,
     buf: BufView,
-  ) -> FsResult<deno_core::WriteOutcome>;
+  ) -> FsResult<simien_core::WriteOutcome>;
 
   fn write_all_sync(self: Rc<Self>, buf: &[u8]) -> FsResult<()>;
   async fn write_all(self: Rc<Self>, buf: BufView) -> FsResult<()>;
@@ -420,12 +420,12 @@ impl FileResource {
   }
 }
 
-impl deno_core::Resource for FileResource {
+impl simien_core::Resource for FileResource {
   fn name(&self) -> Cow<'_, str> {
     Cow::Borrowed(&self.name)
   }
 
-  fn read(self: Rc<Self>, limit: usize) -> deno_core::AsyncResult<BufView> {
+  fn read(self: Rc<Self>, limit: usize) -> simien_core::AsyncResult<BufView> {
     let cancel_handle = self.cancel_handle();
     Box::pin(async move {
       self
@@ -441,7 +441,7 @@ impl deno_core::Resource for FileResource {
   fn read_byob(
     self: Rc<Self>,
     buf: BufMutView,
-  ) -> deno_core::AsyncResult<(usize, BufMutView)> {
+  ) -> simien_core::AsyncResult<(usize, BufMutView)> {
     let cancel_handle = self.cancel_handle();
     Box::pin(async move {
       self
@@ -457,7 +457,7 @@ impl deno_core::Resource for FileResource {
   fn write(
     self: Rc<Self>,
     buf: BufView,
-  ) -> deno_core::AsyncResult<deno_core::WriteOutcome> {
+  ) -> simien_core::AsyncResult<simien_core::WriteOutcome> {
     Box::pin(async move {
       self
         .file
@@ -468,7 +468,7 @@ impl deno_core::Resource for FileResource {
     })
   }
 
-  fn write_all(self: Rc<Self>, buf: BufView) -> deno_core::AsyncResult<()> {
+  fn write_all(self: Rc<Self>, buf: BufView) -> simien_core::AsyncResult<()> {
     Box::pin(async move {
       self
         .file

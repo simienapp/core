@@ -3,7 +3,7 @@
 (function () {
 const { core, primordials } = __bootstrap;
 const { getOptionValue } = core.loadExtScript(
-  "ext:deno_node/internal/options.ts",
+  "ext:simien_node/internal/options.ts",
 );
 
 const {

@@ -6,10 +6,10 @@ const {
   isIterable,
   isNodeStream,
   isWebStream,
-} = core.loadExtScript("ext:deno_node/internal/streams/utils.js");
-import { pipelineImpl as pl } from "ext:deno_node/internal/streams/pipeline.js";
+} = core.loadExtScript("ext:simien_node/internal/streams/utils.js");
+import { pipelineImpl as pl } from "ext:simien_node/internal/streams/pipeline.js";
 const { finished } = core.loadExtScript(
-  "ext:deno_node/internal/streams/end-of-stream.js",
+  "ext:simien_node/internal/streams/end-of-stream.js",
 );
 import * as _mod2 from "node:stream";
 "use strict";

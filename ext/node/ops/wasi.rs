@@ -15,11 +15,11 @@ use std::io::SeekFrom;
 use std::io::Write;
 use std::path::Path;
 
-use deno_core::GarbageCollected;
-use deno_core::OpState;
-use deno_core::op2;
-use deno_permissions::OpenAccessKind;
-use deno_permissions::PermissionsContainer;
+use simien_core::GarbageCollected;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_permissions::OpenAccessKind;
+use simien_permissions::PermissionsContainer;
 use rand::RngCore;
 
 const ERRNO_SUCCESS: i32 = 0;
@@ -420,7 +420,7 @@ pub struct WasiContext {
 
 // SAFETY: WasiContext contains no pointers to trace
 unsafe impl GarbageCollected for WasiContext {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"WasiContext"
@@ -526,14 +526,14 @@ fn monotonic_nanos() -> u64 {
   start.elapsed().as_nanos() as u64
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum WasiError {
   #[class(type)]
   #[error("{0}")]
   Type(String),
   #[class(inherit)]
   #[error(transparent)]
-  Permission(#[from] deno_permissions::PermissionCheckError),
+  Permission(#[from] simien_permissions::PermissionCheckError),
 }
 
 #[op2]
@@ -2311,7 +2311,7 @@ fn resolve_filestat_times_from_meta(
 /// handle so the user-side fd stays open after WASI exits.
 ///
 /// Permissions: we only accept fds that node:fs has registered in
-/// `deno_io::FdTable`, so an opener went through Deno's permission system
+/// `simien_io::FdTable`, so an opener went through Deno's permission system
 /// (op_node_open_sync). Naked OS fds inherited from the parent process or
 /// internal Deno opens are rejected so the WASI constructor can't become
 /// an escape hatch around `--allow-read` / `--allow-write`.
@@ -2324,7 +2324,7 @@ fn make_stdio_entry(
     0..=2 => None,
     fd if fd < 0 => None,
     fd => {
-      if !state.borrow::<deno_io::FdTable>().contains(fd) {
+      if !state.borrow::<simien_io::FdTable>().contains(fd) {
         return None;
       }
       dup_user_fd_to_file(state, fd)

@@ -13,12 +13,12 @@
 
 (function () {
 const { core, internals } = __bootstrap;
-const { EventEmitter } = core.loadExtScript("ext:deno_node/_events.mjs");
+const { EventEmitter } = core.loadExtScript("ext:simien_node/_events.mjs");
 const { init: initPrimary } = core.loadExtScript(
-  "ext:deno_node/internal/cluster/primary.ts",
+  "ext:simien_node/internal/cluster/primary.ts",
 );
 const { init: initChild } = core.loadExtScript(
-  "ext:deno_node/internal/cluster/child.ts",
+  "ext:simien_node/internal/cluster/child.ts",
 );
 
 const cluster: any = new EventEmitter();

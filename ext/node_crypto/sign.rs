@@ -73,7 +73,7 @@ fn dsa_sig_from_p1363(bytes: &[u8], q_len: usize) -> Option<dsa::Signature> {
   dsa::Signature::from_components(r, s).ok()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(type)]
 pub enum KeyObjectHandlePrehashedSignAndVerifyError {
   #[error("invalid DSA signature encoding")]

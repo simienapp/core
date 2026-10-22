@@ -8,23 +8,23 @@ use std::rc::Rc;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 
-use deno_core::JsBuffer;
-use deno_core::OpState;
-use deno_core::ResourceId;
-use deno_core::ToV8;
-use deno_core::op2;
+use simien_core::JsBuffer;
+use simien_core::OpState;
+use simien_core::ResourceId;
+use simien_core::ToV8;
+use simien_core::op2;
 #[cfg(feature = "sync_fs")]
-use deno_core::unsync::spawn_blocking;
-use deno_core::v8;
-use deno_fs::FileSystemRc;
-use deno_fs::FsFileType;
-use deno_fs::OpenOptions;
-use deno_io::fs::FsResult;
-use deno_io::fs::FsStatFs;
-use deno_permissions::CheckedPath;
-use deno_permissions::CheckedPathBuf;
-use deno_permissions::OpenAccessKind;
-use deno_permissions::PermissionsContainer;
+use simien_core::unsync::spawn_blocking;
+use simien_core::v8;
+use simien_fs::FileSystemRc;
+use simien_fs::FsFileType;
+use simien_fs::OpenOptions;
+use simien_io::fs::FsResult;
+use simien_io::fs::FsStatFs;
+use simien_permissions::CheckedPath;
+use simien_permissions::CheckedPathBuf;
+use simien_permissions::OpenAccessKind;
+use simien_permissions::PermissionsContainer;
 #[cfg(feature = "sync_fs")]
 use tokio::task::JoinError;
 
@@ -84,7 +84,7 @@ fn crt_error() -> std::io::Error {
 /// On Unix this is a no-op. On Windows it duplicates the OS HANDLE and
 /// converts it to a CRT file descriptor.
 fn raw_fd_from_backing_fd(
-  handle_fd: deno_core::ResourceHandleFd,
+  handle_fd: simien_core::ResourceHandleFd,
 ) -> Result<i32, FsError> {
   #[cfg(unix)]
   {
@@ -148,9 +148,9 @@ fn ebadf() -> FsError {
 fn file_for_fd(
   state: &OpState,
   fd: i32,
-) -> Result<Rc<dyn deno_io::fs::File>, FsError> {
+) -> Result<Rc<dyn simien_io::fs::File>, FsError> {
   state
-    .borrow::<deno_io::FdTable>()
+    .borrow::<simien_io::FdTable>()
     .get(fd)
     .cloned()
     .ok_or_else(ebadf)
@@ -171,11 +171,11 @@ macro_rules! maybe_spawn_blocking {
   }};
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum FsError {
   #[class(inherit)]
   #[error(transparent)]
-  Permission(#[from] deno_permissions::PermissionCheckError),
+  Permission(#[from] simien_permissions::PermissionCheckError),
   #[class(inherit)]
   #[error("{0}")]
   Io(
@@ -188,7 +188,7 @@ pub enum FsError {
   Fs(
     #[from]
     #[inherit]
-    deno_io::fs::FsError,
+    simien_io::fs::FsError,
   ),
   #[class(inherit)]
   #[error(transparent)]
@@ -210,7 +210,7 @@ pub struct NodeFsErrorContext {
   syscall: Option<String>,
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 // Intentionally set the error message to be empty, so that in the JS side it will fall back to the UV error message
 // https://github.com/denoland/deno/blob/f123d84e7d6e8036c3c38ecec6e25deb87a8829b/ext/node/polyfills/internal/errors.ts#L268-L270
@@ -226,11 +226,11 @@ pub struct NodeFsError {
 }
 
 fn map_fs_error_to_node_fs_error(
-  err: deno_io::fs::FsError,
+  err: simien_io::fs::FsError,
   context: NodeFsErrorContext,
 ) -> FsError {
   let os_errno = match err {
-    deno_io::fs::FsError::Io(ref io_err) => io_err.raw_os_error(),
+    simien_io::fs::FsError::Io(ref io_err) => io_err.raw_os_error(),
     _ => None,
   };
 
@@ -241,7 +241,7 @@ fn map_fs_error_to_node_fs_error(
   FsError::Fs(err)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 #[class(generic)]
 #[error("{message}")]
 #[property("kind" = self.kind())]
@@ -307,7 +307,7 @@ impl CpError {
 pub fn op_node_fs_exists_sync(
   state: &mut OpState,
   #[string] path: &str,
-) -> Result<bool, deno_permissions::PermissionCheckError> {
+) -> Result<bool, simien_permissions::PermissionCheckError> {
   let path_or_err = state.borrow_mut::<PermissionsContainer>().check_open(
     Cow::Borrowed(Path::new(path)),
     OpenAccessKind::ReadNoFollow,
@@ -407,7 +407,7 @@ pub fn op_node_open_sync(
     return Err(e.into());
   }
 
-  state.borrow_mut::<deno_io::FdTable>().register(fd, file);
+  state.borrow_mut::<simien_io::FdTable>().register(fd, file);
   Ok(fd)
 }
 
@@ -469,7 +469,7 @@ pub async fn op_node_open(
   }
 
   let mut state = state.borrow_mut();
-  state.borrow_mut::<deno_io::FdTable>().register(fd, file);
+  state.borrow_mut::<simien_io::FdTable>().register(fd, file);
   Ok(fd)
 }
 #[derive(Debug, ToV8)]
@@ -890,7 +890,7 @@ pub fn op_node_fs_close(state: &mut OpState, fd: i32) -> Result<(), FsError> {
   // FdTable.remove() drops the Rc<dyn File> and cancels the cancel handle,
   // which will abort any in-flight async reads on this fd.
   let file = state
-    .borrow_mut::<deno_io::FdTable>()
+    .borrow_mut::<simien_io::FdTable>()
     .remove(fd)
     .ok_or_else(ebadf)?;
 
@@ -928,7 +928,7 @@ pub fn op_node_fs_close(state: &mut OpState, fd: i32) -> Result<(), FsError> {
 /// Positioned read: if position >= 0, uses pread to read without moving the
 /// file cursor. If position < 0, reads from the current position.
 fn read_with_position(
-  file: Rc<dyn deno_io::fs::File>,
+  file: Rc<dyn simien_io::fs::File>,
   buf: &mut [u8],
   position: i64,
 ) -> Result<u32, FsError> {
@@ -967,11 +967,11 @@ pub async fn op_node_fs_read_deferred(
 ) -> Result<u32, FsError> {
   let file = file_for_fd(&state.borrow(), fd)?;
   if position >= 0 {
-    let view = deno_core::BufMutView::from(buf);
+    let view = simien_core::BufMutView::from(buf);
     let (nread, _) = file.read_at_async(view, position as u64).await?;
     Ok(nread as u32)
   } else {
-    let view = deno_core::BufMutView::from(buf);
+    let view = simien_core::BufMutView::from(buf);
     let (nread, _) = file.read_byob(view).await?;
     Ok(nread as u32)
   }
@@ -981,7 +981,7 @@ pub async fn op_node_fs_read_deferred(
 /// the file cursor. If position < 0, writes at the current position.
 /// Handles partial writes internally by looping until all bytes are written.
 fn write_with_position(
-  file: Rc<dyn deno_io::fs::File>,
+  file: Rc<dyn simien_io::fs::File>,
   buf: &[u8],
   position: i64,
 ) -> Result<u32, FsError> {
@@ -1110,8 +1110,8 @@ pub struct NodeFsStat {
   pub is_socket: bool,
 }
 
-impl From<deno_io::fs::FsStat> for NodeFsStat {
-  fn from(stat: deno_io::fs::FsStat) -> Self {
+impl From<simien_io::fs::FsStat> for NodeFsStat {
+  fn from(stat: simien_io::fs::FsStat) -> Self {
     NodeFsStat {
       is_file: stat.is_file,
       is_directory: stat.is_directory,
@@ -1334,7 +1334,7 @@ const CP_IS_SRC_FIFO_FLAG: u64 = 1u64 << 39;
 /// - bit 32      : destination exists
 /// - bits 33..39 : source type flags (dir, file, char/block device, symlink, socket, fifo)
 fn compact_stat_info(
-  src_stat: &deno_io::fs::FsStat,
+  src_stat: &simien_io::fs::FsStat,
   is_dest_exists: bool,
 ) -> u64 {
   let mut packed = src_stat.mode as u64;
@@ -1958,8 +1958,8 @@ fn cp_sync_dispatch_no_filter(
 
 /// Check if two stat results refer to the same file (same dev + ino).
 fn are_identical_stat(
-  src_stat: &deno_io::fs::FsStat,
-  dest_stat: &deno_io::fs::FsStat,
+  src_stat: &simien_io::fs::FsStat,
+  dest_stat: &simien_io::fs::FsStat,
 ) -> bool {
   match (dest_stat.ino, src_stat.ino) {
     (Some(dest_ino), Some(src_ino)) if dest_ino > 0 && dest_stat.dev > 0 => {
@@ -2540,7 +2540,7 @@ async fn check_parent_paths_impl(
     .parent()
     .map(Cow::Borrowed)
     .unwrap_or_default();
-  let src_parent = deno_path_util::strip_unc_prefix(
+  let src_parent = simien_path_util::strip_unc_prefix(
     fs.realpath_sync(&CheckedPath::unsafe_new(Cow::Borrowed(&src_parent)))
       .unwrap_or_else(|_| {
         fs.cwd()
@@ -2553,7 +2553,7 @@ async fn check_parent_paths_impl(
     .parent()
     .map(|p| p.to_path_buf())
     .unwrap_or_default();
-  current = deno_path_util::strip_unc_prefix(
+  current = simien_path_util::strip_unc_prefix(
     fs.realpath_sync(&CheckedPath::unsafe_new(Cow::Borrowed(&current)))
       .unwrap_or_else(|_| std::path::absolute(&current).unwrap_or(current)),
   );
@@ -2633,7 +2633,7 @@ fn check_parent_paths_impl_sync(
     .parent()
     .map(Cow::Borrowed)
     .unwrap_or_default();
-  let src_parent = deno_path_util::strip_unc_prefix(
+  let src_parent = simien_path_util::strip_unc_prefix(
     fs.realpath_sync(&CheckedPath::unsafe_new(Cow::Borrowed(&src_parent)))
       .unwrap_or_else(|_| {
         fs.cwd()
@@ -2646,7 +2646,7 @@ fn check_parent_paths_impl_sync(
     .parent()
     .map(|p| p.to_path_buf())
     .unwrap_or_default();
-  current = deno_path_util::strip_unc_prefix(
+  current = simien_path_util::strip_unc_prefix(
     fs.realpath_sync(&CheckedPath::unsafe_new(Cow::Borrowed(&current)))
       .unwrap_or_else(|_| std::path::absolute(&current).unwrap_or(current)),
   );

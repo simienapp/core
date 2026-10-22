@@ -6,14 +6,14 @@
 (function () {
 const { core, primordials } = __bootstrap;
 const { WasiContext } = core.ops;
-const { statSync } = core.loadExtScript("ext:deno_node/fs.ts");
-const { exit } = core.loadExtScript("ext:deno_os/30_os.js");
+const { statSync } = core.loadExtScript("ext:simien_node/fs.ts");
+const { exit } = core.loadExtScript("ext:simien_os/30_os.js");
 const {
   ERR_INVALID_ARG_TYPE,
   ERR_INVALID_ARG_VALUE,
   ERR_WASI_ALREADY_STARTED,
   ERR_WASI_NOT_STARTED,
-} = core.loadExtScript("ext:deno_node/internal/errors.ts");
+} = core.loadExtScript("ext:simien_node/internal/errors.ts");
 
 let warningEmitted = false;
 function emitExperimentalWarning() {

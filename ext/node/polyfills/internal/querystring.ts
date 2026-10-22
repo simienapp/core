@@ -2,7 +2,7 @@
 (function () {
 const { core, primordials } = __bootstrap;
 const { ERR_INVALID_URI } = core.loadExtScript(
-  "ext:deno_node/internal/errors.ts",
+  "ext:simien_node/internal/errors.ts",
 );
 const {
   Array,

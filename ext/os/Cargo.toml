@@ -1,23 +1,23 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 
 [package]
-name = "deno_os"
-version = "0.76.0"
-authors.workspace = true
+name = "simien_os"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "OS specific APIs for Deno"
+repository = "https://github.com/simienapp/core"
+description = "OS information and signals for Simien's Node layer. Forked from deno_os 0.76.0."
 
 [lib]
 path = "lib.rs"
 
 [dependencies]
-deno_core.workspace = true
-deno_error.workspace = true
-deno_path_util.workspace = true
-deno_permissions.workspace = true
+simien_core.workspace = true
+simien_error.workspace = true
+simien_path_util.workspace = true
+simien_permissions.workspace = true
 deno_signals.workspace = true
 libc.workspace = true
 netif.workspace = true

@@ -7,13 +7,13 @@ use std::rc::Rc;
 #[cfg(target_family = "windows")]
 use std::sync::OnceLock;
 
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::unsync::spawn_blocking;
-use deno_error::JsError;
-use deno_net::ops::NetPermToken;
-use deno_permissions::PermissionCheckError;
-use deno_permissions::PermissionsContainer;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::unsync::spawn_blocking;
+use simien_error::JsError;
+use simien_net::ops::NetPermToken;
+use simien_permissions::PermissionCheckError;
+use simien_permissions::PermissionsContainer;
 use socket2::SockAddr;
 
 #[derive(Debug, thiserror::Error, JsError)]

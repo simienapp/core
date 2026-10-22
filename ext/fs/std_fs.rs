@@ -13,16 +13,16 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::Mutex;
 
-use deno_core::unsync::spawn_blocking;
-use deno_io::StdFileResourceInner;
-use deno_io::fs::File;
-use deno_io::fs::FsError;
-use deno_io::fs::FsResult;
-use deno_io::fs::FsStat;
-use deno_io::fs::FsStatFs;
-use deno_maybe_sync::new_rc;
-use deno_permissions::CheckedPath;
-use deno_permissions::CheckedPathBuf;
+use simien_core::unsync::spawn_blocking;
+use simien_io::StdFileResourceInner;
+use simien_io::fs::File;
+use simien_io::fs::FsError;
+use simien_io::fs::FsResult;
+use simien_io::fs::FsStat;
+use simien_io::fs::FsStatFs;
+use simien_maybe_sync::new_rc;
+use simien_permissions::CheckedPath;
+use simien_permissions::CheckedPathBuf;
 
 use crate::FileSystem;
 use crate::OpenOptions;
@@ -937,7 +937,7 @@ fn stat(path: &Path) -> FsResult<FsStat> {
   let file = open_for_stat_windows(path, false)?;
   let metadata = file.metadata()?;
   let mut fsstat = FsStat::from_std(metadata);
-  deno_io::stat_extra(&file, &mut fsstat)?;
+  simien_io::stat_extra(&file, &mut fsstat)?;
   Ok(fsstat)
 }
 
@@ -952,7 +952,7 @@ fn lstat(path: &Path) -> FsResult<FsStat> {
   let file = open_for_stat_windows(path, true)?;
   let metadata = file.metadata()?;
   let mut fsstat = FsStat::from_std(metadata);
-  deno_io::stat_extra(&file, &mut fsstat)?;
+  simien_io::stat_extra(&file, &mut fsstat)?;
   Ok(fsstat)
 }
 
@@ -1131,7 +1131,7 @@ fn exists(path: &Path) -> bool {
 }
 
 fn realpath(path: &Path) -> FsResult<PathBuf> {
-  Ok(deno_path_util::strip_unc_prefix(path.canonicalize()?))
+  Ok(simien_path_util::strip_unc_prefix(path.canonicalize()?))
 }
 
 fn read_dir(path: &Path) -> FsResult<Vec<FsDirEntry>> {

@@ -2,7 +2,7 @@
 
 pub use impl_::*;
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum PriorityError {
   #[class(inherit)]
   #[error("{0}")]

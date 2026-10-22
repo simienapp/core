@@ -8,21 +8,21 @@ use deno_ast::SourceMapOption;
 use deno_ast::TranspileModuleOptions;
 use deno_ast::TranspileOptions;
 use deno_ast::TypeStripOptions;
-use deno_core::op2;
-use deno_core::url::Url;
-use deno_error::JsErrorBox;
+use simien_core::op2;
+use simien_core::url::Url;
+use simien_error::JsErrorBox;
 
-deno_error::js_error_wrapper!(
+simien_error::js_error_wrapper!(
   deno_ast::ParseDiagnostic,
   JsParseDiagnostic,
   "SyntaxError"
 );
-deno_error::js_error_wrapper!(
+simien_error::js_error_wrapper!(
   deno_ast::TranspileError,
   JsTranspileError,
   "Error"
 );
-deno_error::js_error_wrapper!(
+simien_error::js_error_wrapper!(
   deno_ast::TypeStripError,
   JsTypeStripError,
   "SyntaxError"

@@ -26,11 +26,11 @@ use std::os::raw::c_char;
 use std::os::raw::c_int;
 use std::os::raw::c_void;
 
-use deno_core::GarbageCollected;
-use deno_core::op2;
-use deno_core::uv_compat::uv_buf_t;
-use deno_core::uv_compat::uv_stream_t;
-use deno_core::v8;
+use simien_core::GarbageCollected;
+use simien_core::op2;
+use simien_core::uv_compat::uv_buf_t;
+use simien_core::uv_compat::uv_stream_t;
+use simien_core::v8;
 
 use super::sys;
 use crate::ops::stream_wrap::LibUvStreamWrap;
@@ -111,7 +111,7 @@ pub struct HTTPParser {
 unsafe impl Send for HTTPParser {}
 
 unsafe impl GarbageCollected for HTTPParser {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static CStr {
     c"HTTPParser"
@@ -687,7 +687,7 @@ unsafe extern "C" fn on_message_complete(parser: *mut sys::llhttp_t) -> c_int {
 /// Shape matches the error that `HTTPParser.prototype.execute` builds in
 /// JS for the non-consume path (see `http_parser.ts`), so both paths
 /// deliver the same object to `onParserExecuteCommon` in `_http_server.js`.
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 enum ParseError {
   #[class(generic)]
   #[error("Parse Error: Header overflow")]
@@ -870,7 +870,7 @@ unsafe fn consume_read_callback(
       } else {
         ParseError::Generic { bytes_parsed }
       };
-      deno_core::error::to_v8_error(scope, &parse_err)
+      simien_core::error::to_v8_error(scope, &parse_err)
     } else {
       v8::Integer::new(scope, nread_result).into()
     };
@@ -1167,7 +1167,7 @@ impl HTTPParser {
     // type to be exactly `LibUvStreamWrap` and silently return `None`
     // for any subclass, disabling the consume fast path.
     let handle_value: v8::Local<v8::Value> = handle.into();
-    let Some(stream_wrap) = deno_core::cppgc::try_unwrap_cppgc_base_object::<
+    let Some(stream_wrap) = simien_core::cppgc::try_unwrap_cppgc_base_object::<
       LibUvStreamWrap,
     >(scope, handle_value) else {
       return;

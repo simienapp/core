@@ -14,4 +14,4 @@ export {
   on,
   once,
   setMaxListeners,
-} from "ext:deno_node/_events.mjs";
+} from "ext:simien_node/_events.mjs";

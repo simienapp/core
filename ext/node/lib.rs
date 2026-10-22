@@ -11,31 +11,31 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_core::FastString;
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::url::Url;
-use deno_core::v8;
-use deno_core::v8::ExternalReference;
-use deno_error::JsErrorBox;
-use deno_permissions::OpenAccessKind;
-use deno_permissions::PermissionsContainer;
-use node_resolver::DenoIsBuiltInNodeModuleChecker;
-use node_resolver::InNpmPackageChecker;
-use node_resolver::IsBuiltInNodeModuleChecker;
-use node_resolver::NpmPackageFolderResolver;
-use node_resolver::PackageJsonResolverRc;
-use node_resolver::errors::PackageJsonLoadError;
+use simien_core::FastString;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::url::Url;
+use simien_core::v8;
+use simien_core::v8::ExternalReference;
+use simien_error::JsErrorBox;
+use simien_permissions::OpenAccessKind;
+use simien_permissions::PermissionsContainer;
+use simien_node_resolver::DenoIsBuiltInNodeModuleChecker;
+use simien_node_resolver::InNpmPackageChecker;
+use simien_node_resolver::IsBuiltInNodeModuleChecker;
+use simien_node_resolver::NpmPackageFolderResolver;
+use simien_node_resolver::PackageJsonResolverRc;
+use simien_node_resolver::errors::PackageJsonLoadError;
 
 extern crate libz_sys as zlib;
 
 pub mod ops;
 
-use deno_dotenv::parse_env_content_hook;
-pub use deno_package_json::PackageJson;
-use deno_permissions::PermissionCheckError;
-pub use node_resolver::DENO_SUPPORTED_BUILTIN_NODE_MODULES as SUPPORTED_BUILTIN_NODE_MODULES;
-pub use node_resolver::PathClean;
+use simien_dotenv::parse_env_content_hook;
+pub use simien_package_json::PackageJson;
+use simien_permissions::PermissionCheckError;
+pub use simien_node_resolver::DENO_SUPPORTED_BUILTIN_NODE_MODULES as SUPPORTED_BUILTIN_NODE_MODULES;
+pub use simien_node_resolver::PathClean;
 pub use ops::ipc::ChildPipeFd;
 use ops::vm;
 pub use ops::vm::ContextInitMode;
@@ -121,11 +121,11 @@ fn op_node_build_os() -> String {
   env!("TARGET").split('-').nth(2).unwrap().to_string()
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 enum DotEnvLoadErr {
   #[class(inherit)]
   #[error("{0}")]
-  Fs(#[from] deno_io::fs::FsError),
+  Fs(#[from] simien_io::fs::FsError),
   #[class(inherit)]
   #[error(transparent)]
   Permission(
@@ -142,7 +142,7 @@ fn op_node_load_env_file(
   scope: &mut v8::PinScope<'_, '_>,
   #[string] path: &str,
 ) -> Result<(), DotEnvLoadErr> {
-  let fs = state.borrow::<deno_fs::FileSystemRc>().clone();
+  let fs = state.borrow::<simien_fs::FileSystemRc>().clone();
   let permissions = state.borrow::<PermissionsContainer>().clone();
   permissions
     .check_env_all()
@@ -156,7 +156,7 @@ fn op_node_load_env_file(
     .map_err(DotEnvLoadErr::Permission)?;
 
   let contents = fs.read_text_file_lossy_sync(&path)?;
-  let process_env = deno_os::ProcessEnvGuard::lock();
+  let process_env = simien_os::ProcessEnvGuard::lock();
   parse_env_content_hook(&contents, &mut |key, value| {
     // Follows Node.js behavior where null bytes are stripped from env keys and values
     let key = if let Some(null_pos) = key.find('\0') {
@@ -192,14 +192,14 @@ pub struct NodeExtInitServices<
   TSys: ExtNodeSys,
 > {
   pub node_require_loader: NodeRequireLoaderRc,
-  pub node_resolver:
+  pub simien_node_resolver:
     NodeResolverRc<TInNpmPackageChecker, TNpmPackageFolderResolver, TSys>,
   pub pkg_json_resolver: PackageJsonResolverRc<TSys>,
   pub sys: TSys,
 }
 
-deno_core::extension!(deno_node,
-  deps = [ deno_io, deno_fs ],
+simien_core::extension!(simien_node,
+  deps = [ simien_io, simien_fs ],
   parameters = [TInNpmPackageChecker: InNpmPackageChecker, TNpmPackageFolderResolver: NpmPackageFolderResolver, TSys: ExtNodeSys],
   ops = [
     ops::assert::op_node_get_first_expression,
@@ -798,14 +798,14 @@ deno_core::extension!(deno_node,
     "path/mod.ts",
   ],
   synthetic_esm = [
-    "node:url" = "ext:deno_node/url.ts",
-    "node:util" = "ext:deno_node/util.ts",
-    "node:worker_threads" = "ext:deno_node/worker_threads.ts",
-    "node:zlib" = "ext:deno_node/zlib.js",
+    "node:url" = "ext:simien_node/url.ts",
+    "node:util" = "ext:simien_node/util.ts",
+    "node:worker_threads" = "ext:simien_node/worker_threads.ts",
+    "node:zlib" = "ext:simien_node/zlib.js",
   ],
   options = {
     maybe_init: Option<NodeExtInitServices<TInNpmPackageChecker, TNpmPackageFolderResolver, TSys>>,
-    fs: deno_fs::FileSystemRc,
+    fs: simien_fs::FileSystemRc,
   },
   state = |state, options| {
     state.put(options.fs.clone());
@@ -814,7 +814,7 @@ deno_core::extension!(deno_node,
     if let Some(init) = &options.maybe_init {
       state.put(init.sys.clone());
       state.put(init.node_require_loader.clone());
-      state.put(init.node_resolver.clone());
+      state.put(init.simien_node_resolver.clone());
       state.put(init.pkg_json_resolver.clone());
     }
 
@@ -825,10 +825,10 @@ deno_core::extension!(deno_node,
     state.put(crate::ops::tls::NodeTlsState {
       custom_ca_certs: None,
       client_session_store: std::sync::Arc::new(
-        deno_tls::rustls::client::ClientSessionMemoryCache::new(256),
+        simien_tls::rustls::client::ClientSessionMemoryCache::new(256),
       ),
       client_session_store_insecure: std::sync::Arc::new(
-        deno_tls::rustls::client::ClientSessionMemoryCache::new(256),
+        simien_tls::rustls::client::ClientSessionMemoryCache::new(256),
       ),
       server_ticketer: None,
       cached_default_verifier: None,
@@ -837,7 +837,7 @@ deno_core::extension!(deno_node,
       cached_insecure_no_client_auth: None,
     });
   },
-  customizer = |ext: &mut deno_core::Extension| {
+  customizer = |ext: &mut simien_core::Extension| {
     let external_references = [
       vm::QUERY_MAP_FN.with(|query| {
         ExternalReference {
@@ -917,17 +917,17 @@ deno_core::extension!(deno_node,
   },
 );
 
-#[sys_traits::auto_impl]
+#[simien_sys_traits::auto_impl]
 pub trait ExtNodeSys:
-  node_resolver::NodeResolverSys
-  + sys_traits::EnvCurrentDir
-  + sys_traits::EnvVar
+  simien_node_resolver::NodeResolverSys
+  + simien_sys_traits::EnvCurrentDir
+  + simien_sys_traits::EnvVar
   + Clone
 {
 }
 
 pub type NodeResolver<TInNpmPackageChecker, TNpmPackageFolderResolver, TSys> =
-  node_resolver::NodeResolver<
+  simien_node_resolver::NodeResolver<
     TInNpmPackageChecker,
     DenoIsBuiltInNodeModuleChecker,
     TNpmPackageFolderResolver,
@@ -935,7 +935,7 @@ pub type NodeResolver<TInNpmPackageChecker, TNpmPackageFolderResolver, TSys> =
   >;
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type NodeResolverRc<TInNpmPackageChecker, TNpmPackageFolderResolver, TSys> =
-  deno_fs::sync::MaybeArc<
+  simien_fs::sync::MaybeArc<
     NodeResolver<TInNpmPackageChecker, TNpmPackageFolderResolver, TSys>,
   >;
 
@@ -958,9 +958,9 @@ pub fn create_host_defined_options<'s>(
 pub fn create_vm_dynamic_import_missing_host_defined_options<'s>(
   scope: &mut v8::PinScope<'s, '_>,
 ) -> v8::Local<'s, v8::Data> {
-  deno_core::create_host_defined_options_with_kind(
+  simien_core::create_host_defined_options_with_kind(
     scope,
-    deno_core::host_defined_options_kind::VM_DYNAMIC_IMPORT_MISSING,
+    simien_core::host_defined_options_kind::VM_DYNAMIC_IMPORT_MISSING,
   )
 }
 
@@ -968,9 +968,9 @@ pub fn create_vm_dynamic_import_callback_host_defined_options<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   callback_id: u32,
 ) -> v8::Local<'s, v8::Data> {
-  deno_core::create_host_defined_options_with_kind_and_key(
+  simien_core::create_host_defined_options_with_kind_and_key(
     scope,
-    deno_core::host_defined_options_kind::VM_DYNAMIC_IMPORT_CALLBACK,
+    simien_core::host_defined_options_kind::VM_DYNAMIC_IMPORT_CALLBACK,
     callback_id,
   )
 }

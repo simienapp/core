@@ -4,11 +4,11 @@ use std::borrow::Cow;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::url::Url;
-use deno_error::JsErrorBox;
-use deno_permissions::PermissionsContainer;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::url::Url;
+use simien_error::JsErrorBox;
+use simien_permissions::PermissionsContainer;
 
 use crate::ExtNodeSys;
 use crate::NodeRequireLoaderRc;
@@ -18,7 +18,7 @@ pub const DEFAULT_STACK_SIZE_MB: usize = 4;
 
 /// Resolved resource limits with V8 defaults filled in for unspecified values.
 /// Stored in the worker's OpState so the JS polyfill can read actual values.
-#[derive(deno_core::serde::Serialize, Clone, Debug, Default, PartialEq, Eq)]
+#[derive(simien_core::serde::Serialize, Clone, Debug, Default, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ResolvedResourceLimits {
   pub max_young_generation_size_mb: usize,
@@ -43,7 +43,7 @@ fn ensure_read_permission<'a>(
   loader.ensure_read_permission(permissions, file_path)
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum WorkerThreadsFilenameError {
   #[class(inherit)]
   #[error(transparent)]
@@ -60,10 +60,10 @@ pub enum WorkerThreadsFilenameError {
   InvalidRelativeUrl,
   #[class(generic)]
   #[error(transparent)]
-  UrlFromPathString(#[from] deno_path_util::PathToUrlError),
+  UrlFromPathString(#[from] simien_path_util::PathToUrlError),
   #[class(generic)]
   #[error(transparent)]
-  UrlToPathString(#[from] deno_path_util::UrlToFilePathError),
+  UrlToPathString(#[from] simien_path_util::UrlToFilePathError),
   #[class(generic)]
   #[error("URL to Path")]
   UrlToPath,
@@ -75,7 +75,7 @@ pub enum WorkerThreadsFilenameError {
   Fs(
     #[from]
     #[inherit]
-    deno_io::fs::FsError,
+    simien_io::fs::FsError,
   ),
   #[class(inherit)]
   #[error(transparent)]
@@ -107,12 +107,12 @@ pub fn op_worker_threads_filename<TSys: ExtNodeSys + 'static>(
       .map_err(WorkerThreadsFilenameError::Permission)?;
     let sys = state.borrow::<TSys>();
     let canonicalized_path = match sys.fs_canonicalize(&path) {
-      Ok(p) => Cow::Owned(deno_path_util::strip_unc_prefix(p)),
+      Ok(p) => Cow::Owned(simien_path_util::strip_unc_prefix(p)),
       Err(_) => path,
     };
-    deno_path_util::url_from_file_path(&canonicalized_path)?
+    simien_path_util::url_from_file_path(&canonicalized_path)?
   };
-  let url_path = deno_path_util::url_to_file_path(&url)?;
+  let url_path = simien_path_util::url_to_file_path(&url)?;
   let _url_path = ensure_read_permission(state, Cow::Owned(url_path))
     .map_err(WorkerThreadsFilenameError::Permission)?;
   Ok(Some(url.into()))

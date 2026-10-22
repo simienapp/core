@@ -6,20 +6,20 @@ use std::net::SocketAddr;
 use std::net::ToSocketAddrs;
 use std::rc::Rc;
 
-use deno_core::GarbageCollected;
-use deno_core::InspectorMsg;
-use deno_core::InspectorSessionKind;
-use deno_core::JsRuntimeInspector;
-use deno_core::ModuleSpecifier;
-use deno_core::OpState;
-use deno_core::op2;
-use deno_core::serde_json;
-use deno_core::v8;
-use deno_inspector_server::InspectPublishUid;
-use deno_inspector_server::InspectorServerUrl;
-use deno_inspector_server::create_inspector_server;
-use deno_inspector_server::stop_inspector_server;
-use deno_permissions::PermissionsContainer;
+use simien_core::GarbageCollected;
+use simien_core::InspectorMsg;
+use simien_core::InspectorSessionKind;
+use simien_core::JsRuntimeInspector;
+use simien_core::ModuleSpecifier;
+use simien_core::OpState;
+use simien_core::op2;
+use simien_core::serde_json;
+use simien_core::v8;
+use simien_inspector_server::InspectPublishUid;
+use simien_inspector_server::InspectorServerUrl;
+use simien_inspector_server::create_inspector_server;
+use simien_inspector_server::stop_inspector_server;
+use simien_permissions::PermissionsContainer;
 
 #[op2(fast)]
 pub fn op_inspector_enabled(state: &OpState) -> bool {
@@ -257,7 +257,7 @@ fn capture_initiator(scope: &mut v8::PinScope<'_, '_>) -> serde_json::Value {
         // `findFrameInInitiator(__filename, initiator)` match.
         if s.starts_with("file://")
           && let Ok(parsed) = ModuleSpecifier::parse(&s)
-          && let Ok(path) = deno_path_util::url_to_file_path(&parsed)
+          && let Ok(path) = simien_path_util::url_to_file_path(&parsed)
         {
           return path.to_string_lossy().into_owned();
         }
@@ -291,47 +291,47 @@ fn capture_initiator(scope: &mut v8::PinScope<'_, '_>) -> serde_json::Value {
 }
 
 struct JSInspectorSession {
-  session: RefCell<Option<deno_core::LocalInspectorSession>>,
+  session: RefCell<Option<simien_core::LocalInspectorSession>>,
 }
 
 // SAFETY: we're sure this can be GCed
 unsafe impl GarbageCollected for JSInspectorSession {
-  fn trace(&self, _visitor: &mut deno_core::v8::cppgc::Visitor) {}
+  fn trace(&self, _visitor: &mut simien_core::v8::cppgc::Visitor) {}
 
   fn get_name(&self) -> &'static std::ffi::CStr {
     c"JSInspectorSession"
   }
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum InspectorOpenError {
   #[class(inherit)]
   #[error(transparent)]
   Permission(
     #[from]
     #[inherit]
-    deno_permissions::PermissionCheckError,
+    simien_permissions::PermissionCheckError,
   ),
   #[class(inherit)]
   #[error(transparent)]
   Server(
     #[from]
     #[inherit]
-    deno_inspector_server::InspectorServerError,
+    simien_inspector_server::InspectorServerError,
   ),
   #[class(generic)]
   #[error("{0}")]
   InvalidHost(String),
 }
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum InspectorConnectError {
   #[class(inherit)]
   #[error(transparent)]
   Permission(
     #[from]
     #[inherit]
-    deno_permissions::PermissionCheckError,
+    simien_permissions::PermissionCheckError,
   ),
   #[class(generic)]
   #[error("connectToMainThread not supported")]
