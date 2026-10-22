@@ -67,10 +67,6 @@ const { channel: createDiagnosticsChannel } = core.loadExtScript(
 );
 const workerThreadsChannel = createDiagnosticsChannel("worker_threads");
 const lazyStream = core.createLazyLoader("node:stream");
-const {
-  BroadcastChannel: WebBroadcastChannel,
-  refBroadcastChannel,
-} = core.loadExtScript("ext:simien_web/01_broadcast_channel.js");
 const { untransferableSymbol } = core.loadExtScript(
   "ext:simien_node/internal_binding/util.ts",
 );
@@ -2232,6 +2228,15 @@ function patchMessagePortIfFound(data: any, seen = new SafeSet<any>()) {
   }
 }
 
+// Simien's web APIs are WinterTC's, without BroadcastChannel: until Simien
+// has its own workers, constructing one is "not supported yet".
+const refBroadcastChannel = Symbol("refBroadcastChannel");
+class WebBroadcastChannel {
+  constructor() {
+    notImplemented("BroadcastChannel isn't supported in Simien yet (simienapp/runtime#46)");
+  }
+}
+
 class BroadcastChannel extends WebBroadcastChannel {
   ref() {
     this[refBroadcastChannel](true);
@@ -2244,7 +2249,15 @@ class BroadcastChannel extends WebBroadcastChannel {
   }
 }
 
-const { locks } = core.createLazyLoader("ext:simien_web/locks.js")();
+// Web Locks are not in Simien's web APIs: using them is "not supported yet".
+const locks = {
+  request() {
+    notImplemented("worker_threads.locks isn't supported in Simien yet (simienapp/runtime#46)");
+  },
+  query() {
+    notImplemented("worker_threads.locks isn't supported in Simien yet (simienapp/runtime#46)");
+  },
+};
 
 // Node's `worker_threads.MessagePort` is a function (not a class) that throws
 // `ERR_CONSTRUCT_CALL_INVALID` whether called as `MessagePort()` or

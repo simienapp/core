@@ -38,3 +38,5 @@ runtime/subprocess_windows
 libs/dotenv
 libs/node_shim
 libs/inspector_server
+runtime/js
+runtime/ops

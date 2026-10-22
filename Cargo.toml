@@ -61,6 +61,7 @@ members = [
   "runtime/subprocess_windows",
   "libs/core_icudata",
   "libs/whoami",
+  "runtime",
 ]
 
 [workspace.package]
@@ -71,7 +72,7 @@ repository = "https://github.com/simienapp/core"
 
 [workspace.dependencies]
 # The Node layer (APS 2: Node's APIs for code granted dangerouslyUseNode).
-simien_node = { version = "0.1.0", path = "./ext/node" }
+simien_node = { version = "0.1.1", path = "./ext/node" }
 simien_node_crypto = { version = "0.1.0", path = "./ext/node_crypto" }
 simien_napi = { version = "0.1.0", path = "./ext/napi" }
 simien_fs = { version = "0.1.0", path = "./ext/fs" }
@@ -87,6 +88,7 @@ simien_signals = { version = "0.1.0", path = "./ext/signals" }
 simien_subprocess_windows = { version = "0.1.0", path = "./runtime/subprocess_windows" }
 simien_core_icudata = { version = "0.1.0", path = "./libs/core_icudata" }
 simien_whoami = { version = "0.1.0", path = "./libs/whoami" }
+simien_node_runtime = { version = "0.1.0", path = "./runtime" }
 # JavaScript and TypeScript parsing, the same oxc version as simienapp/runtime.
 oxc_allocator = "0.152.0"
 oxc_ast = "0.152.0"

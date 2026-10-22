@@ -63,7 +63,11 @@ pub fn op_node_strip_typescript_types(
     }
   }
 
-  let scoping = SemanticBuilder::new().build(&program).semantic.into_scoping();
+  let scoping = SemanticBuilder::new()
+    .with_enum_eval(true)
+    .build(&program)
+    .semantic
+    .into_scoping();
   let transformed = Transformer::new(&allocator, Path::new(FILE), &TransformOptions::default())
     .build_with_scoping(scoping, &mut program);
   if let Some(error) = transformed.diagnostics.first() {

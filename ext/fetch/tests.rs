@@ -310,6 +310,10 @@ fn deny_import_permissions(deny: &[&str]) -> PermissionsContainer {
 // silently start governing module loads.
 #[tokio::test]
 async fn test_import_client_denies_host_resolving_to_denied_ip() {
+  // The only test here that builds a client without starting a TLS server
+  // first: without this it passed only when another test had installed the
+  // provider, and failed whenever it ran first.
+  install_default_crypto_provider();
   // RFC 5737 TEST-NET-1: never routed, and never connected to here since the
   // deny check fails first.
   let denied_ip = "192.0.2.1";
