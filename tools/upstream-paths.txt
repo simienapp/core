@@ -25,3 +25,16 @@ libs/package_json
 libs/npmrc
 libs/maybe_sync
 libs/resolver
+ext/node
+ext/node_crypto
+ext/napi
+ext/fs
+ext/io
+ext/process
+ext/os
+ext/signals
+runtime/features
+runtime/subprocess_windows
+libs/dotenv
+libs/node_shim
+libs/inspector_server

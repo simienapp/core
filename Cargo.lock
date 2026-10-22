@@ -1109,12 +1109,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "deno_core_icudata"
-version = "0.77.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9efff8990a82c1ae664292507e1a5c6749ddd2312898cdf9cd7cb1fd4bc64c6"
-
-[[package]]
 name = "deno_error"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1150,18 +1144,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "deno_subprocess_windows"
-version = "0.54.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04d4f451b2f94d2847de4895d39ca5aa264b90af34e72fd79ddc1d0da05a5ea0"
-dependencies = [
- "futures-channel",
- "libc",
- "rand 0.8.5",
- "windows-sys 0.59.0",
-]
-
-[[package]]
 name = "deno_terminal"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1169,16 +1151,6 @@ checksum = "f3ba8041ae7319b3ca6a64c399df4112badcbbe0868b4517637647614bede4be"
 dependencies = [
  "once_cell",
  "termcolor",
-]
-
-[[package]]
-name = "deno_whoami"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e75e4caa92b98a27f09c671d1399aee0f5970aa491b9a598523aac000a2192e3"
-dependencies = [
- "libc",
- "whoami",
 ]
 
 [[package]]
@@ -5171,7 +5143,7 @@ dependencies = [
 
 [[package]]
 name = "simien_core"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -5181,7 +5153,6 @@ dependencies = [
  "bytes",
  "cooked-waker",
  "criterion",
- "deno_core_icudata",
  "futures",
  "indexmap",
  "inventory",
@@ -5196,6 +5167,7 @@ dependencies = [
  "serde",
  "serde_json",
  "simien_boxed_error",
+ "simien_core_icudata",
  "simien_error",
  "simien_ops",
  "simien_path_util",
@@ -5215,6 +5187,10 @@ dependencies = [
  "uuid",
  "windows-sys 0.59.0",
 ]
+
+[[package]]
+name = "simien_core_icudata"
+version = "0.1.0"
 
 [[package]]
 name = "simien_crypto"
@@ -5373,7 +5349,7 @@ dependencies = [
 
 [[package]]
 name = "simien_http"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "async-compression",
  "async-trait",
@@ -5444,7 +5420,6 @@ name = "simien_io"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "deno_subprocess_windows",
  "filetime",
  "libc",
  "log",
@@ -5456,6 +5431,7 @@ dependencies = [
  "simien_core",
  "simien_error",
  "simien_permissions",
+ "simien_subprocess_windows",
  "tokio",
  "uuid",
  "windows-sys 0.59.0",
@@ -5536,7 +5512,7 @@ dependencies = [
 
 [[package]]
 name = "simien_net"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "hickory-proto",
  "hickory-resolver",
@@ -5571,8 +5547,6 @@ dependencies = [
  "brotli",
  "bytes",
  "cc",
- "deno_subprocess_windows",
- "deno_whoami",
  "errno",
  "filetime",
  "hdrhistogram",
@@ -5613,8 +5587,10 @@ dependencies = [
  "simien_permissions",
  "simien_process",
  "simien_resolver",
+ "simien_subprocess_windows",
  "simien_sys_traits",
  "simien_tls",
+ "simien_whoami",
  "smallvec",
  "socket2 0.5.5",
  "thiserror 2.0.12",
@@ -5926,7 +5902,6 @@ dependencies = [
 name = "simien_process"
 version = "0.1.0"
 dependencies = [
- "deno_subprocess_windows",
  "libc",
  "log",
  "memchr",
@@ -5941,6 +5916,7 @@ dependencies = [
  "simien_path_util",
  "simien_permissions",
  "simien_signals",
+ "simien_subprocess_windows",
  "simien_sys_traits",
  "tempfile",
  "thiserror 2.0.12",
@@ -5950,7 +5926,7 @@ dependencies = [
 
 [[package]]
 name = "simien_resolver"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "anyhow",
  "async-once-cell",
@@ -6038,6 +6014,17 @@ dependencies = [
  "signal-hook",
  "thiserror 2.0.12",
  "tokio",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "simien_subprocess_windows"
+version = "0.1.0"
+dependencies = [
+ "futures-channel",
+ "libc",
+ "pretty_assertions",
+ "rand 0.8.5",
  "windows-sys 0.59.0",
 ]
 
@@ -6154,7 +6141,7 @@ dependencies = [
 
 [[package]]
 name = "simien_websocket"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "bytes",
  "fastwebsockets",
@@ -6171,6 +6158,14 @@ dependencies = [
  "simien_tls",
  "thiserror 2.0.12",
  "tokio",
+]
+
+[[package]]
+name = "simien_whoami"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "whoami",
 ]
 
 [[package]]
