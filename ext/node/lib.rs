@@ -593,6 +593,7 @@ simien_core::extension!(simien_node,
   ],
   lazy_loaded_js = [
     dir "polyfills",
+    "internal/telemetry_off.js",
     "02_register_cloneable.js",
     "cluster.ts",
     "console.ts",

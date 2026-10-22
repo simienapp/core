@@ -168,6 +168,20 @@ fn file_path(specifier: &Url) -> Result<PathBuf, JsErrorBox> {
     .map_err(|_| JsErrorBox::generic(format!("{specifier} is not a file")))
 }
 
+/// A module by its real path, as Node identifies modules (symlinks
+/// resolved): a package linked into node_modules finds its own dependencies
+/// next to where it really is, and loads once however it's reached.
+fn real_url(url: Url) -> Result<ModuleSpecifier, ModuleLoaderError> {
+  if url.scheme() != "file" {
+    return Ok(url);
+  }
+  let path = file_path(&url)?;
+  let real = std::fs::canonicalize(&path)
+    .map_err(|e| JsErrorBox::generic(format!("{}: {e}", path.display())))?;
+  Url::from_file_path(&real)
+    .map_err(|()| JsErrorBox::generic(format!("{} is not absolute", real.display())))
+}
+
 impl ModuleLoader for NodeProgram {
   fn resolve(
     &self,
@@ -182,8 +196,10 @@ impl ModuleLoader for NodeProgram {
       return Url::parse(&format!("node:{specifier}")).map_err(JsErrorBox::from_err);
     }
     if matches!(kind, ResolutionKind::MainModule) {
-      return simien_core::resolve_url_or_path(specifier, Path::new("/"))
-        .map_err(JsErrorBox::from_err);
+      return real_url(
+        simien_core::resolve_url_or_path(specifier, Path::new("/"))
+          .map_err(JsErrorBox::from_err)?,
+      );
     }
     let referrer = Url::parse(referrer).map_err(JsErrorBox::from_err)?;
     let resolved = self
@@ -195,7 +211,7 @@ impl ModuleLoader for NodeProgram {
         NodeResolutionKind::Execution,
       )
       .map_err(JsErrorBox::from_err)?;
-    resolved.into_url().map_err(JsErrorBox::from_err)
+    real_url(resolved.into_url().map_err(JsErrorBox::from_err)?)
   }
 
   fn load(

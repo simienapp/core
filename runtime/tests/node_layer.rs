@@ -9,14 +9,11 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use simien_core::JsRuntime;
 use simien_core::ModuleLoadResponse;
 use simien_core::ModuleLoader;
 use simien_core::ModuleSpecifier;
 use simien_core::ResolutionKind;
-use simien_core::RuntimeOptions;
 use simien_error::JsErrorBox;
-use simien_node_runtime::BootstrapOptions;
 use simien_permissions::PermissionDeniedError;
 use simien_permissions::PermissionsContainer;
 use simien_permissions::Policy;
@@ -87,63 +84,7 @@ impl Policy for NoFiles {
   }
 }
 
-simien_core::extension!(
-  test_permissions,
-  options = { permissions: PermissionsContainer },
-  state = |state, options| {
-    state.put(options.permissions);
-    state.put(simien_fetch::PermissionsContainer::allow_all());
-  },
-);
-
-// The web globals an embedder installs (Simien's web_host does the same).
-simien_core::extension!(
-  test_globals,
-  deps = [simien_webidl, simien_web, simien_fetch, simien_crypto],
-  esm_entry_point = "ext:test_globals/globals.js",
-  esm = [dir "tests", "globals.js"],
-);
-
-type Sys = simien_sys_traits::impls::RealSys;
-
-fn runtime(permissions: PermissionsContainer, program: Option<&simien_node_runtime::loader::NodeProgram>) -> JsRuntime {
-  let fs: simien_fs::FileSystemRc = simien_maybe_sync::new_rc(simien_fs::RealFs);
-  let main_module = ModuleSpecifier::parse("file:///main.mjs").unwrap();
-  let mut runtime = JsRuntime::new(RuntimeOptions {
-    module_loader: Some(program.map_or_else(|| Rc::new(NodeOnlyLoader) as Rc<dyn ModuleLoader>, |p| p.module_loader())),
-    extension_transpiler: Some(Rc::new(simien_node_runtime::transpile::transpile_extension)),
-    extensions: vec![
-      test_permissions::init(permissions),
-      simien_webidl::simien_webidl::init(),
-      simien_web::simien_web::init(simien_web::BlobStore::default_arc(), None),
-      simien_crypto::simien_crypto::init(None),
-      simien_fetch::simien_fetch::init(Default::default()),
-      test_globals::init(),
-      simien_net::simien_net::init(None, None),
-      simien_io::simien_io::init(Some(Default::default())),
-      simien_fs::simien_fs::init(fs.clone()),
-      simien_os::simien_os::init(None),
-      simien_process::simien_process::init(None),
-      simien_napi::simien_napi::init(None),
-      simien_node::simien_node::init::<
-        simien_node_runtime::loader::InNpmPackageChecker,
-        simien_node_runtime::loader::NpmFolderResolver,
-        Sys,
-      >(program.map(|p| p.init_services()), fs),
-      simien_node_runtime::ops::bootstrap::simien_bootstrap::init(BootstrapOptions::default()),
-      simien_node_runtime::ops::runtime::simien_runtime::init(main_module),
-      simien_node_runtime::ops::tty::simien_tty::init(),
-      simien_node_runtime::ops::fs_events::simien_fs_events::init(),
-      simien_node_runtime::ops::node_gaps::simien_node_gaps::init(),
-      simien_node_runtime::runtime::init(),
-    ],
-    ..Default::default()
-  });
-  runtime
-    .execute_script("bootstrap", "globalThis.__simienBootstrapNode('simien');")
-    .expect("the Node bootstrap runs");
-  runtime
-}
+mod support;
 
 /// Runs `code` as the main module; a thrown error fails the run.
 fn run(permissions: PermissionsContainer, code: String) -> Result<(), String> {
@@ -158,15 +99,18 @@ fn run_program(
 ) -> Result<(), String> {
   let tokio = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
   tokio.block_on(async move {
-    let mut runtime = runtime(permissions, program.as_ref());
     let specifier = ModuleSpecifier::parse(main).unwrap();
-    let id = runtime
-      .load_main_es_module_from_code(&specifier, code)
-      .await
-      .map_err(|e| e.to_string())?;
-    let evaluated = runtime.mod_evaluate(id);
-    runtime.run_event_loop(Default::default()).await.map_err(|e| e.to_string())?;
-    evaluated.await.map_err(|e| e.to_string())
+    let mut isolate = support::isolate(
+      permissions,
+      program.as_ref(),
+      Rc::new(NodeOnlyLoader),
+      specifier,
+      Vec::new(),
+    );
+    match isolate.run(Some(code)).await? {
+      0 => Ok(()),
+      code => Err(format!("exit code {code}")),
+    }
   })
 }
 
@@ -180,6 +124,7 @@ fn node_modules_work_and_deno_is_hidden() {
     import {{ Buffer }} from "node:buffer";
     import process from "node:process";
     import fs from "node:fs";
+    import nodeConsole from "node:console";
     function check(what, got, want) {{
       if (got !== want) throw new Error(`${{what}}: got ${{got}}, want ${{want}}`);
     }}
@@ -189,6 +134,20 @@ fn node_modules_work_and_deno_is_hidden() {
     check("process.argv0", process.argv0, "simien");
     fs.writeFileSync({file:?}, "from node:fs");
     check("fs round trip", fs.readFileSync({file:?}, "utf8"), "from node:fs");
+    check("global", global, globalThis);
+    check("process global", globalThis.process, process);
+    check("Buffer global", globalThis.Buffer, Buffer);
+    check("setImmediate", typeof setImmediate, "function");
+    check("console is node:console's", console, nodeConsole);
+    check("console.info", typeof console.info, "function");
+    let missing;
+    try {{ fs.statSync({file:?} + ".missing"); }} catch (e) {{ missing = e; }}
+    check("a missing file is ENOENT", missing?.code, "ENOENT");
+    let notFound;
+    try {{ Deno.lstatSync({file:?} + ".missing"); }} catch (e) {{ notFound = e; }}
+    check("op errors keep their class", notFound instanceof Deno.errors.NotFound, true);
+    await new Promise((resolve) => setImmediate(resolve));
+    check("setTimeout returns a Timeout", typeof setTimeout(() => {{}}, 0).unref, "function");
     check("Deno is usable", typeof Deno.readTextFile, "function");
     check("Deno is hidden", Object.keys(globalThis).includes("Deno"), false);
     check("Deno is fixed", Object.getOwnPropertyDescriptor(globalThis, "Deno").writable, false);

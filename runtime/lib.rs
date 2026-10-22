@@ -25,7 +25,18 @@ pub mod loader;
 pub mod ops;
 pub mod transpile;
 
+use simien_core::Extension;
+use simien_core::JsRuntime;
+use simien_core::ModuleSpecifier;
+use simien_core::error::CoreError;
+use simien_core::error::JsError;
+use simien_core::v8;
 use simien_terminal::colors::ColorLevel;
+
+use crate::loader::InNpmPackageChecker;
+use crate::loader::NodeProgram;
+use crate::loader::NpmFolderResolver;
+use crate::loader::Sys;
 
 /// What the bootstrap ops report.
 #[derive(Clone, Debug)]
@@ -59,6 +70,7 @@ simien_core::extension!(
     simien_os,
     simien_process,
     simien_napi,
+    simien_node_crypto,
     simien_node
   ],
   esm_entry_point = "ext:runtime/99_simien_node.js",
@@ -81,3 +93,128 @@ simien_core::extension!(
     "40_tty.js"
   ],
 );
+
+/// Every extension the Node layer adds after an embedder's web APIs
+/// (simien_webidl, simien_web, simien_crypto, simien_fetch) and its
+/// `PermissionsContainer` in op state, in the order they must load. Without
+/// a `program`, `require()` of files and packages is unavailable.
+pub fn extensions(
+  program: Option<&NodeProgram>,
+  main_module: ModuleSpecifier,
+  bootstrap: BootstrapOptions,
+  exit_code: simien_os::ExitCode,
+) -> Vec<Extension> {
+  let fs: simien_fs::FileSystemRc = simien_maybe_sync::new_rc(simien_fs::RealFs);
+  vec![
+    simien_net::simien_net::init(None, None),
+    simien_io::simien_io::init(Some(Default::default())),
+    simien_fs::simien_fs::init(fs.clone()),
+    simien_os::simien_os::init(Some(exit_code)),
+    simien_process::simien_process::init(None),
+    simien_napi::simien_napi::init(None),
+    simien_node_crypto::simien_node_crypto::init(),
+    simien_node::simien_node::init::<InNpmPackageChecker, NpmFolderResolver, Sys>(
+      program.map(NodeProgram::init_services),
+      fs,
+    ),
+    ops::bootstrap::simien_bootstrap::init(bootstrap),
+    ops::runtime::simien_runtime::init(main_module),
+    ops::tty::simien_tty::init(),
+    ops::fs_events::simien_fs_events::init(),
+    ops::node_gaps::simien_node_gaps::init(),
+    runtime::init(),
+  ]
+}
+
+/// Installs the hidden `Deno` global, Node's globals and the global events,
+/// and stashes Node's bootstrap, once, before any app code runs. `argv0` is
+/// `process.argv0`. The [`Lifecycle`] runs the program.
+pub fn bootstrap(
+  runtime: &mut JsRuntime,
+  argv0: &str,
+) -> Result<Lifecycle, Box<JsError>> {
+  let argv0 = serde_json::to_string(argv0).expect("a string serializes");
+  let hooks = runtime.execute_script(
+    "ext:runtime/bootstrap",
+    format!("globalThis.__simienBootstrapNode({argv0});"),
+  )?;
+  simien_core::scope!(scope, runtime);
+  let hooks = v8::Local::new(scope, hooks);
+  let hooks: v8::Local<v8::Object> =
+    hooks.try_into().expect("the bootstrap returns its hooks");
+  let hook = |name: &str| {
+    let key = v8::String::new(scope, name).expect("a short string");
+    let value = hooks.get(scope, key.into()).expect("the hook is there");
+    let function: v8::Local<v8::Function> =
+      value.try_into().expect("the hook is a function");
+    v8::Global::new(scope, function)
+  };
+  Ok(Lifecycle {
+    load: hook("load"),
+    before_unload: hook("beforeUnload"),
+    unload: hook("unload"),
+    process_before_exit: hook("processBeforeExit"),
+    process_exit: hook("processExit"),
+  })
+}
+
+/// The events a Node program sees around its run, in Node's order.
+pub struct Lifecycle {
+  load: v8::Global<v8::Function>,
+  before_unload: v8::Global<v8::Function>,
+  unload: v8::Global<v8::Function>,
+  process_before_exit: v8::Global<v8::Function>,
+  process_exit: v8::Global<v8::Function>,
+}
+
+impl Lifecycle {
+  /// Runs `main` (from `code` when given, else through the module loader)
+  /// as Node runs a program: evaluate it, run the event loop dry, emit
+  /// "beforeExit" (whose listeners may schedule more work, which runs too),
+  /// then "exit". Returns the exit code (`process.exitCode`).
+  pub async fn run(
+    &self,
+    runtime: &mut JsRuntime,
+    exit_code: &simien_os::ExitCode,
+    main: &ModuleSpecifier,
+    code: Option<String>,
+  ) -> Result<i32, CoreError> {
+    let id = match code {
+      Some(code) => runtime.load_main_es_module_from_code(main, code).await?,
+      None => runtime.load_main_es_module(main).await?,
+    };
+    self.call(runtime, &self.load).await?;
+    let evaluated = runtime.mod_evaluate(id);
+    runtime.run_event_loop(Default::default()).await?;
+    evaluated.await?;
+    loop {
+      let web_continue = self.call(runtime, &self.before_unload).await?;
+      let more = if web_continue {
+        self.call(runtime, &self.process_before_exit).await?
+      } else {
+        true
+      };
+      if !more {
+        break;
+      }
+      runtime.run_event_loop(Default::default()).await?;
+    }
+    self.call(runtime, &self.unload).await?;
+    self.call(runtime, &self.process_exit).await?;
+    Ok(exit_code.get())
+  }
+
+  /// Calls a hook; true when it returned true.
+  async fn call(
+    &self,
+    runtime: &mut JsRuntime,
+    hook: &v8::Global<v8::Function>,
+  ) -> Result<bool, CoreError> {
+    let returned = Box::pin(runtime.call(hook));
+    let value = runtime
+      .with_event_loop_future(returned, Default::default())
+      .await?;
+    simien_core::scope!(scope, runtime);
+    Ok(v8::Local::new(scope, value).is_true())
+  }
+}

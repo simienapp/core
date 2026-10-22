@@ -117,14 +117,14 @@ const onClientRequestStartChannel = channel("http.client.request.start");
 const onClientRequestErrorChannel = channel("http.client.request.error");
 const onClientResponseFinishChannel = channel("http.client.response.finish");
 const { updateSpanFromError } = core.loadExtScript(
-  "ext:deno_telemetry/util.ts",
+  "ext:simien_node/internal/telemetry_off.js",
 );
 const {
   otelState,
   builtinTracer,
   ContextManager,
   SPAN_KEY,
-} = core.loadExtScript("ext:deno_telemetry/telemetry.ts");
+} = core.loadExtScript("ext:simien_node/internal/telemetry_off.js");
 
 const INVALID_PATH_REGEX = new SafeRegExp(/[^\u0021-\u00ff]/);
 const kError = Symbol("kError");

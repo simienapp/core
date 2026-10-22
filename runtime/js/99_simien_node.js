@@ -8,7 +8,8 @@
 // - Node itself starts on first use, as upstream defers it: the arguments are
 //   stashed for node:process and node:module to pick up.
 // The embedder calls `globalThis.__simienBootstrapNode(argv0)` once, before
-// any app code runs; the function removes itself.
+// any app code runs; the function removes itself and returns the lifecycle
+// hooks the embedder runs the program with.
 
 import { core, internals, primordials } from "ext:core/mod.js";
 import {
@@ -20,6 +21,7 @@ import {
   op_ppid,
 } from "ext:core/ops";
 import { denoNs } from "ext:runtime/90_deno_ns.js";
+const { errors } = core.loadExtScript("ext:runtime/01_errors.js");
 const os = core.loadExtScript("ext:simien_os/30_os.js");
 
 const {
@@ -28,11 +30,108 @@ const {
   ObjectDefineProperty,
   ObjectFreeze,
   ObjectGetOwnPropertyDescriptors,
+  ObjectKeys,
+  ObjectSetPrototypeOf,
+  ReflectApply,
   ReflectOwnKeys,
   Symbol,
   Uint8ArrayPrototype,
   uncurryThis,
 } = primordials;
+
+// Node's own modules behind its globals, loaded on first use (as upstream).
+const lazyProcess = core.createLazyLoader("node:process");
+const lazyBuffer = core.createLazyLoader("node:buffer");
+const lazyTimers = core.createLazyLoader("node:timers");
+const event = core.loadExtScript("ext:simien_web/02_event.js");
+const lazyGlobalScope = core.createLazyLoader(
+  "ext:runtime/98_global_scope_shared.js",
+);
+const webidl = core.loadExtScript("ext:simien_webidl/00_webidl.js");
+
+// The global is an EventTarget, as upstream makes it: node:process maps its
+// "exit", "beforeExit" and rejection listeners onto global events.
+// Ops fail with these classes (NotFound, AlreadyExists, ...); registered so
+// they arrive as `Deno.errors.*`, which node:fs and the rest map to Node's
+// error codes. As upstream registers them.
+function registerErrorClasses() {
+  for (const name of ObjectKeys(errors)) {
+    // simien_core registers these itself.
+    if (name === "BadResource" || name === "Interrupted" || name === "NotCapable") {
+      continue;
+    }
+    core.registerErrorClass(name, errors[name]);
+  }
+}
+
+function makeGlobalAnEventTarget() {
+  if (typeof globalThis.addEventListener !== "function") {
+    ObjectSetPrototypeOf(globalThis, event.EventTargetPrototype);
+  }
+  globalThis[webidl.brand] = webidl.brand;
+  event.setEventTargetData(globalThis);
+  event.saveGlobalThisReference(globalThis);
+  event.defineEventHandler(globalThis, "unhandledrejection");
+  core.setReportExceptionCallback(event.reportException);
+  core.setUnhandledPromiseRejectionHandler(processUnhandledPromiseRejection);
+  core.setHandledPromiseRejectionHandler(processRejectionHandled);
+}
+
+// A rejection nothing handled: "unhandledrejection" listeners first, then
+// node:process (which raises it as Node does). true when it was handled.
+function processUnhandledPromiseRejection(promise, reason) {
+  const rejectionEvent = new event.PromiseRejectionEvent(
+    "unhandledrejection",
+    { cancelable: true, promise, reason },
+  );
+  globalThis.dispatchEvent(rejectionEvent);
+  if (
+    !rejectionEvent.defaultPrevented &&
+    typeof internals.nodeProcessUnhandledRejectionCallback !== "undefined"
+  ) {
+    internals.nodeProcessUnhandledRejectionCallback(rejectionEvent);
+  }
+  return rejectionEvent.defaultPrevented;
+}
+
+function processRejectionHandled(promise, reason) {
+  const rejectionHandledEvent = new event.PromiseRejectionEvent(
+    "rejectionhandled",
+    { promise, reason },
+  );
+  globalThis.dispatchEvent(rejectionHandledEvent);
+  if (typeof internals.nodeProcessRejectionHandledCallback !== "undefined") {
+    internals.nodeProcessRejectionHandledCallback(rejectionHandledEvent);
+  }
+}
+
+// What the embedder calls around the program, as Node runs one (see
+// simien_node_runtime::Lifecycle). node:process sets its handlers when it
+// starts, so they're looked up at call time; before then nothing listens.
+const lifecycle = {
+  __proto__: null,
+  load() {
+    globalThis.dispatchEvent(new event.Event("load"));
+  },
+  beforeUnload() {
+    return globalThis.dispatchEvent(
+      new event.Event("beforeunload", { cancelable: true }),
+    );
+  },
+  unload() {
+    globalThis.dispatchEvent(new event.Event("unload"));
+  },
+  processBeforeExit() {
+    return internals.dispatchProcessBeforeExitEvent
+      ? ReflectApply(internals.dispatchProcessBeforeExitEvent, internals, [])
+      : false;
+  },
+  processExit() {
+    if (internals.dispatchProcessExitEvent) {
+      ReflectApply(internals.dispatchProcessExitEvent, internals, []);
+    }
+  },
+};
 
 function getSafeOwnPropertyDescriptors(object) {
   const descriptors = ObjectGetOwnPropertyDescriptors(object);
@@ -131,6 +230,28 @@ function bootstrapNode(argv0) {
     configurable: false,
   });
 
+  // Node's globals: only isolates granted dangerouslyUseNode get them.
+  // `console` is node:console's (the same object), not the embedder's.
+  ObjectDefineProperties(globalThis, {
+    console: lazyGlobalScope().windowOrWorkerGlobalScope.console,
+    global: core.propWritable(globalThis),
+    process: core.propWritableLazyLoaded((m) => m.default, lazyProcess),
+    Buffer: core.propWritableLazyLoaded((m) => m.Buffer, lazyBuffer),
+    // node:timers' timers return Timeout objects (ref, unref, refresh).
+    setTimeout: core.propWritableLazyLoaded((m) => m.setTimeout, lazyTimers),
+    setInterval: core.propWritableLazyLoaded((m) => m.setInterval, lazyTimers),
+    clearTimeout: core.propWritableLazyLoaded((m) => m.clearTimeout, lazyTimers),
+    clearInterval: core.propWritableLazyLoaded(
+      (m) => m.clearInterval,
+      lazyTimers,
+    ),
+    setImmediate: core.propWritableLazyLoaded((m) => m.setImmediate, lazyTimers),
+    clearImmediate: core.propWritableLazyLoaded(
+      (m) => m.clearImmediate,
+      lazyTimers,
+    ),
+  });
+
   // node:process and node:module start Node from these on first use.
   internals.__nodeBootstrapArgs = {
     usesLocalNodeModulesDir: true,
@@ -142,6 +263,10 @@ function bootstrapNode(argv0) {
     denoArgs: finalDenoNs.args,
     denoVersion: finalDenoNs.version,
   };
+
+  registerErrorClasses();
+  makeGlobalAnEventTarget();
+  return lifecycle;
 }
 
 ObjectDefineProperty(globalThis, "__simienBootstrapNode", {
