@@ -20,13 +20,13 @@ pub fn username() -> String {
     );
 
     if ret != 0 {
-      return "Unknown".to_string().into();
+      return "Unknown".to_string();
     }
 
     let _passwd = _passwd.assume_init();
 
     if _passwd.is_null() {
-      return "Unknown".to_string().into();
+      return "Unknown".to_string();
     }
 
     passwd.assume_init()

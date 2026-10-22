@@ -198,6 +198,10 @@ pub struct FsDirEntry {
   pub is_symlink: bool,
 }
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait FsReadDir: std::fmt::Debug + MaybeSend + MaybeSync {
   async fn next(&self) -> FsResult<Option<FsDirEntry>>;
@@ -208,6 +212,10 @@ pub type FileSystemRc = simien_maybe_sync::MaybeArc<dyn FileSystem>;
 #[allow(clippy::disallowed_types, reason = "definition")]
 pub type FsReadDirRc = simien_maybe_sync::MaybeArc<dyn FsReadDir>;
 
+#[allow(
+  clippy::double_must_use,
+  reason = "async_trait marks the boxed future it returns #[must_use]"
+)]
 #[async_trait::async_trait(?Send)]
 pub trait FileSystem: std::fmt::Debug + MaybeSend + MaybeSync {
   fn cwd(&self) -> FsResult<PathBuf>;

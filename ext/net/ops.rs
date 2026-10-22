@@ -1683,6 +1683,8 @@ mod tests {
     set_sockopt_fn: Box<dyn Fn(&mut OpState, u32)>,
     test_fn: Box<dyn FnOnce(SockRef)>,
   ) {
+    use std::sync::Arc;
+
     let sockets = Arc::new(Mutex::new(vec![]));
     let clone_addr = addr.clone();
     let addr = addr.to_socket_addrs().unwrap().next().unwrap();
@@ -1694,17 +1696,10 @@ mod tests {
     }
     .boxed_local();
 
-    use std::sync::Arc;
-
-    use simien_permissions::RuntimePermissionDescriptorParser;
-
     simien_core::extension!(
       test_ext,
       state = |state| {
-        let parser = Arc::new(RuntimePermissionDescriptorParser::new(
-          simien_sys_traits::impls::RealSys,
-        ));
-        state.put(PermissionsContainer::allow_all(parser));
+        state.put(PermissionsContainer::allow_all());
       }
     );
 
@@ -1756,18 +1751,12 @@ mod tests {
 
   #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
   async fn tcp_connect_cancel_while_resolving() {
-    use std::sync::Arc;
     use std::task::Poll;
-
-    use simien_permissions::RuntimePermissionDescriptorParser;
 
     simien_core::extension!(
       test_ext,
       state = |state| {
-        let parser = Arc::new(RuntimePermissionDescriptorParser::new(
-          simien_sys_traits::impls::RealSys,
-        ));
-        state.put(PermissionsContainer::allow_all(parser));
+        state.put(PermissionsContainer::allow_all());
       }
     );
 

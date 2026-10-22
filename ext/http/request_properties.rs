@@ -162,11 +162,29 @@ impl HttpPropertyExtractor for DefaultHttpPropertyExtractor {
       NetworkStreamAddress::Ip(ip) => Some(ip.port() as _),
       #[cfg(unix)]
       NetworkStreamAddress::Unix(_) => None,
+      #[cfg(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "macos"
+      ))]
+      NetworkStreamAddress::Vsock(vsock) => Some(vsock.port()),
+      #[cfg(windows)]
+      NetworkStreamAddress::WindowsPipe(_) => None,
     };
     let peer_address = match peer_address {
       NetworkStreamAddress::Ip(addr) => Rc::from(addr.ip().to_string()),
       #[cfg(unix)]
       NetworkStreamAddress::Unix(_) => Rc::from("unix"),
+      #[cfg(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "macos"
+      ))]
+      NetworkStreamAddress::Vsock(addr) => {
+        Rc::from(format!("vsock:{}", addr.cid()))
+      }
+      #[cfg(windows)]
+      NetworkStreamAddress::WindowsPipe(_) => Rc::from("pipe"),
     };
     let local_port = listen_properties.local_port;
     let stream_type = listen_properties.stream_type;
@@ -209,6 +227,14 @@ fn listener_properties(
     NetworkStreamAddress::Ip(ip) => Some(ip.port() as _),
     #[cfg(unix)]
     NetworkStreamAddress::Unix(_) => None,
+    #[cfg(any(
+      target_os = "android",
+      target_os = "linux",
+      target_os = "macos"
+    ))]
+    NetworkStreamAddress::Vsock(vsock) => Some(vsock.port()),
+    #[cfg(windows)]
+    NetworkStreamAddress::WindowsPipe(_) => None,
   };
   Ok(HttpListenProperties {
     scheme,
@@ -253,6 +279,16 @@ fn req_host_from_addr(
       percent_encoding::NON_ALPHANUMERIC,
     )
     .to_string(),
+    #[cfg(any(
+      target_os = "android",
+      target_os = "linux",
+      target_os = "macos"
+    ))]
+    NetworkStreamAddress::Vsock(vsock) => {
+      format!("{}:{}", vsock.cid(), vsock.port())
+    }
+    #[cfg(windows)]
+    NetworkStreamAddress::WindowsPipe(_) => "localhost".to_owned(),
   }
 }
 
@@ -262,6 +298,14 @@ fn req_scheme_from_stream_type(stream_type: NetworkStreamType) -> &'static str {
     NetworkStreamType::Tls => "https://",
     #[cfg(unix)]
     NetworkStreamType::Unix => "http+unix://",
+    #[cfg(any(
+      target_os = "android",
+      target_os = "linux",
+      target_os = "macos"
+    ))]
+    NetworkStreamType::Vsock => "http+vsock://",
+    #[cfg(windows)]
+    NetworkStreamType::WindowsPipe => "http://",
   }
 }
 
@@ -286,6 +330,14 @@ fn req_host<'a>(
       }
       #[cfg(unix)]
       NetworkStreamType::Unix => {}
+      #[cfg(any(
+        target_os = "android",
+        target_os = "linux",
+        target_os = "macos"
+      ))]
+      NetworkStreamType::Vsock => {}
+      #[cfg(windows)]
+      NetworkStreamType::WindowsPipe => {}
     }
     return Some(Cow::Borrowed(auth.as_str()));
   }
