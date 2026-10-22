@@ -375,7 +375,8 @@ impl HandleWrap {
 
       if let Some(cb) = cb {
         let recv = v8::undefined(scope);
-        cb.open(scope).call(scope, recv.into(), &[]);
+        // SAFETY: used at once, in this scope, on the isolate's own thread.
+        unsafe { cb.open(scope) }.call(scope, recv.into(), &[]);
       }
     };
 

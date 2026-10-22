@@ -1264,7 +1264,7 @@ fn napi_create_string_latin1(
   }
   crate::return_status_if_false!(
     env,
-    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as _,
+    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as usize,
     napi_invalid_arg
   );
 
@@ -1311,7 +1311,7 @@ pub(crate) fn napi_create_string_utf8(
   }
   crate::return_status_if_false!(
     env,
-    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as _,
+    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as usize,
     napi_invalid_arg
   );
 
@@ -1358,7 +1358,7 @@ fn napi_create_string_utf16(
   }
   crate::return_status_if_false!(
     env,
-    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as _,
+    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as usize,
     napi_invalid_arg
   );
 
@@ -1848,7 +1848,7 @@ fn node_api_create_property_key_latin1(
   }
   crate::return_status_if_false!(
     env,
-    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as _,
+    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as usize,
     napi_invalid_arg
   );
 
@@ -1899,7 +1899,7 @@ fn node_api_create_property_key_utf8(
   }
   crate::return_status_if_false!(
     env,
-    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as _,
+    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as usize,
     napi_invalid_arg
   );
 
@@ -1946,7 +1946,7 @@ fn node_api_create_property_key_utf16(
   }
   crate::return_status_if_false!(
     env,
-    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as _,
+    (length == NAPI_AUTO_LENGTH) || length <= INT_MAX as usize,
     napi_invalid_arg
   );
 
@@ -2097,7 +2097,7 @@ fn napi_create_bigint_words<'s>(
   check_arg!(env, words);
   check_arg!(env, result);
 
-  if word_count > INT_MAX as _ {
+  if word_count > INT_MAX as usize {
     return napi_invalid_arg;
   }
 

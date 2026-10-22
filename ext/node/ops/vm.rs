@@ -371,15 +371,27 @@ unsafe impl simien_core::GarbageCollected for ContextifyContext {
   }
 }
 
-impl Drop for ContextifyContext {
-  fn drop(&mut self) {
-    if !self.microtask_queue.is_null() {
-      // SAFETY: If this isn't null, it is a valid MicrotaskQueue.
-      unsafe {
-        std::ptr::drop_in_place(self.microtask_queue);
-      }
-    }
+/// The microtask queues `vm` contexts own (`microtaskMode: "afterEvaluate"`).
+///
+/// V8 152 hands out a rooted handle that must be dropped before its isolate
+/// is disposed, and contexts keep the queue itself alive. So the handles live
+/// in the runtime's state, which is cleared before the isolate is disposed,
+/// and a context keeps only a pointer to its queue. Upstream (V8 150) owned
+/// the queue in the context and freed it when the context was collected,
+/// which could now run during isolate teardown.
+#[derive(Default)]
+struct VmMicrotaskQueues(Vec<v8::MicrotaskQueueHandle>);
+
+fn new_microtask_queue(scope: &mut v8::PinScope) -> *mut v8::MicrotaskQueue {
+  let handle = v8::MicrotaskQueue::new(scope, v8::MicrotasksPolicy::Explicit);
+  let queue = &*handle as *const v8::MicrotaskQueue as *mut v8::MicrotaskQueue;
+  let state = simien_core::JsRuntime::op_state_from(scope);
+  let mut state = state.borrow_mut();
+  if !state.has::<VmMicrotaskQueues>() {
+    state.put(VmMicrotaskQueues::default());
   }
+  state.borrow_mut::<VmMicrotaskQueues>().0.push(handle);
+  queue
 }
 
 // A unique tag pointer used as a marker in embedder slot
@@ -471,7 +483,7 @@ impl ContextifyContext {
     let tmp = init_global_template(scope, ContextInitMode::UseSnapshot);
 
     let microtask_queue = if own_microtask_queue {
-      v8::MicrotaskQueue::new(scope, v8::MicrotasksPolicy::Explicit).into_raw()
+      new_microtask_queue(scope)
     } else {
       std::ptr::null_mut()
     };
@@ -567,7 +579,7 @@ impl ContextifyContext {
     let main_context = scope.get_current_context();
 
     let microtask_queue = if own_microtask_queue {
-      v8::MicrotaskQueue::new(scope, v8::MicrotasksPolicy::Explicit).into_raw()
+      new_microtask_queue(scope)
     } else {
       std::ptr::null_mut()
     };
@@ -998,7 +1010,7 @@ fn property_setter<'s>(
   key: v8::Local<'s, v8::Name>,
   value: v8::Local<'s, v8::Value>,
   args: v8::PropertyCallbackArguments<'s>,
-  _rv: v8::ReturnValue<()>,
+  _rv: v8::ReturnValue<v8::Boolean>,
 ) -> v8::Intercepted {
   let Some(ctx) = ContextifyContext::get(scope, args.holder()) else {
     return v8::Intercepted::kNo;
@@ -1114,7 +1126,7 @@ fn property_definer<'s>(
   key: v8::Local<'s, v8::Name>,
   desc: &v8::PropertyDescriptor,
   args: v8::PropertyCallbackArguments<'s>,
-  _: v8::ReturnValue<()>,
+  _: v8::ReturnValue<v8::Boolean>,
 ) -> v8::Intercepted {
   let Some(ctx) = ContextifyContext::get(scope, args.holder()) else {
     return v8::Intercepted::kNo;
@@ -1323,7 +1335,7 @@ fn indexed_property_setter<'s>(
   index: u32,
   value: v8::Local<'s, v8::Value>,
   args: v8::PropertyCallbackArguments<'s>,
-  rv: v8::ReturnValue<()>,
+  rv: v8::ReturnValue<v8::Boolean>,
 ) -> v8::Intercepted {
   let key = uint32_to_name(scope, index);
   property_setter(scope, key, value, args, rv)
@@ -1344,7 +1356,7 @@ fn indexed_property_definer<'s>(
   index: u32,
   descriptor: &v8::PropertyDescriptor,
   args: v8::PropertyCallbackArguments<'s>,
-  rv: v8::ReturnValue<()>,
+  rv: v8::ReturnValue<v8::Boolean>,
 ) -> v8::Intercepted {
   let key = uint32_to_name(scope, index);
   property_definer(scope, key, descriptor, args, rv)

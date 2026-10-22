@@ -21,7 +21,14 @@ base64.workspace = true
 simien_boxed_error.workspace = true
 brotli.workspace = true
 bytes.workspace = true
-deno_ast = { workspace = true, features = ["type_strip"] }
+oxc_allocator.workspace = true
+oxc_ast.workspace = true
+oxc_ast_visit.workspace = true
+oxc_codegen.workspace = true
+oxc_parser.workspace = true
+oxc_semantic.workspace = true
+oxc_span.workspace = true
+oxc_transformer.workspace = true
 simien_core.workspace = true
 simien_dotenv.workspace = true
 simien_error.workspace = true

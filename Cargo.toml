@@ -81,7 +81,15 @@ simien_inspector_server = { version = "0.1.0", path = "./libs/inspector_server" 
 simien_permissions = { version = "0.1.0", path = "./libs/permissions" }
 simien_features = { version = "0.1.0", path = "./runtime/features" }
 simien_signals = { version = "0.1.0", path = "./ext/signals" }
-deno_ast = { version = "=0.53.3", features = ["transpiling"] }
+# JavaScript and TypeScript parsing, the same oxc version as simienapp/runtime.
+oxc_allocator = "0.152.0"
+oxc_ast = "0.152.0"
+oxc_ast_visit = "0.152.0"
+oxc_codegen = "0.152.0"
+oxc_parser = "0.152.0"
+oxc_semantic = "0.152.0"
+oxc_span = "0.152.0"
+oxc_transformer = "0.152.0"
 
 deno_core_icudata = "0.77.0"
 deno_doc = "0.207.0"
