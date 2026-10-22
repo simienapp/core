@@ -1,13 +1,13 @@
 # Copyright 2018-2026 the Deno authors. MIT license.
 [package]
-name = "deno_subprocess_windows"
-version = "0.54.0"
-authors.workspace = true
+name = "simien_subprocess_windows"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
 readme = "README.md"
-repository.workspace = true
-description = "Subprocess API implementation for Windows"
+repository = "https://github.com/simienapp/core"
+description = "Child processes on Windows for Simien's Node layer. Forked from deno_subprocess_windows 0.54.0."
 
 [dependencies]
 futures-channel = "0.3.31"

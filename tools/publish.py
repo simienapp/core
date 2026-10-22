@@ -63,11 +63,24 @@ def local_dependencies(name):
     return {(d["name"], kinds[d["kind"]]) for d in package["dependencies"] if not (d["kind"] == "dev" and d.get("req") == "*" )}
 
 
+def deno_dependencies():
+    """Every crate here that depends on a deno_* crate, of any kind. APS 2.1:
+    Simien depends on no Deno crate; what it uses is forked here, renamed."""
+    meta = json.loads(subprocess.run(["cargo", "metadata", "--no-deps", "--format-version", "1"], cwd=ROOT, capture_output=True, text=True, check=True).stdout)
+    return sorted(
+        f"{p['name']} depends on {d['name']}"
+        for p in meta["packages"]
+        for d in p["dependencies"]
+        if d["name"].startswith("deno_") or (d.get("rename") or "").startswith("deno_")
+    )
+
+
 def check():
-    """Fail when a crate changed its dependencies but kept a version that's
-    already on crates.io: a publish run skips it, and the published set no
-    longer builds together (simien_path_util 0.1.1, #18)."""
-    stale = []
+    """Fail when a crate depends on a deno_* crate (APS 2.1), or changed its
+    dependencies but kept a version that's already on crates.io: a publish
+    run skips it, and the published set no longer builds together
+    (simien_path_util 0.1.1, #18)."""
+    stale = [f"{line}: fork it here, renamed simien_* (APS 2.1)" for line in deno_dependencies()]
     for name, version, _, _ in plan():
         if name == "simien" or not on_crates_io(name, version):
             continue

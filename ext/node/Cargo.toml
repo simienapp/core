@@ -45,7 +45,7 @@ simien_permissions.workspace = true
 simien_process.workspace = true
 simien_resolver.workspace = true
 simien_tls.workspace = true
-deno_whoami.workspace = true
+simien_whoami.workspace = true
 filetime.workspace = true
 hdrhistogram.workspace = true
 idna.workspace = true
@@ -79,4 +79,4 @@ cc = "1"
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { workspace = true, features = ["Win32_Networking_WinSock", "Win32_NetworkManagement_IpHelper", "Win32_System_Console", "Win32_System_ProcessStatus", "Win32_System_SystemInformation", "Win32_System_Threading"] }
-deno_subprocess_windows.workspace = true
+simien_subprocess_windows.workspace = true

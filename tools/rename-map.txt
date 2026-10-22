@@ -55,3 +55,6 @@ deno_permissions simien_permissions
 deno_inspector_server simien_inspector_server
 deno_features simien_features
 deno_signals simien_signals
+deno_whoami simien_whoami
+deno_subprocess_windows simien_subprocess_windows
+deno_core_icudata simien_core_icudata

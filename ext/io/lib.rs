@@ -39,7 +39,7 @@ use simien_core::unsync::TaskQueue;
 use simien_core::unsync::spawn_blocking;
 use simien_error::JsErrorBox;
 #[cfg(windows)]
-use deno_subprocess_windows::Stdio as StdStdio;
+use simien_subprocess_windows::Stdio as StdStdio;
 use fs::FileResource;
 use fs::FsError;
 use fs::FsResult;

@@ -23,7 +23,7 @@ use simien_core::error::ResourceError;
 use simien_error::JsErrorBox;
 use simien_permissions::PermissionCheckError;
 #[cfg(windows)]
-use deno_subprocess_windows::Stdio as StdStdio;
+use simien_subprocess_windows::Stdio as StdStdio;
 use tokio::task::JoinError;
 
 #[derive(Debug, simien_error::JsError)]

@@ -160,7 +160,8 @@ fn v8_init(
 ) {
   #[cfg(feature = "include_icu_data")]
   {
-    v8::icu::set_common_data_77(deno_core_icudata::ICU_DATA).unwrap();
+    // V8 152 reads ICU 78 (simien_core_icudata 0.1.0 is deno_core_icudata 0.78).
+    v8::icu::set_common_data_78(simien_core_icudata::ICU_DATA).unwrap();
   }
 
   // V8 152 dropped --no-validate-asm along with asm.js validation itself: asm.js

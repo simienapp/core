@@ -200,7 +200,7 @@ fn get_user_info(_uid: u32) -> Result<UserInfo, OsError> {
   let homedir = homedir_wide.to_string_lossy().into_owned();
 
   Ok(UserInfo {
-    username: deno_whoami::username(),
+    username: simien_whoami::username(),
     homedir,
     shell: None,
   })

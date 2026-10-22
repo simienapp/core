@@ -54,11 +54,11 @@ use simien_permissions::PathQueryDescriptor;
 use simien_permissions::PermissionsContainer;
 use simien_permissions::RunQueryDescriptor;
 #[cfg(windows)]
-use deno_subprocess_windows::Child as AsyncChild;
+use simien_subprocess_windows::Child as AsyncChild;
 #[cfg(windows)]
-use deno_subprocess_windows::Command;
+use simien_subprocess_windows::Command;
 #[cfg(windows)]
-use deno_subprocess_windows::Stdio as StdStdio;
+use simien_subprocess_windows::Stdio as StdStdio;
 use serde::Deserialize;
 #[cfg(unix)]
 use tokio::process::Child as AsyncChild;
@@ -401,7 +401,7 @@ impl Drop for ChildResource {
       }
       #[cfg(windows)]
       {
-        let _ = deno_subprocess_windows::process_kill(
+        let _ = simien_subprocess_windows::process_kill(
           self.pid as i32,
           /* SIGTERM */ 15,
         );
@@ -2052,7 +2052,7 @@ fn op_spawn_child_ref(
 mod deprecated {
   use simien_core::FromV8;
   #[cfg(windows)]
-  use deno_subprocess_windows::Child;
+  use simien_subprocess_windows::Child;
   #[cfg(not(windows))]
   use tokio::process::Child;
 

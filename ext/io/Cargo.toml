@@ -35,5 +35,5 @@ nix = { workspace = true, features = ["fs", "user", "socket"] }
 rand.workspace = true
 parking_lot.workspace = true
 windows-sys = { workspace = true, features = ["Win32_System_Console"] }
-deno_subprocess_windows.workspace = true
+simien_subprocess_windows.workspace = true
 libc.workspace = true
