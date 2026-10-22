@@ -12,19 +12,19 @@ use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 
-use deno_core::AsyncRefCell;
-use deno_core::CancelFuture;
-use deno_core::CancelHandle;
-use deno_core::OpState;
-use deno_core::RcRef;
-use deno_core::Resource;
-use deno_core::ResourceId;
-use deno_core::ToV8;
-use deno_core::op2;
-use deno_core::parking_lot::Mutex;
-use deno_error::JsErrorClass;
-use deno_error::builtin_classes::GENERIC_ERROR;
-use deno_permissions::PermissionsContainer;
+use simien_core::AsyncRefCell;
+use simien_core::CancelFuture;
+use simien_core::CancelHandle;
+use simien_core::OpState;
+use simien_core::RcRef;
+use simien_core::Resource;
+use simien_core::ResourceId;
+use simien_core::ToV8;
+use simien_core::op2;
+use simien_core::parking_lot::Mutex;
+use simien_error::JsErrorClass;
+use simien_error::builtin_classes::GENERIC_ERROR;
+use simien_permissions::PermissionsContainer;
 use notify::Error as NotifyError;
 use notify::EventKind;
 use notify::RecommendedWatcher;
@@ -37,8 +37,8 @@ use notify::event::ModifyKind;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::error::TrySendError;
 
-deno_core::extension!(
-  deno_fs_events,
+simien_core::extension!(
+  simien_fs_events,
   ops = [op_fs_events_open, op_fs_events_poll],
 );
 
@@ -325,7 +325,7 @@ fn is_file_removed(event_path: &Path) -> bool {
 const WINDOWS_PATH_NOT_FOUND_MSG: &str =
   "Input watch path is neither a file nor a directory.";
 
-deno_error::js_error_wrapper!(NotifyError, JsNotifyError, |err| {
+simien_error::js_error_wrapper!(NotifyError, JsNotifyError, |err| {
   match &err.kind {
     notify::ErrorKind::Generic(msg) if msg == WINDOWS_PATH_NOT_FOUND_MSG => {
       "NotFound".into()
@@ -339,20 +339,20 @@ deno_error::js_error_wrapper!(NotifyError, JsNotifyError, |err| {
   }
 });
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum FsEventsError {
   #[class(inherit)]
   #[error(transparent)]
-  Resource(#[from] deno_core::error::ResourceError),
+  Resource(#[from] simien_core::error::ResourceError),
   #[class(inherit)]
   #[error(transparent)]
-  Permission(#[from] deno_permissions::PermissionCheckError),
+  Permission(#[from] simien_permissions::PermissionCheckError),
   #[class(inherit)]
   #[error(transparent)]
   Notify(JsNotifyError),
   #[class(inherit)]
   #[error(transparent)]
-  Canceled(#[from] deno_core::Canceled),
+  Canceled(#[from] simien_core::Canceled),
 }
 
 fn make_watch_sender(
@@ -482,7 +482,7 @@ fn ensure_watcher(
 /// the path the caller passed in.
 fn normalize_watch_path(path: PathBuf) -> PathBuf {
   if path.is_absolute() {
-    return deno_path_util::normalize_path(Cow::Owned(path)).into_owned();
+    return simien_path_util::normalize_path(Cow::Owned(path)).into_owned();
   }
   #[allow(
     clippy::disallowed_methods,
@@ -491,7 +491,7 @@ fn normalize_watch_path(path: PathBuf) -> PathBuf {
   let cwd = std::env::current_dir();
   match cwd {
     Ok(cwd) => {
-      deno_path_util::normalize_path(Cow::Owned(cwd.join(&path))).into_owned()
+      simien_path_util::normalize_path(Cow::Owned(cwd.join(&path))).into_owned()
     }
     Err(_) => path,
   }
@@ -513,7 +513,7 @@ fn op_fs_events_open(
       let checked = permissions_container
         .check_open(
           Cow::Owned(PathBuf::from(path)),
-          deno_permissions::OpenAccessKind::ReadNoFollow,
+          simien_permissions::OpenAccessKind::ReadNoFollow,
           Some("Deno.watchFs()"),
         )?
         .into_owned_path();
@@ -523,7 +523,7 @@ fn op_fs_events_open(
       let checked = permissions_container
         .check_open(
           Cow::Owned(PathBuf::from(path)),
-          deno_permissions::OpenAccessKind::ReadNoFollow,
+          simien_permissions::OpenAccessKind::ReadNoFollow,
           Some("Deno.watchFs()"),
         )?
         .into_owned_path();

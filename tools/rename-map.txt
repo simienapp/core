@@ -58,3 +58,7 @@ deno_signals simien_signals
 deno_whoami simien_whoami
 deno_subprocess_windows simien_subprocess_windows
 deno_core_icudata simien_core_icudata
+deno_tty simien_tty
+deno_fs_events simien_fs_events
+deno_bootstrap simien_bootstrap
+deno_runtime simien_runtime

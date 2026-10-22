@@ -33,3 +33,16 @@ ported  2f885193c6 perf: avoid allocating null-prototype objects for default par
 checked-repo deno_core_icudata 9adfc10 (0.78.0, ICU 78; libs/core_icudata)
 # libs/whoami is deno_whoami 0.1.0's published source: its repository isn't
 # public, so there's nothing to watch.
+
+# simien_node_runtime (runtime/): upstream's runtime/js and runtime/ops at
+# v2.9.7, cut to what simien_node reads. Changed here on purpose:
+#   runtime/js/90_deno_ns.js          FFI, KV, cron, WebGPU, canvas, telemetry,
+#                                     bundle, permissions, serveHttp, unstable cut
+#   runtime/js/98_global_scope_shared.js  only `console` (the embedder installs
+#                                     the other globals)
+#   runtime/js/99_main.js             replaced by our 99_simien_node.js
+#   runtime/ops/bootstrap.rs          only the ops something reads; +target op
+#   runtime/ops/tty.rs                op_read_line_prompt (prompt()) cut
+#   runtime/ops/node_gaps.rs          ours: op_current_thread_cpu_usage from
+#                                     worker_host.rs; worker/sqlite/serve stubs
+#   desktop, http, permissions, web_worker, worker_host ops: cut

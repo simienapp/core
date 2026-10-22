@@ -1,0 +1,58 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_node_runtime"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+readme = "js/README.md"
+repository = "https://github.com/simienapp/core"
+description = "The Deno namespace simien_node reads, as a hidden global in isolates granted dangerouslyUseNode, with the ops behind it and the TypeScript transpiler its extensions need. Forked from deno_runtime 0.267.0's js/ and ops/."
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+libc.workspace = true
+log.workspace = true
+notify.workspace = true
+once_cell.workspace = true
+oxc_allocator.workspace = true
+oxc_codegen.workspace = true
+oxc_parser.workspace = true
+oxc_semantic.workspace = true
+oxc_span.workspace = true
+oxc_transformer.workspace = true
+same-file.workspace = true
+serde.workspace = true
+simien_core.workspace = true
+simien_error.workspace = true
+simien_fetch.workspace = true
+simien_fs.workspace = true
+simien_io.workspace = true
+simien_net.workspace = true
+simien_node.workspace = true
+simien_os.workspace = true
+simien_path_util.workspace = true
+simien_permissions.workspace = true
+simien_process.workspace = true
+simien_terminal.workspace = true
+simien_web.workspace = true
+simien_webidl.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+nix = { workspace = true, features = ["term"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = ["Win32_Foundation", "Win32_System_Console", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Threading"] }
+
+[dev-dependencies]
+simien_crypto.workspace = true
+simien_maybe_sync.workspace = true
+simien_resolver.workspace = true
+simien_sys_traits = { workspace = true, features = ["real", "libc", "winapi"] }
+tempfile.workspace = true
+tokio = { workspace = true, features = ["rt", "macros"] }

@@ -1,25 +1,10 @@
 // Copyright 2018-2026 the Deno authors. MIT license.
 
+// Simien keeps the ops behind the Deno namespace simien_node reads. Workers,
+// desktop, permission prompts and Deno's HTTP ops are cut (APS 2.1).
+
 pub mod bootstrap;
-pub mod desktop;
 pub mod fs_events;
-pub mod http;
-pub mod permissions;
+pub mod node_gaps;
 pub mod runtime;
 pub mod tty;
-pub mod web_worker;
-pub mod worker_host;
-
-use std::sync::Arc;
-
-use deno_core::OpState;
-use deno_features::FeatureChecker;
-
-/// Helper for checking unstable features. Used for sync ops.
-pub fn check_unstable(state: &OpState, feature: &str, api_name: &str) {
-  state
-    .borrow::<Arc<FeatureChecker>>()
-    .check_or_exit(feature, api_name);
-}
-
-pub struct TestingFeaturesEnabled(pub bool);

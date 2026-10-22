@@ -5,35 +5,20 @@ use std::cell::RefCell;
 #[cfg(unix)]
 use std::collections::HashMap;
 use std::io::Error;
+#[cfg(windows)]
 use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering::Relaxed;
 
-use deno_core::OpState;
+use simien_core::OpState;
 #[cfg(unix)]
-use deno_core::ResourceId;
-use deno_core::op2;
+use simien_core::ResourceId;
+use simien_core::op2;
 #[cfg(windows)]
-use deno_core::parking_lot::Mutex;
-use deno_error::JsErrorBox;
-use deno_error::JsErrorClass;
-use deno_error::builtin_classes::GENERIC_ERROR;
+use simien_core::parking_lot::Mutex;
+use simien_error::JsErrorBox;
 #[cfg(windows)]
-use deno_io::WinTtyState;
+use simien_io::WinTtyState;
 #[cfg(unix)]
 use nix::sys::termios;
-use rustyline::Cmd;
-use rustyline::ConditionalEventHandler;
-use rustyline::Editor;
-use rustyline::Event;
-use rustyline::EventContext;
-use rustyline::EventHandler;
-use rustyline::KeyCode;
-use rustyline::KeyEvent;
-use rustyline::Modifiers;
-use rustyline::RepeatCount;
-use rustyline::config::Configurer;
-use rustyline::error::ReadlineError;
 
 #[cfg(unix)]
 #[derive(Default, Clone)]
@@ -57,13 +42,13 @@ impl TtyModeStore {
 }
 
 #[cfg(unix)]
-use deno_process::JsNixError;
+use simien_process::JsNixError;
 #[cfg(windows)]
 use windows_sys::Win32::System::Console as wincon;
 
-deno_core::extension!(
-  deno_tty,
-  ops = [op_set_raw, op_console_size, op_read_line_prompt],
+simien_core::extension!(
+  simien_tty,
+  ops = [op_set_raw, op_console_size],
   state = |state| {
     #[cfg(unix)]
     state.put(TtyModeStore::default());
@@ -72,14 +57,14 @@ deno_core::extension!(
   },
 );
 
-#[derive(Debug, thiserror::Error, deno_error::JsError)]
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum TtyError {
   #[class(inherit)]
   #[error(transparent)]
   Resource(
     #[from]
     #[inherit]
-    deno_core::error::ResourceError,
+    simien_core::error::ResourceError,
   ),
   #[class(inherit)]
   #[error("{0}")]
@@ -133,7 +118,7 @@ fn op_set_raw(
   // Copyright (c) 2019 Timon. MIT license.
   #[cfg(windows)]
   {
-    use deno_error::JsErrorBox;
+    use simien_error::JsErrorBox;
     use windows_sys::Win32::Foundation::FALSE;
 
     let handle = handle_or_fd;
@@ -459,72 +444,5 @@ mod tests {
       known_off_modes[1],
       mode_raw_input_off(mode_raw_input_on(known_off_modes[1]))
     );
-  }
-}
-
-deno_error::js_error_wrapper!(ReadlineError, JsReadlineError, |err| {
-  match err {
-    ReadlineError::Io(e) => e.get_class(),
-    ReadlineError::Eof => GENERIC_ERROR.into(),
-    ReadlineError::Interrupted => GENERIC_ERROR.into(),
-    #[cfg(unix)]
-    ReadlineError::Errno(e) => JsNixError(*e).get_class(),
-    _ => GENERIC_ERROR.into(),
-  }
-});
-
-struct PromptEscEventHandler {
-  interrupted_by_esc: Arc<AtomicBool>,
-}
-
-impl ConditionalEventHandler for PromptEscEventHandler {
-  fn handle(
-    &self,
-    _: &Event,
-    _: RepeatCount,
-    _: bool,
-    _: &EventContext,
-  ) -> Option<Cmd> {
-    self.interrupted_by_esc.store(true, Relaxed);
-    Some(Cmd::Interrupt)
-  }
-}
-
-#[op2]
-#[string]
-pub fn op_read_line_prompt(
-  #[string] prompt_text: &str,
-  #[string] default_value: &str,
-) -> Result<Option<String>, JsReadlineError> {
-  let _terminal_input_guard = deno_permissions::prompter::lock_terminal_input();
-  let mut editor = Editor::<(), rustyline::history::DefaultHistory>::new()
-    .expect("Failed to create editor.");
-
-  editor.set_keyseq_timeout(Some(1));
-  let interrupted_by_esc = Arc::new(AtomicBool::new(false));
-  editor.bind_sequence(
-    KeyEvent(KeyCode::Esc, Modifiers::empty()),
-    EventHandler::Conditional(Box::new(PromptEscEventHandler {
-      interrupted_by_esc: interrupted_by_esc.clone(),
-    })),
-  );
-
-  let read_result =
-    editor.readline_with_initial(prompt_text, (default_value, ""));
-  match read_result {
-    Ok(line) => Ok(Some(line)),
-    Err(ReadlineError::Interrupted) => {
-      if interrupted_by_esc.load(Relaxed) {
-        return Ok(None);
-      }
-
-      // SAFETY: Disable raw mode and raise SIGINT.
-      unsafe {
-        libc::raise(libc::SIGINT);
-      }
-      Ok(None)
-    }
-    Err(ReadlineError::Eof) => Ok(None),
-    Err(err) => Err(JsReadlineError(err)),
   }
 }
