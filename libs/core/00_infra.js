@@ -102,6 +102,12 @@
     let error;
     try {
       error = errorMap[className]?.(message);
+      // A class nobody registered is still an error, named after its class,
+      // never a thrown `undefined`.
+      if (error === undefined) {
+        error = new Error(message);
+        error.name = className;
+      }
     } catch (e) {
       throw new Error(
         `Unable to build custom error for "${className}"\n  ${e.message}`,

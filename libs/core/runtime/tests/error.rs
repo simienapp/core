@@ -37,6 +37,35 @@ async fn test_error_builder() {
   .await;
 }
 
+// An op failing with a class nobody registered still throws an Error, named
+// after its class: never `undefined` (which upstream threw).
+#[test]
+fn unregistered_error_class_is_an_error() {
+  #[op2]
+  #[string]
+  fn op_unregistered_err() -> Result<String, JsErrorBox> {
+    Err(JsErrorBox::new("Unregistered", "abc"))
+  }
+
+  simien_core::extension!(test_ext, ops = [op_unregistered_err]);
+  let mut runtime = JsRuntime::new(RuntimeOptions {
+    extensions: vec![test_ext::init()],
+    ..Default::default()
+  });
+  runtime
+    .execute_script(
+      "unregistered.js",
+      r#"
+      let error;
+      try { Deno.core.ops.op_unregistered_err(); } catch (e) { error = e; }
+      if (!(error instanceof Error)) throw new Error("threw " + error);
+      if (error.name !== "Unregistered") throw new Error("name " + error.name);
+      if (error.message !== "abc") throw new Error("message " + error.message);
+      "#,
+    )
+    .expect("the op's failure is an Error");
+}
+
 #[test]
 fn syntax_error() {
   let mut runtime = JsRuntime::new(Default::default());
