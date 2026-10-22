@@ -106,11 +106,11 @@ simien_core::extension!(
 
 type Sys = simien_sys_traits::impls::RealSys;
 
-fn runtime(permissions: PermissionsContainer) -> JsRuntime {
+fn runtime(permissions: PermissionsContainer, program: Option<&simien_node_runtime::loader::NodeProgram>) -> JsRuntime {
   let fs: simien_fs::FileSystemRc = simien_maybe_sync::new_rc(simien_fs::RealFs);
   let main_module = ModuleSpecifier::parse("file:///main.mjs").unwrap();
   let mut runtime = JsRuntime::new(RuntimeOptions {
-    module_loader: Some(Rc::new(NodeOnlyLoader)),
+    module_loader: Some(program.map_or_else(|| Rc::new(NodeOnlyLoader) as Rc<dyn ModuleLoader>, |p| p.module_loader())),
     extension_transpiler: Some(Rc::new(simien_node_runtime::transpile::transpile_extension)),
     extensions: vec![
       test_permissions::init(permissions),
@@ -124,11 +124,12 @@ fn runtime(permissions: PermissionsContainer) -> JsRuntime {
       simien_fs::simien_fs::init(fs.clone()),
       simien_os::simien_os::init(None),
       simien_process::simien_process::init(None),
+      simien_napi::simien_napi::init(None),
       simien_node::simien_node::init::<
-        simien_resolver::npm::DenoInNpmPackageChecker,
-        simien_resolver::npm::NpmResolver<Sys>,
+        simien_node_runtime::loader::InNpmPackageChecker,
+        simien_node_runtime::loader::NpmFolderResolver,
         Sys,
-      >(None, fs),
+      >(program.map(|p| p.init_services()), fs),
       simien_node_runtime::ops::bootstrap::simien_bootstrap::init(BootstrapOptions::default()),
       simien_node_runtime::ops::runtime::simien_runtime::init(main_module),
       simien_node_runtime::ops::tty::simien_tty::init(),
@@ -146,10 +147,19 @@ fn runtime(permissions: PermissionsContainer) -> JsRuntime {
 
 /// Runs `code` as the main module; a thrown error fails the run.
 fn run(permissions: PermissionsContainer, code: String) -> Result<(), String> {
+  run_program(permissions, None, "file:///main.mjs", code)
+}
+
+fn run_program(
+  permissions: PermissionsContainer,
+  program: Option<simien_node_runtime::loader::NodeProgram>,
+  main: &str,
+  code: String,
+) -> Result<(), String> {
   let tokio = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
   tokio.block_on(async move {
-    let mut runtime = runtime(permissions);
-    let specifier = ModuleSpecifier::parse("file:///main.mjs").unwrap();
+    let mut runtime = runtime(permissions, program.as_ref());
+    let specifier = ModuleSpecifier::parse(main).unwrap();
     let id = runtime
       .load_main_es_module_from_code(&specifier, code)
       .await
@@ -209,4 +219,75 @@ fn the_policy_still_decides_every_file_access() {
   );
   run(PermissionsContainer::new(Arc::new(NoFiles)), code).expect("denials are errors in JavaScript");
   assert_eq!(std::fs::read_to_string(&file).unwrap(), "secret");
+}
+
+/// A node_modules tree like an installed project's.
+fn project() -> tempfile::TempDir {
+  let dir = tempfile::tempdir().unwrap();
+  let write = |path: &str, text: &str| {
+    let path = dir.path().join(path);
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    std::fs::write(path, text).unwrap();
+  };
+  write("node_modules/cjs-pkg/package.json", r#"{ "name": "cjs-pkg", "main": "lib/index.js" }"#);
+  write(
+    "node_modules/cjs-pkg/lib/index.js",
+    "const helper = require('./helper');\nmodule.exports = { greet: (n) => helper.prefix + n };\nexports.version = '1.0';\nmodule.exports.version = '1.0';\n",
+  );
+  write("node_modules/cjs-pkg/lib/helper.js", "exports.prefix = 'hello ';\n");
+  write(
+    "node_modules/esm-pkg/package.json",
+    r#"{ "name": "esm-pkg", "type": "module", "exports": { ".": { "import": "./dist/index.js" } } }"#,
+  );
+  write("node_modules/esm-pkg/dist/index.js", "export const shout = (s) => s.toUpperCase();\n");
+  write("data.json", r#"{ "answer": 42 }"#);
+  dir
+}
+
+#[test]
+fn a_program_loads_esm_and_commonjs_from_node_modules() {
+  let dir = project();
+  let main = dir.path().join("main.mjs");
+  let code = r#"
+    import { greet, version } from "cjs-pkg";
+    import cjsDefault from "cjs-pkg";
+    import { shout } from "esm-pkg";
+    import { createRequire } from "node:module";
+    import fs from "fs";
+    function check(what, got, want) {
+      if (got !== want) throw new Error(`${what}: got ${got}, want ${want}`);
+    }
+    check("named import from CommonJS", greet("simien"), "hello simien");
+    check("export from CommonJS", version, "1.0");
+    check("default import from CommonJS", cjsDefault.greet("x"), "hello x");
+    check("ESM through exports", shout("node"), "NODE");
+    const require = createRequire(import.meta.url);
+    check("require() of a package", require("cjs-pkg").greet("y"), "hello y");
+    check("require() of JSON", require("./data.json").answer, 42);
+    check("bare builtin", typeof fs.readFileSync, "function");
+  "#;
+  std::fs::write(&main, code).unwrap();
+  let program = simien_node_runtime::loader::NodeProgram::new(dir.path());
+  let main_url = ModuleSpecifier::from_file_path(&main).unwrap().to_string();
+  run_program(PermissionsContainer::allow_all(), Some(program), &main_url, code.to_string())
+    .expect("the program runs");
+}
+
+#[test]
+fn require_reads_only_what_the_policy_allows() {
+  let dir = project();
+  let main = dir.path().join("main.mjs");
+  let code = r#"
+    import { createRequire } from "node:module";
+    const require = createRequire(import.meta.url);
+    let error;
+    try { require("./data.json"); } catch (e) { error = e; }
+    if (!error) throw new Error("require() read a file the policy denies");
+    if (!String(error).includes("Requires read access")) throw error;
+  "#;
+  std::fs::write(&main, code).unwrap();
+  let program = simien_node_runtime::loader::NodeProgram::new(dir.path());
+  let main_url = ModuleSpecifier::from_file_path(&main).unwrap().to_string();
+  run_program(PermissionsContainer::new(Arc::new(NoFiles)), Some(program), &main_url, code.to_string())
+    .expect("require()'s denial is an error in JavaScript");
 }

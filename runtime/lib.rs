@@ -3,7 +3,9 @@
 //! The Deno namespace simien_node reads, for isolates granted
 //! `dangerouslyUseNode` (Simien APS 2 and APS 3, option A).
 //!
-//! An isolate gets these extensions after the web APIs and the Node layer:
+//! An isolate gets these extensions after the web APIs, simien_napi (whose
+//! `op_napi_open` `node:module` imports; addons load only past `check_ffi`)
+//! and the Node layer:
 //! - [`ops::bootstrap::simien_bootstrap`] with [`BootstrapOptions`], and
 //!   [`ops::runtime::simien_runtime`] with the main module;
 //! - [`ops::tty::simien_tty`] and [`ops::fs_events::simien_fs_events`];
@@ -18,6 +20,8 @@
 //! Everything here asks Simien's policy through simien_permissions; nothing
 //! is granted by being here.
 
+pub mod cjs;
+pub mod loader;
 pub mod ops;
 pub mod transpile;
 
@@ -54,6 +58,7 @@ simien_core::extension!(
     simien_fs,
     simien_os,
     simien_process,
+    simien_napi,
     simien_node
   ],
   esm_entry_point = "ext:runtime/99_simien_node.js",

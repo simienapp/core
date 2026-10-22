@@ -5775,12 +5775,16 @@ dependencies = [
 name = "simien_node_runtime"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
+ "futures",
  "libc",
  "log",
  "nix 0.30.1",
  "notify",
  "once_cell",
  "oxc_allocator",
+ "oxc_ast",
+ "oxc_ast_visit",
  "oxc_codegen",
  "oxc_parser",
  "oxc_semantic",
@@ -5795,8 +5799,10 @@ dependencies = [
  "simien_fs",
  "simien_io",
  "simien_maybe_sync",
+ "simien_napi",
  "simien_net",
  "simien_node",
+ "simien_node_resolver",
  "simien_os",
  "simien_path_util",
  "simien_permissions",
@@ -5809,6 +5815,7 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.12",
  "tokio",
+ "url",
  "windows-sys 0.59.0",
 ]
 
