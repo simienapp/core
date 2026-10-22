@@ -16,6 +16,11 @@ In CI CARGO_REGISTRY_TOKEN comes from crates.io trusted publishing
 doesn't have yet is published with NEW_CRATE_TOKEN, the release
 environment's CARGO_REGISTRY_TOKEN secret, which is only needed while a new
 crate is waiting.
+
+A trusted-publishing token lives about 30 minutes, and waiting out the
+new-crate rate limit takes longer, so in CI this mints a fresh one (as
+crates-io-auth-action does) before publishing with one older than
+TOKEN_REFRESH seconds, and revokes the ones it minted at the end.
 """
 
 import email.utils
@@ -32,6 +37,53 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DRY = "--dry-run" in sys.argv
 CHECK = "--check" in sys.argv
 AGENT = "simienapp-core-publish (https://github.com/simienapp/core)"
+TOKENS_URL = "https://crates.io/api/v1/trusted_publishing/tokens"
+TOKEN_REFRESH = 20 * 60
+
+
+class TrustedToken:
+    """The trusted-publishing token, fresh enough to publish with."""
+
+    def __init__(self):
+        self.token = os.environ.get("CARGO_REGISTRY_TOKEN", "")
+        self.since = time.monotonic()
+        self.minted = []
+
+    def can_mint(self):
+        return bool(os.environ.get("ACTIONS_ID_TOKEN_REQUEST_URL") and os.environ.get("ACTIONS_ID_TOKEN_REQUEST_TOKEN"))
+
+    def get(self):
+        if self.can_mint() and time.monotonic() - self.since > TOKEN_REFRESH:
+            self.token = self.mint()
+            self.since = time.monotonic()
+            self.minted.append(self.token)
+            print("token   minted a fresh trusted-publishing token", flush=True)
+        return self.token
+
+    def mint(self):
+        # GitHub's OIDC token for audience crates.io, exchanged for a crates.io token.
+        oidc = urllib.request.Request(
+            os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"] + "&audience=crates.io",
+            headers={"Authorization": "Bearer " + os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"], "User-Agent": AGENT},
+        )
+        with urllib.request.urlopen(oidc) as r:
+            jwt = json.load(r)["value"]
+        exchange = urllib.request.Request(
+            TOKENS_URL,
+            data=json.dumps({"jwt": jwt}).encode(),
+            headers={"Content-Type": "application/json", "User-Agent": AGENT},
+            method="POST",
+        )
+        with urllib.request.urlopen(exchange) as r:
+            return json.load(r)["token"]
+
+    def revoke_minted(self):
+        for token in self.minted:
+            req = urllib.request.Request(TOKENS_URL, headers={"Authorization": "Bearer " + token, "User-Agent": AGENT}, method="DELETE")
+            try:
+                urllib.request.urlopen(req).close()
+            except urllib.error.HTTPError as e:
+                print(f"token   revoking a minted token failed: HTTP {e.code}", flush=True)
 
 
 def on_crates_io(name, version=None):
@@ -123,6 +175,14 @@ def main():
     # A crate that can't be published (no trusted publisher yet, say) doesn't
     # hold up the others: its dependents are skipped, everything else goes
     # up, and the run still fails at the end, naming what didn't.
+    trusted = TrustedToken()
+    try:
+        publish_all(trusted)
+    finally:
+        trusted.revoke_minted()
+
+
+def publish_all(trusted):
     failed, skipped = [], []
     for name, version, args, deps in plan():
         if blocked := sorted(deps & set(failed + skipped)):
@@ -147,6 +207,8 @@ def main():
             print(f"publish {name} {version}" + (" (new crate)" if new else ""), flush=True)
             continue
         while True:
+            if not new:
+                env["CARGO_REGISTRY_TOKEN"] = trusted.get()
             r = subprocess.run(["cargo", "publish", "--no-verify", *args], cwd=ROOT, capture_output=True, text=True, env=env)
             out = r.stdout + r.stderr
             if r.returncode == 0:
