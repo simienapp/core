@@ -33,6 +33,7 @@ const { guessHandleType } = core.loadExtScript(
 );
 const { codeMap } = core.loadExtScript("ext:simien_node/internal_binding/uv.ts");
 import { op_bootstrap_color_depth } from "ext:core/ops";
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const { validateInteger } = core.loadExtScript(
   "ext:simien_node/internal/validators.mjs",
 );

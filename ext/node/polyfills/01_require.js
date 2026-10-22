@@ -189,6 +189,7 @@ const internalConsole = core.loadExtScript(
 import pathPosix from "node:path/posix";
 import pathWin32 from "node:path/win32";
 import path from "node:path";
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 // node:process is lazy now (see lib.rs / 98_global_scope_shared.js). 01_require
 // only uses `process` inside require-time functions + the builtin map, never at
 // module-eval, so resolving it lazily keeps the node process closure out of the

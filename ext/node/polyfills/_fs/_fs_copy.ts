@@ -10,6 +10,7 @@ import {
   getValidatedPathToString,
   getValidMode,
 } from "ext:simien_node/internal/fs/utils.mjs";
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 
 const {
   Error,

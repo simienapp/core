@@ -22,6 +22,7 @@
 
 (function () {
 const { core, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   op_node_udp_bind,
   op_node_udp_fd_for_ipc,

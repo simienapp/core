@@ -21,6 +21,7 @@
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 (function () {
 const { core, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const { getExecArgvOptions, getOptions } = core.loadExtScript(
   "ext:simien_node/internal_binding/node_options.ts",
 );

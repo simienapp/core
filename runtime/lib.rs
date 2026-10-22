@@ -10,9 +10,10 @@
 //!   [`ops::runtime::simien_runtime`] with the main module;
 //! - [`ops::tty::simien_tty`] and [`ops::fs_events::simien_fs_events`];
 //! - [`runtime`], the JavaScript: it builds the namespace and leaves
-//!   `globalThis.__simienBootstrapNode(argv0)` for the embedder to call once,
-//!   which installs `Deno` as a hidden global (not enumerable, not writable)
-//!   and stashes Node's bootstrap so it starts on first `node:*` use.
+//!   `globalThis.__simienBootstrapNode(argv0, versions)` for the embedder to
+//!   call once, which fills simien_node's private Deno namespace, removes
+//!   core's `Deno` from the global (programs never see one) and stashes
+//!   Node's bootstrap so it starts on first `node:*` use.
 //!
 //! The runtime must pass [`transpile::transpile_extension`] as
 //! `RuntimeOptions::extension_transpiler`: simien_node's files are TypeScript.
@@ -126,17 +127,24 @@ pub fn extensions(
   ]
 }
 
-/// Installs the hidden `Deno` global, Node's globals and the global events,
-/// and stashes Node's bootstrap, once, before any app code runs. `argv0` is
-/// `process.argv0`. The [`Lifecycle`] runs the program.
+/// Fills simien_node's private Deno namespace, installs Node's globals and
+/// the global events, and stashes Node's bootstrap, once, before any app code
+/// runs. `argv0` is `process.argv0`; `simien_version` is the embedder's
+/// version, which `process.versions.simien` reports. The [`Lifecycle`] runs
+/// the program.
 pub fn bootstrap(
   runtime: &mut JsRuntime,
   argv0: &str,
+  simien_version: &str,
 ) -> Result<Lifecycle, Box<JsError>> {
   let argv0 = serde_json::to_string(argv0).expect("a string serializes");
+  let versions = serde_json::json!({
+    "simien": simien_version,
+    "v8": v8::V8::get_version(),
+  });
   let hooks = runtime.execute_script(
     "ext:runtime/bootstrap",
-    format!("globalThis.__simienBootstrapNode({argv0});"),
+    format!("globalThis.__simienBootstrapNode({argv0}, {versions});"),
   )?;
   simien_core::scope!(scope, runtime);
   let hooks = v8::Local::new(scope, hooks);

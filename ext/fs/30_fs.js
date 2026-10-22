@@ -356,7 +356,7 @@ function createByteStruct(types) {
   // types can be "date", "bool" or "u64".
   let offset = 0;
   let str =
-    'const unix = Deno.build.os === "darwin" || Deno.build.os === "linux" || Deno.build.os === "android" || Deno.build.os === "openbsd" || Deno.build.os === "freebsd";' +
+    'const unix = core.build.os === "darwin" || core.build.os === "linux" || core.build.os === "android" || core.build.os === "openbsd" || core.build.os === "freebsd";' +
     // Two's-complement inversion avoids float64 precision loss near 2^64.
     " const readI64Ms = (lo, hi) => hi < 2147483648 ? lo + hi * 4294967296 : -((~hi >>> 0) * 4294967296 + (~lo >>> 0) + 1);" +
     " return {";
@@ -403,7 +403,12 @@ function createByteStruct(types) {
   }
   str += "};";
   // ...so you don't like eval huh? don't worry, it only executes during snapshot :)
-  return [new Function("view", str), new Uint32Array(offset)];
+  // `core` comes in through the closure: there is no global `Deno` to read
+  // the platform from.
+  return [
+    new Function("core", `return (view) => { ${str} }`)(core),
+    new Uint32Array(offset),
+  ];
 }
 
 const { 0: statStruct, 1: statBuf } = createByteStruct({

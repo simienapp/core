@@ -3,6 +3,7 @@
 
 (function () {
 const { core, internals, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   op_create_worker,
   op_host_get_worker_cpu_usage,

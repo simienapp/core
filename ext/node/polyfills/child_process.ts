@@ -5,6 +5,7 @@
 
 (function () {
 const { core, internals, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   op_bootstrap_unstable_args,
   op_node_child_ipc_pipe,

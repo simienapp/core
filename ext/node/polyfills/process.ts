@@ -134,6 +134,7 @@ const {
 } = core.loadExtScript("ext:simien_node/internal/timers.mjs");
 import type fsUtils from "ext:simien_node/internal/fs/utils.mjs";
 import type * as utilModule from "ext:simien_node/util.ts";
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 
 let fsUtilsModule: typeof fsUtils;
 const lazyLoadFsUtils = core.createLazyLoader<typeof fsUtils>(

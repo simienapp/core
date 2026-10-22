@@ -3,6 +3,7 @@
 
 (function () {
 const { core, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const lazyPath = core.createLazyLoader("node:path");
 const lazyFsPromises = core.createLazyLoader(
   "ext:simien_node/internal/fs/promises.ts",

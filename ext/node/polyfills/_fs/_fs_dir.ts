@@ -5,6 +5,7 @@ import {
   type Dirent,
   direntFromDeno,
 } from "ext:simien_node/internal/fs/utils.mjs";
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const { default: assert } = core.loadExtScript("ext:simien_node/assert.ts");
 const { ERR_MISSING_ARGS, ERR_DIR_CLOSED } = core.loadExtScript(
   "ext:simien_node/internal/errors.ts",

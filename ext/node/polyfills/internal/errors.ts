@@ -13,6 +13,7 @@
 
 (function () {
 const { core, primordials } = __bootstrap;
+const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   AggregateError,
   ArrayIsArray,
