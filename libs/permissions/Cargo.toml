@@ -1,0 +1,22 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_permissions"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+repository = "https://github.com/simienapp/core"
+description = "The permission checks Simien's Node layer makes, answered by the embedder's policy. Keeps the interface of Deno's permissions crate (0.118.0) without its permission model."
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+simien_error.workspace = true
+simien_sys_traits = { workspace = true, features = ["libc", "real", "winapi"] }
+thiserror.workspace = true
+which.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+nix = { workspace = true, features = ["fs"] }

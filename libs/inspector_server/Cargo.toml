@@ -1,0 +1,27 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_inspector_server"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+repository = "https://github.com/simienapp/core"
+description = "node:inspector's server for simien_node. Forked from deno_inspector_server 0.33.0."
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+simien_core.workspace = true
+simien_error.workspace = true
+
+fastwebsockets.workspace = true
+http.workspace = true
+http-body-util.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+log.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+uuid.workspace = true

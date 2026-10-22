@@ -19,3 +19,17 @@ skipped abd22074e4 version bump: forward v2.9.7 release commit to main
 ported  1b48a20f85 fix(core): errno_location for android bionic (#36890)
 ported  117c76f209 chore(core): add SharedArrayBuffer to primordials (#36627)
 ported  2f885193c6 perf: avoid allocating null-prototype objects for default parameters (#36940)
+
+# The Node layer (simienapp/runtime#46), brought in at v2.9.7 with history.
+# Changed here on purpose, so an upstream patch to these files may need a hand
+# port:
+#   ext/node/ops/assert.rs   own tokenizer instead of deno_ast (APS 2.1)
+#   ext/node/ops/module.rs   stripTypeScriptTypes on oxc instead of deno_ast
+#   ext/node/ops/vm.rs       V8 152: Boolean setter/definer returns, microtask
+#                            queue handles in the op state
+#   ext/net                  tunnels cut (Deno Deploy only; drops deno_tunnel)
+#   libs/permissions         Simien's own crate: deno_permissions' interface,
+#                            answered by the embedder's policy; not a path upstream
+checked-repo deno_core_icudata 9adfc10 (0.78.0, ICU 78; libs/core_icudata)
+# libs/whoami is deno_whoami 0.1.0's published source: its repository isn't
+# public, so there's nothing to watch.

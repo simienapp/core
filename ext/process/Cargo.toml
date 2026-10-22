@@ -1,0 +1,40 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_process"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+readme = "README.md"
+repository = "https://github.com/simienapp/core"
+description = "Child processes for Simien's Node layer, checked against Simien's permissions. Forked from deno_process 0.74.0."
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+simien_core.workspace = true
+simien_error.workspace = true
+simien_fs.workspace = true
+simien_io.workspace = true
+simien_os.workspace = true
+simien_path_util.workspace = true
+simien_permissions.workspace = true
+simien_signals.workspace = true
+simien_subprocess_windows.workspace = true
+libc.workspace = true
+log.workspace = true
+memchr.workspace = true
+rand.workspace = true
+serde.workspace = true
+simien_sys_traits = { workspace = true, features = ["real", "winapi", "libc"] }
+tempfile.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+nix = { workspace = true, features = ["signal", "process"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = ["Win32_System_Threading"] }

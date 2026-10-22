@@ -243,6 +243,63 @@ impl Resource for UnixStreamResource {
   }
 }
 
+#[cfg(any(target_os = "android", target_os = "linux", target_os = "macos"))]
+pub type VsockStreamResource =
+  FullDuplexResource<tokio_vsock::OwnedReadHalf, tokio_vsock::OwnedWriteHalf>;
+
+#[cfg(not(any(
+  target_os = "android",
+  target_os = "linux",
+  target_os = "macos"
+)))]
+pub struct VsockStreamResource;
+
+#[cfg(not(any(
+  target_os = "android",
+  target_os = "linux",
+  target_os = "macos"
+)))]
+impl VsockStreamResource {
+  fn read(self: Rc<Self>, _data: &mut [u8]) -> AsyncResult<usize> {
+    unreachable!()
+  }
+  fn write(self: Rc<Self>, _data: &[u8]) -> AsyncResult<usize> {
+    unreachable!()
+  }
+  #[allow(clippy::unused_async, reason = "not supported")]
+  pub async fn shutdown(self: Rc<Self>) -> Result<(), JsErrorBox> {
+    unreachable!()
+  }
+  pub fn cancel_read_ops(&self) {
+    unreachable!()
+  }
+  pub fn cancel_ops(&self) {
+    unreachable!()
+  }
+}
+
+impl Resource for VsockStreamResource {
+  simien_core::impl_readable_byob!();
+  simien_core::impl_writable!();
+
+  fn name(&self) -> Cow<'_, str> {
+    "vsockStream".into()
+  }
+
+  fn shutdown(self: Rc<Self>) -> AsyncResult<()> {
+    Box::pin(self.shutdown().map_err(JsErrorBox::from_err))
+  }
+
+  fn close(self: Rc<Self>) {
+    self.cancel_ops();
+  }
+
+  // See the note on TcpStreamResource::cancel_read_ops.
+  fn cancel_read_ops(self: Rc<Self>) {
+    VsockStreamResource::cancel_read_ops(&self);
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use std::io;

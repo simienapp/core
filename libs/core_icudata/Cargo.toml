@@ -1,0 +1,9 @@
+
+[package]
+authors = ["the Deno authors", "the Simien authors"]
+name = "simien_core_icudata"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/simienapp/core"
+version = "0.1.0"
+description = "ICU 78 data for simien_core's include_icu_data feature (V8 152). Forked from deno_core_icudata 0.78.0."

@@ -1,0 +1,31 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_napi"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+readme = "README.md"
+repository = "https://github.com/simienapp/core"
+description = "Node-API: native addons for code granted dangerouslyUseNode. Forked from deno_napi 0.190.0."
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+simien_core.workspace = true
+simien_error.workspace = true
+simien_node.workspace = true
+simien_permissions.workspace = true
+denort_helper.workspace = true
+libc.workspace = true
+libloading.workspace = true
+libuv-sys-lite.workspace = true
+log.workspace = true
+napi_sym.workspace = true
+object.workspace = true
+thiserror.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows-sys.workspace = true

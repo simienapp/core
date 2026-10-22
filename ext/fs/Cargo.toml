@@ -1,0 +1,42 @@
+# Copyright 2018-2026 the Deno authors. MIT license.
+
+[package]
+name = "simien_fs"
+version = "0.1.0"
+authors = ["the Deno authors", "the Simien authors"]
+edition.workspace = true
+license.workspace = true
+readme = "README.md"
+repository = "https://github.com/simienapp/core"
+description = "File system ops for Simien's Node layer, checked against Simien's permissions. Forked from deno_fs 0.169.0."
+
+[lib]
+path = "lib.rs"
+
+[features]
+sync_fs = ["simien_maybe_sync/sync"]
+
+[dependencies]
+async-trait.workspace = true
+simien_boxed_error.workspace = true
+simien_core.workspace = true
+simien_error.workspace = true
+simien_io.workspace = true
+simien_maybe_sync.workspace = true
+simien_path_util.workspace = true
+simien_permissions.workspace = true
+filetime.workspace = true
+libc.workspace = true
+rand.workspace = true
+rayon.workspace = true
+same-file.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+nix = { workspace = true, features = ["fs", "user"] }
+
+[target.'cfg(windows)'.dependencies]
+junction.workspace = true
+windows-sys = { workspace = true, features = ["Win32_Storage_FileSystem"] }
