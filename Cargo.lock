@@ -5743,7 +5743,7 @@ dependencies = [
 
 [[package]]
 name = "simien_node_resolver"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -5751,6 +5751,11 @@ dependencies = [
  "lazy-regex",
  "log",
  "once_cell",
+ "oxc_allocator",
+ "oxc_ast",
+ "oxc_ast_visit",
+ "oxc_parser",
+ "oxc_span",
  "path-clean",
  "percent-encoding",
  "pretty_assertions",
@@ -5773,7 +5778,7 @@ dependencies = [
 
 [[package]]
 name = "simien_node_runtime"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "async-trait",
  "futures",

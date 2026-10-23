@@ -6,6 +6,8 @@
 pub mod analyze;
 mod builtin_modules;
 pub mod cache;
+#[cfg(feature = "oxc")]
+pub mod cjs;
 pub mod errors;
 mod npm;
 mod package_json;

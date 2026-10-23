@@ -67,7 +67,7 @@ type Resolver = NodeResolver<
   Sys,
 >;
 type Translator = NodeCodeTranslator<
-  OxcCjsCodeAnalyzer,
+  OxcCjsCodeAnalyzer<Sys>,
   InNpmPackageChecker,
   DenoIsBuiltInNodeModuleChecker,
   NpmFolderResolver,
@@ -105,7 +105,7 @@ impl NodeProgram {
       NodeResolverOptions::default(),
     ));
     let analyzer = simien_maybe_sync::new_rc(CjsModuleExportAnalyzer::new(
-      OxcCjsCodeAnalyzer,
+      OxcCjsCodeAnalyzer::new(sys.clone()),
       ByonmInNpmPackageChecker,
       resolver.clone(),
       npm,
@@ -143,23 +143,8 @@ impl NodeProgram {
   }
 
   fn may_be_cjs(&self, path: &Path) -> Result<bool, PackageJsonLoadError> {
-    may_be_cjs(&self.pkg_json_resolver, path)
+    simien_node_resolver::cjs::may_be_cjs(&self.pkg_json_resolver, path)
   }
-}
-
-/// Whether Node would load `path` as CommonJS (or decide by its syntax):
-/// `.cjs`, or a `.js` whose closest package.json isn't `"type": "module"`.
-fn may_be_cjs(
-  pkg_json_resolver: &PackageJsonResolverRc<Sys>,
-  path: &Path,
-) -> Result<bool, PackageJsonLoadError> {
-  Ok(match path.extension().and_then(|e| e.to_str()) {
-    Some("cjs") => true,
-    Some("js") => pkg_json_resolver
-      .get_closest_package_json(path)?
-      .is_none_or(|pkg| pkg.typ != "module"),
-    _ => false,
-  })
 }
 
 fn file_path(specifier: &Url) -> Result<PathBuf, JsErrorBox> {
@@ -282,7 +267,9 @@ impl NodeRequireLoader for RequireLoader {
 
   fn is_maybe_cjs(&self, specifier: &Url) -> Result<bool, PackageJsonLoadError> {
     match specifier.to_file_path() {
-      Ok(path) => may_be_cjs(&self.pkg_json_resolver, &path),
+      Ok(path) => {
+        simien_node_resolver::cjs::may_be_cjs(&self.pkg_json_resolver, &path)
+      }
       Err(()) => Ok(false),
     }
   }

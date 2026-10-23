@@ -1,6 +1,7 @@
 // Copyright 2018-2026 the Simien authors. MIT license.
 
-//! Which names a CommonJS module exports, for importing it from ESM.
+//! Which names a CommonJS module exports, for importing it from ESM, and
+//! which modules it `require()`s by a fixed name.
 //!
 //! `import { x } from "a-commonjs-package"` works in Node because Node reads
 //! the module's source for the names it assigns (cjs-module-lexer).
@@ -17,6 +18,9 @@
 //!
 //! esbuild's `0 && (module.exports = { … })` annotation is an assignment like
 //! any other. A file with `import`/`export` syntax, or a `.mjs` file, is ESM.
+//!
+//! Simien's Node programs and its served apps both read CommonJS through
+//! this, so a package's names are the same in either.
 
 use std::borrow::Cow;
 use std::path::Path;
@@ -37,12 +41,17 @@ use oxc_ast_visit::walk;
 use oxc_parser::Parser;
 use oxc_span::SourceType;
 use simien_error::JsErrorBox;
-use simien_node_resolver::analyze::CjsAnalysis;
-use simien_node_resolver::analyze::CjsAnalysisExports;
-use simien_node_resolver::analyze::CjsCodeAnalyzer;
-use simien_node_resolver::analyze::CjsMemberReExport;
-use simien_node_resolver::analyze::EsmAnalysisMode;
+use crate::analyze::CjsAnalysis;
+use crate::analyze::CjsAnalysisExports;
+use crate::analyze::CjsCodeAnalyzer;
+use crate::analyze::CjsMemberReExport;
+use crate::analyze::EsmAnalysisMode;
+use simien_sys_traits::FsMetadata;
+use simien_sys_traits::FsRead;
 use url::Url;
+
+use crate::PackageJsonResolverRc;
+use crate::errors::PackageJsonLoadError;
 
 /// The names a module exports and the modules it re-exports from.
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -50,6 +59,9 @@ pub struct Exports {
   pub exports: Vec<String>,
   pub reexports: Vec<String>,
   pub member_reexports: Vec<(String, String)>,
+  /// What its `require("…")` calls load, wherever they are, each once (a
+  /// CommonJS module's; an ES module's is empty).
+  pub requires: Vec<String>,
 }
 
 /// What a source is, and what it exports.
@@ -92,6 +104,7 @@ pub fn analyze(path: &Path, source: &str) -> Result<Analysis, JsErrorBox> {
   let mut exports = finder.exports;
   dedup(&mut exports.exports);
   dedup(&mut exports.reexports);
+  dedup(&mut exports.requires);
   Ok(Analysis::Cjs(exports))
 }
 
@@ -266,6 +279,9 @@ impl<'a> Visit<'a> for CjsFinder {
   }
 
   fn visit_call_expression(&mut self, it: &CallExpression<'a>) {
+    if let Some(specifier) = required_call(it) {
+      self.exports.requires.push(specifier);
+    }
     let callee_name = match &it.callee {
       Expression::Identifier(id) => Some(id.name.as_str()),
       Expression::StaticMemberExpression(m) => Some(m.property.name.as_str()),
@@ -300,9 +316,32 @@ impl<'a> Visit<'a> for CjsFinder {
 
 }
 
-/// [`CjsCodeAnalyzer`] for simien_node_resolver's translator.
-#[derive(Default)]
-pub struct OxcCjsCodeAnalyzer;
+/// [`CjsCodeAnalyzer`] for simien_node_resolver's translator. A module the
+/// translator doesn't pass the source of is read through `sys`.
+pub struct OxcCjsCodeAnalyzer<TSys> {
+  sys: TSys,
+}
+
+impl<TSys> OxcCjsCodeAnalyzer<TSys> {
+  pub fn new(sys: TSys) -> Self {
+    Self { sys }
+  }
+}
+
+/// Whether Node would load `path` as CommonJS (or decide by its syntax):
+/// `.cjs`, or a `.js` whose closest package.json isn't `"type": "module"`.
+pub fn may_be_cjs<TSys: FsRead + FsMetadata>(
+  pkg_json_resolver: &PackageJsonResolverRc<TSys>,
+  path: &Path,
+) -> Result<bool, PackageJsonLoadError> {
+  Ok(match path.extension().and_then(|e| e.to_str()) {
+    Some("cjs") => true,
+    Some("js") => pkg_json_resolver
+      .get_closest_package_json(path)?
+      .is_none_or(|pkg| pkg.typ != "module"),
+    _ => false,
+  })
+}
 
 fn to_analysis_exports(exports: Exports) -> CjsAnalysisExports {
   CjsAnalysisExports {
@@ -317,21 +356,23 @@ fn to_analysis_exports(exports: Exports) -> CjsAnalysisExports {
 }
 
 #[async_trait::async_trait(?Send)]
-impl CjsCodeAnalyzer for OxcCjsCodeAnalyzer {
+impl<TSys: FsRead> CjsCodeAnalyzer for OxcCjsCodeAnalyzer<TSys> {
   async fn analyze_cjs<'a>(
     &self,
     specifier: &Url,
     maybe_source: Option<Cow<'a, str>>,
     esm_analysis_mode: EsmAnalysisMode,
   ) -> Result<CjsAnalysis<'a>, JsErrorBox> {
-    let path = specifier
-      .to_file_path()
+    let path = simien_path_util::url_to_file_path(specifier)
       .map_err(|_| JsErrorBox::generic(format!("{specifier} is not a file")))?;
     let source = match maybe_source {
       Some(source) => source,
       None => Cow::Owned(
-        std::fs::read_to_string(&path)
-          .map_err(|e| JsErrorBox::generic(format!("{}: {e}", path.display())))?,
+        self
+          .sys
+          .fs_read_to_string(&path)
+          .map_err(|e| JsErrorBox::generic(format!("{}: {e}", path.display())))?
+          .into_owned(),
       ),
     };
     Ok(match analyze(&path, &source)? {
@@ -397,6 +438,17 @@ mod tests {
     );
     // Inside a function or a branch, as the lexer does.
     assert_eq!(cjs("if (x) { exports.m = 1 } (function(){ exports.n = 2 })()").exports, ["m", "n"]);
+  }
+
+  #[test]
+  fn finds_the_fixed_names_it_requires() {
+    let requires = cjs(
+      "const a = require('a'); if (dev) module.exports = require('./dev.js'); \
+       else module.exports = require(`./prod.js`); require('a'); require(name); \
+       function f() { return require('node:fs') }",
+    )
+    .requires;
+    assert_eq!(requires, ["a", "./dev.js", "./prod.js", "node:fs"]);
   }
 
   #[test]

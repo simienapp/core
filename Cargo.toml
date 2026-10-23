@@ -88,7 +88,7 @@ simien_signals = { version = "0.1.0", path = "./ext/signals" }
 simien_subprocess_windows = { version = "0.1.0", path = "./runtime/subprocess_windows" }
 simien_core_icudata = { version = "0.1.0", path = "./libs/core_icudata" }
 simien_whoami = { version = "0.1.0", path = "./libs/whoami" }
-simien_node_runtime = { version = "0.4.0", path = "./runtime" }
+simien_node_runtime = { version = "0.4.1", path = "./runtime" }
 # JavaScript and TypeScript parsing, the same oxc version as simienapp/runtime.
 oxc_allocator = "0.152.0"
 oxc_ast = "0.152.0"
@@ -144,7 +144,7 @@ simien_ops = { version = "0.1.1", path = "./libs/ops" }
 simien_package_json = { version = "0.1.1", path = "./libs/package_json", default-features = false }
 eszip = { version = "0.137.0" }
 napi_sym = { version = "0.189.0" }
-simien_node_resolver = { version = "0.1.1", path = "./libs/node_resolver" }
+simien_node_resolver = { version = "0.1.2", path = "./libs/node_resolver" }
 node_shim = { version = "0.34.0" }
 simien_serde_v8 = { version = "0.1.1", path = "./libs/serde_v8", default-features = false }
 test_macro = { }
