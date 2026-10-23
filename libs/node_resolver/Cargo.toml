@@ -2,7 +2,7 @@
 
 [package]
 name = "simien_node_resolver"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["the Deno authors", "the Simien authors"]
 repository = "https://github.com/simienapp/core"
 description = "package.json exports/imports and condition resolution for Simien's module loader. Forked from node_resolver 0.97.0."
@@ -15,6 +15,8 @@ path = "lib.rs"
 
 [features]
 sync = ["simien_maybe_sync/sync", "simien_package_json/sync"]
+# The CommonJS analysis, for a translator and a loader to share.
+oxc = ["dep:oxc_allocator", "dep:oxc_ast", "dep:oxc_ast_visit", "dep:oxc_parser", "dep:oxc_span"]
 
 [dependencies]
 anyhow.workspace = true
@@ -31,6 +33,11 @@ futures.workspace = true
 lazy-regex.workspace = true
 log.workspace = true
 once_cell.workspace = true
+oxc_allocator = { workspace = true, optional = true }
+oxc_ast = { workspace = true, optional = true }
+oxc_ast_visit = { workspace = true, optional = true }
+oxc_parser = { workspace = true, optional = true }
+oxc_span = { workspace = true, optional = true }
 path-clean.workspace = true
 percent-encoding.workspace = true
 pretty_assertions.workspace = true

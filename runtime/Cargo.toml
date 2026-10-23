@@ -2,7 +2,7 @@
 
 [package]
 name = "simien_node_runtime"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true
@@ -39,7 +39,7 @@ simien_io.workspace = true
 simien_net.workspace = true
 simien_node.workspace = true
 simien_node_crypto.workspace = true
-simien_node_resolver.workspace = true
+simien_node_resolver = { workspace = true, features = ["oxc"] }
 simien_os.workspace = true
 simien_path_util.workspace = true
 simien_permissions.workspace = true

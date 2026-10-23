@@ -21,7 +21,7 @@
 //! Everything here asks Simien's policy through simien_permissions; nothing
 //! is granted by being here.
 
-pub mod cjs;
+pub use simien_node_resolver::cjs;
 pub mod loader;
 pub mod ops;
 pub mod transpile;
