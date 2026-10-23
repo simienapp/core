@@ -5618,7 +5618,7 @@ dependencies = [
 
 [[package]]
 name = "simien_node"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "base64 0.22.1",
  "brotli",
@@ -5778,7 +5778,7 @@ dependencies = [
 
 [[package]]
 name = "simien_node_runtime"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "async-trait",
  "futures",

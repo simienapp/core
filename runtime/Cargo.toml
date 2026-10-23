@@ -2,7 +2,7 @@
 
 [package]
 name = "simien_node_runtime"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true

@@ -346,6 +346,7 @@ simien_core::extension!(simien_node,
     // prototype to inject NGHTTP2 error codes.
     ops::http2::op_http2_error_string,
     ops::http2::op_http2_http_state,
+    ops::os::op_node_os_available_parallelism,
     ops::os::op_node_os_get_priority,
     ops::os::op_node_os_set_priority,
     ops::os::op_node_os_user_info,

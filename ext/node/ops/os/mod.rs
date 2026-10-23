@@ -40,6 +40,13 @@ pub enum OsError {
   ),
 }
 
+/// `os.availableParallelism()`: upstream read `navigator.hardwareConcurrency`,
+/// a global Simien's Node layer doesn't have. Unchecked, as it was there.
+#[op2(fast)]
+pub fn op_node_os_available_parallelism() -> u32 {
+  std::thread::available_parallelism().map_or(1, |n| n.get() as u32)
+}
+
 #[op2(fast, stack_trace)]
 pub fn op_node_os_get_priority(
   state: &mut OpState,
