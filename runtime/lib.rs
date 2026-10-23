@@ -50,6 +50,11 @@ pub struct BootstrapOptions {
   /// the child its way (Simien: `__node-program --project … <rules>`). Empty:
   /// upstream's translation to Deno's command line.
   pub exec_args: Vec<String>,
+  /// A `cluster` worker's id and the primary's scheduling policy, as the
+  /// primary passed them (`NODE_UNIQUE_ID`, `NODE_CLUSTER_SCHED_POLICY`).
+  /// `None` for a program that isn't a worker.
+  pub cluster_unique_id: Option<String>,
+  pub cluster_sched_policy: Option<String>,
   /// `0` off to `5` trace, as upstream's `WorkerLogLevel`.
   pub log_level: i32,
   pub color_level: ColorLevel,
@@ -60,6 +65,8 @@ impl Default for BootstrapOptions {
     Self {
       args: Vec::new(),
       exec_args: Vec::new(),
+      cluster_unique_id: None,
+      cluster_sched_policy: None,
       log_level: 1,
       color_level: simien_terminal::colors::get_color_level(),
     }

@@ -350,3 +350,27 @@ fn available_parallelism_is_a_count() {
   );
   run(PermissionsContainer::allow_all(), code).expect("availableParallelism");
 }
+
+/// A program started as a `cluster` worker (the primary's NODE_UNIQUE_ID,
+/// handed over in `BootstrapOptions`) is one; any other program is the
+/// primary, as upstream's bootstrap makes it.
+#[test]
+fn a_cluster_worker_knows_it_is_one() {
+  let worker = r#"
+    import cluster from "node:cluster";
+    if (!cluster.isWorker || cluster.isPrimary) throw new Error(`isWorker ${cluster.isWorker}`);
+    if (cluster.schedulingPolicy !== cluster.SCHED_NONE) throw new Error(`policy ${cluster.schedulingPolicy}`);
+    "#;
+  let bootstrap = BootstrapOptions {
+    cluster_unique_id: Some("1".to_string()),
+    cluster_sched_policy: Some("none".to_string()),
+    ..Default::default()
+  };
+  run_with(PermissionsContainer::allow_all(), None, "file:///main.mjs", worker.to_string(), bootstrap)
+    .expect("a worker");
+  let primary = r#"
+    import cluster from "node:cluster";
+    if (!cluster.isPrimary || cluster.isWorker) throw new Error(`isPrimary ${cluster.isPrimary}`);
+    "#;
+  run(PermissionsContainer::allow_all(), primary.to_string()).expect("the primary");
+}

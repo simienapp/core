@@ -15,6 +15,7 @@ simien_core::extension!(
   ops = [
     op_bootstrap_args,
     op_bootstrap_exec_args,
+    op_bootstrap_cluster,
     op_bootstrap_target,
     op_bootstrap_pid,
     op_bootstrap_log_level,
@@ -54,6 +55,19 @@ pub fn op_bootstrap_args(state: &mut OpState) -> Vec<String> {
 #[op2]
 pub fn op_bootstrap_exec_args(state: &mut OpState) -> Vec<String> {
   state.borrow::<BootstrapOptions>().exec_args.clone()
+}
+
+/// `[uniqueId, schedPolicy]` for a `cluster` worker, both `null` otherwise.
+#[op2]
+#[serde]
+pub fn op_bootstrap_cluster(
+  state: &mut OpState,
+) -> (Option<String>, Option<String>) {
+  let options = state.borrow::<BootstrapOptions>();
+  (
+    options.cluster_unique_id.clone(),
+    options.cluster_sched_policy.clone(),
+  )
 }
 
 #[op2(fast)]
