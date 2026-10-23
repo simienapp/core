@@ -21,6 +21,29 @@ use simien_inspector_server::create_inspector_server;
 use simien_inspector_server::stop_inspector_server;
 use simien_permissions::PermissionsContainer;
 
+/// The runtime's inspector, when it was started with one: a runtime made
+/// without it has nothing to connect a session to or serve.
+fn runtime_inspector(
+  state: &OpState,
+) -> Result<Rc<JsRuntimeInspector>, InspectorNotAvailable> {
+  state
+    .try_borrow::<Rc<JsRuntimeInspector>>()
+    .cloned()
+    .ok_or(InspectorNotAvailable)
+}
+
+#[derive(Debug, thiserror::Error, simien_error::JsError)]
+#[error("Inspector is not available")]
+#[class(generic)]
+#[property("code" = "ERR_INSPECTOR_NOT_AVAILABLE")]
+pub struct InspectorNotAvailable;
+
+/// Backs `process.features.inspector`: whether this runtime has one.
+#[op2(fast)]
+pub fn op_inspector_available(state: &OpState) -> bool {
+  state.has::<Rc<JsRuntimeInspector>>()
+}
+
 #[op2(fast)]
 pub fn op_inspector_enabled(state: &OpState) -> bool {
   // If there's `InspectorServerUrl` then inspector is enabled, this
@@ -107,7 +130,7 @@ pub fn op_inspector_open(
   let server =
     create_inspector_server(addr, "deno", InspectPublishUid::default())?;
 
-  let inspector = state.borrow::<Rc<JsRuntimeInspector>>().clone();
+  let inspector = runtime_inspector(state)?;
   let main_module = state.borrow::<ModuleSpecifier>().to_string();
 
   let inspector_url =
@@ -307,6 +330,13 @@ unsafe impl GarbageCollected for JSInspectorSession {
 pub enum InspectorOpenError {
   #[class(inherit)]
   #[error(transparent)]
+  NotAvailable(
+    #[from]
+    #[inherit]
+    InspectorNotAvailable,
+  ),
+  #[class(inherit)]
+  #[error(transparent)]
   Permission(
     #[from]
     #[inherit]
@@ -326,6 +356,13 @@ pub enum InspectorOpenError {
 
 #[derive(Debug, thiserror::Error, simien_error::JsError)]
 pub enum InspectorConnectError {
+  #[class(inherit)]
+  #[error(transparent)]
+  NotAvailable(
+    #[from]
+    #[inherit]
+    InspectorNotAvailable,
+  ),
   #[class(inherit)]
   #[error(transparent)]
   Permission(
@@ -359,7 +396,7 @@ pub fn op_inspector_connect<'s>(
   let context = v8::Global::new(scope, context);
   let callback = v8::Global::new(scope, callback);
 
-  let inspector = state.borrow::<Rc<JsRuntimeInspector>>().clone();
+  let inspector = runtime_inspector(state)?;
 
   // SAFETY: just grabbing the raw pointer
   let isolate = unsafe { isolate.as_raw_isolate_ptr() };
@@ -411,12 +448,12 @@ pub fn op_node_repl_inspector_connect<'s>(
   scope: &mut v8::PinScope<'s, '_>,
   state: &mut OpState,
   callback: v8::Local<'s, v8::Function>,
-) -> JSInspectorSession {
+) -> Result<JSInspectorSession, InspectorNotAvailable> {
   let context = scope.get_current_context();
   let context = v8::Global::new(scope, context);
   let callback = v8::Global::new(scope, callback);
 
-  let inspector = state.borrow::<Rc<JsRuntimeInspector>>().clone();
+  let inspector = runtime_inspector(state)?;
 
   // SAFETY: just grabbing the raw pointer
   let isolate = unsafe { isolate.as_raw_isolate_ptr() };
@@ -445,9 +482,9 @@ pub fn op_node_repl_inspector_connect<'s>(
     },
   );
 
-  JSInspectorSession {
+  Ok(JSInspectorSession {
     session: RefCell::new(Some(session)),
-  }
+  })
 }
 
 #[op2(fast, reentrant)]

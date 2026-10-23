@@ -18,6 +18,7 @@ import {
   op_getegid,
   op_geteuid,
   op_getgroups,
+  op_inspector_available,
   op_inspector_close,
   op_inspector_enabled,
   op_inspector_port,
@@ -1558,7 +1559,9 @@ ObjectDefineProperty(process, "allowedNodeEnvironmentFlags", {
 export const allowedNodeEnvironmentFlags = ALLOWED_FLAGS;
 
 const features = {
-  inspector: true,
+  get inspector() {
+    return op_inspector_available();
+  },
   // TODO(bartlomieju): not sure if it's worth getting actual value during build process
   debug: false,
   uv: true,

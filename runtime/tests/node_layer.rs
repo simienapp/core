@@ -253,3 +253,25 @@ fn require_reads_only_what_the_policy_allows() {
   run_program(PermissionsContainer::new(Arc::new(NoFiles)), Some(program), &main_url, code.to_string())
     .expect("require()'s denial is an error in JavaScript");
 }
+
+/// A runtime started without a snapshot or an inspector (Simien's) still
+/// makes `vm` contexts, and an inspector session is an error, not an abort.
+#[test]
+fn vm_contexts_work_and_a_missing_inspector_is_an_error() {
+  let code = r#"
+    import vm from "node:vm";
+    import process from "node:process";
+    import inspector from "node:inspector";
+    function check(what, got, want) {
+      if (got !== want) throw new Error(`${what}: got ${got}, want ${want}`);
+    }
+    const context = vm.createContext({ x: 2 });
+    check("runs in the context", vm.runInContext("x * 21", context), 42);
+    check("its own globals", vm.runInContext("typeof Array", context), "function");
+    check("no inspector", process.features.inspector, false);
+    let error;
+    try { new inspector.Session().connect(); } catch (e) { error = e; }
+    check("connect", error?.code, "ERR_INSPECTOR_NOT_AVAILABLE");
+    "#;
+  run(PermissionsContainer::allow_all(), code.to_string()).expect("vm and inspector");
+}
