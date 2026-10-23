@@ -47,7 +47,7 @@ pub fn isolate(
   program: Option<&NodeProgram>,
   loader: Rc<dyn ModuleLoader>,
   main_module: ModuleSpecifier,
-  args: Vec<String>,
+  bootstrap: BootstrapOptions,
 ) -> Isolate {
   let exit_code = simien_os::ExitCode::default();
   let mut extensions = vec![
@@ -61,7 +61,7 @@ pub fn isolate(
   extensions.extend(simien_node_runtime::extensions(
     program,
     main_module.clone(),
-    BootstrapOptions { args, ..Default::default() },
+    bootstrap,
     exit_code.clone(),
   ));
   let mut runtime = JsRuntime::new(RuntimeOptions {

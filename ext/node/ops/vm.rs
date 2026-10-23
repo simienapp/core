@@ -740,7 +740,16 @@ impl ContextifyContext {
   ) -> Option<&'c ContextifyContext> {
     let context = object.get_creation_context(scope)?;
 
-    let context_ptr = context.get_aligned_pointer_from_embedder_data(3);
+    // Only a context `attach` finished has the tag; any other (the main
+    // context, or this one while V8 builds its global from the template and
+    // runs the interceptors) holds arbitrary bytes in the slot.
+    let tag_ptr =
+      context.get_aligned_pointer_from_embedder_data(CONTEXTIFY_TAG_SLOT);
+    if tag_ptr != &raw const CONTEXTIFY_TAG as *mut _ {
+      return None;
+    }
+    let context_ptr =
+      context.get_aligned_pointer_from_embedder_data(CONTEXTIFY_CTX_SLOT);
     if context_ptr.is_null() {
       return None;
     }
@@ -769,7 +778,9 @@ pub fn create_v8_context<'a>(
   let scope = std::pin::pin!(v8::EscapableHandleScope::new(scope));
   let scope = &mut scope.init();
 
-  let context = if mode == ContextInitMode::UseSnapshot {
+  // A runtime started from a snapshot has the context in it; one started
+  // without (Simien's) builds it from the same template, as the snapshot did.
+  let from_snapshot = if mode == ContextInitMode::UseSnapshot {
     v8::Context::from_snapshot(
       scope,
       VM_CONTEXT_INDEX,
@@ -778,7 +789,11 @@ pub fn create_v8_context<'a>(
         ..Default::default()
       },
     )
-    .unwrap()
+  } else {
+    None
+  };
+  let context = if let Some(context) = from_snapshot {
+    context
   } else {
     let ctx = v8::Context::new(
       scope,

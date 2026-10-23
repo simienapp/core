@@ -1533,6 +1533,20 @@ function escapeShellArg(arg) {
 }
 
 /**
+ * Simien: another Node program like this one starts the embedder's way
+ * (BootstrapOptions::exec_args), then gets Node's own arguments. `null` when
+ * the embedder gives none: upstream's translation to Deno's command line.
+ */
+function selfArgs(args) {
+  const execArgs = core.ops.op_bootstrap_exec_args?.() ?? [];
+  if (execArgs.length === 0) return null;
+  return [
+    ...new SafeArrayIterator(execArgs),
+    ...new SafeArrayIterator(ArrayPrototypeMap(args, (arg) => String(arg))),
+  ];
+}
+
+/**
  * Transforms a shell command that invokes Deno with Node.js flags into Deno-compatible flags.
  * Uses the Rust CLI parser (op_node_translate_cli_args) to handle argument translation,
  * including subcommand detection, -c/--check flag handling, and adding "run -A".
@@ -1618,7 +1632,10 @@ function transformDenoShellCommand(
   );
 
   try {
-    const result = op_node_translate_cli_args(args, false, false);
+    const own = selfArgs(args);
+    const result = own !== null
+      ? { denoArgs: own }
+      : op_node_translate_cli_args(args, false, false);
     // Shell-quote translated args that contain metacharacters so they are
     // safe to embed in a shell command string.
     const quotedArgs = isWindows
@@ -1736,16 +1753,9 @@ function buildCommand(
   env,
 ) {
   let includeNpmProcessState = false;
-  // Simien: another Node program like this one starts the embedder's way
-  // (BootstrapOptions::exec_args), then gets Node's own arguments.
-  const execArgs = file === Deno.execPath()
-    ? core.ops.op_bootstrap_exec_args?.() ?? []
-    : [];
-  if (execArgs.length > 0) {
-    args = [
-      ...new SafeArrayIterator(execArgs),
-      ...new SafeArrayIterator(ArrayPrototypeMap(args, (arg) => String(arg))),
-    ];
+  const own = file === Deno.execPath() ? selfArgs(args) : null;
+  if (own !== null) {
+    args = own;
   } else if (file === Deno.execPath() && !Deno.build.standalone) {
     // Ensure all args are strings (Node allows numbers in args array)
     args = ArrayPrototypeMap(args, (arg) => String(arg));
@@ -1840,7 +1850,10 @@ function buildCommand(
       const argsForDeno = ArrayPrototypeSlice(args, denoArgIndex + 1);
       if (argsForDeno.length > 0) {
         try {
-          const result = op_node_translate_cli_args(argsForDeno, false, true);
+          const own = selfArgs(argsForDeno);
+          const result = own !== null
+            ? { denoArgs: own }
+            : op_node_translate_cli_args(argsForDeno, false, true);
           args = [
             ...new SafeArrayIterator(
               ArrayPrototypeSlice(args, 0, denoArgIndex + 1),
