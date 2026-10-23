@@ -2022,11 +2022,26 @@ fn get_errno() -> i32 {
     .unwrap_or_default()
 }
 
+/// Which file `fd` is: its device and inode.
 #[cfg(unix)]
-fn assert_fd_closed(fd: i32) {
+fn fd_identity(fd: i32) -> (libc::dev_t, libc::ino_t) {
+  let mut stat = std::mem::MaybeUninit::<libc::stat>::uninit();
+  assert_eq!(unsafe { libc::fstat(fd, stat.as_mut_ptr()) }, 0, "fd {fd} is open");
+  let stat = unsafe { stat.assume_init() };
+  (stat.st_dev, stat.st_ino)
+}
+
+/// `fd`, which was the file `open` while open, is closed. Tests run in
+/// parallel and the lowest free number is reused, so another test may hold
+/// the same number by now: that's still closed, as long as it's another file.
+#[cfg(unix)]
+fn assert_fd_closed(fd: i32, open: (libc::dev_t, libc::ino_t)) {
   unsafe {
     set_errno(0);
-    assert_eq!(libc::fcntl(fd, libc::F_GETFD), -1);
+    if libc::fcntl(fd, libc::F_GETFD) != -1 {
+      assert_ne!(fd_identity(fd), open, "fd {fd} is still the same file");
+      return;
+    }
   }
   assert_eq!(get_errno(), libc::EBADF);
 }
@@ -3152,11 +3167,12 @@ async fn pipe_open_not_active_until_read_start() {
     );
 
     // Cleanup: close the pipe handle.
+    let open = fd_identity(read_fd);
     unsafe {
       uv_close(&mut pipe as *mut uv_pipe_t as *mut uv_handle_t, None);
     }
     tick(runtime).await;
-    assert_fd_closed(read_fd);
+    assert_fd_closed(read_fd, open);
   })
   .await;
 }
@@ -3186,11 +3202,12 @@ async fn pipe_listener_transfers_raw_fd_ownership() {
     assert!(pipe.internal_listener.is_some());
     assert_eq!(pipe.fd(), Some(fd));
 
+    let open = fd_identity(fd);
     unsafe {
       uv_close(&mut pipe as *mut uv_pipe_t as *mut uv_handle_t, None);
     }
     tick(runtime).await;
-    assert_fd_closed(fd);
+    assert_fd_closed(fd, open);
   })
   .await;
 }
@@ -3224,12 +3241,13 @@ async fn pipe_accept_keeps_only_the_tokio_fd_owner() {
     assert!(client.internal_stream.is_some());
     assert_eq!(client.fd(), Some(fd));
 
+    let open = fd_identity(fd);
     unsafe {
       uv_close(&mut client as *mut uv_pipe_t as *mut uv_handle_t, None);
       uv_close(&mut server as *mut uv_pipe_t as *mut uv_handle_t, None);
     }
     tick(runtime).await;
-    assert_fd_closed(fd);
+    assert_fd_closed(fd, open);
     drop(peer);
   })
   .await;
@@ -3282,11 +3300,12 @@ async fn pipe_bound_connect_transfers_raw_fd_ownership() {
     assert!(pipe.internal_stream.is_some());
     assert_eq!(pipe.fd(), Some(fd));
 
+    let open = fd_identity(fd);
     unsafe {
       uv_close(&mut pipe as *mut uv_pipe_t as *mut uv_handle_t, None);
     }
     tick(runtime).await;
-    assert_fd_closed(fd);
+    assert_fd_closed(fd, open);
 
     drop(listener);
     #[allow(
