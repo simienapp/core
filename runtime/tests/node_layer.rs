@@ -375,6 +375,21 @@ fn a_cluster_worker_knows_it_is_one() {
   run(PermissionsContainer::allow_all(), primary.to_string()).expect("the primary");
 }
 
+/// `path.win32.resolve` of a relative path starts from the working folder,
+/// as everywhere else: it read the cwd from a global `Deno`, which Simien
+/// doesn't have, and threw.
+#[test]
+fn win32_resolve_uses_the_working_folder() {
+  let code = r#"
+    import path from "node:path";
+    import process from "node:process";
+    const got = path.win32.resolve("a", "b");
+    const want = path.win32.join(process.cwd(), "a", "b");
+    if (got !== want) throw new Error(`win32.resolve: got ${got}, want ${want}`);
+    "#;
+  run(PermissionsContainer::allow_all(), code.to_string()).expect("win32.resolve");
+}
+
 /// node:test's tests run once the program's code has, in order, subtests
 /// included, as in Node; a failing one makes the exit code 1. (They used to
 /// register with a `Deno.test` that did nothing, so nothing ran.)
