@@ -310,3 +310,28 @@ fn vm_contexts_work_and_a_missing_inspector_is_an_error() {
     "#;
   run(PermissionsContainer::allow_all(), code.to_string()).expect("vm and inspector");
 }
+
+/// Output piped to another program has no color codes: a parent reading a
+/// child's `console.log(pid)` gets the number. The test runs itself again with
+/// stdout piped, so it doesn't depend on where `cargo test` writes.
+#[test]
+fn console_output_into_a_pipe_has_no_colors() {
+  const CHILD: &str = "SIMIEN_TEST_CONSOLE_CHILD";
+  if std::env::var_os(CHILD).is_some() {
+    let code = "console.log(12345); console.log({ n: 1 });".to_string();
+    run(PermissionsContainer::allow_all(), code).expect("console.log");
+    return;
+  }
+  let output = std::process::Command::new(std::env::current_exe().unwrap())
+    .args(["--exact", "console_output_into_a_pipe_has_no_colors", "--nocapture", "--test-threads=1"])
+    .env(CHILD, "1")
+    .env_remove("NO_COLOR")
+    .env_remove("FORCE_COLOR")
+    .stdout(std::process::Stdio::piped())
+    .output()
+    .unwrap();
+  let stdout = String::from_utf8_lossy(&output.stdout);
+  assert!(output.status.success(), "{stdout}");
+  assert!(stdout.contains("12345\n") && stdout.contains("{ n: 1 }"), "{stdout:?}");
+  assert!(!stdout.contains('\x1b'), "color codes in a pipe: {stdout:?}");
+}
