@@ -2,7 +2,7 @@
 
 [package]
 name = "simien_node_resolver"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["the Deno authors", "the Simien authors"]
 repository = "https://github.com/simienapp/core"
 description = "package.json exports/imports and condition resolution for Simien's module loader. Forked from node_resolver 0.97.0."

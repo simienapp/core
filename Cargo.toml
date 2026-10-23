@@ -144,7 +144,7 @@ simien_ops = { version = "0.1.1", path = "./libs/ops" }
 simien_package_json = { version = "0.1.1", path = "./libs/package_json", default-features = false }
 eszip = { version = "0.137.0" }
 napi_sym = { version = "0.189.0" }
-simien_node_resolver = { version = "0.1.2", path = "./libs/node_resolver" }
+simien_node_resolver = { version = "0.1.3", path = "./libs/node_resolver" }
 node_shim = { version = "0.34.0" }
 simien_serde_v8 = { version = "0.1.1", path = "./libs/serde_v8", default-features = false }
 test_macro = { }
