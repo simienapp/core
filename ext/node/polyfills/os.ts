@@ -28,6 +28,7 @@ const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 const {
   op_cpus,
   op_homedir,
+  op_node_os_available_parallelism,
   op_node_os_get_priority,
   op_node_os_set_priority,
   op_node_os_user_info,
@@ -275,7 +276,7 @@ function userInfo(
 }
 
 function availableParallelism() {
-  return navigator.hardwareConcurrency;
+  return op_node_os_available_parallelism();
 }
 
 const EOL = isWindows ? "\r\n" : "\n";

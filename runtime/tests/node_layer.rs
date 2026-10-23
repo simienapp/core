@@ -335,3 +335,18 @@ fn console_output_into_a_pipe_has_no_colors() {
   assert!(stdout.contains("12345\n") && stdout.contains("{ n: 1 }"), "{stdout:?}");
   assert!(!stdout.contains('\x1b'), "color codes in a pipe: {stdout:?}");
 }
+
+/// `os.availableParallelism()` is the machine's, with no `navigator` global.
+#[test]
+fn available_parallelism_is_a_count() {
+  let want = std::thread::available_parallelism().unwrap().get();
+  let code = format!(
+    r#"
+    import os from "node:os";
+    const got = os.availableParallelism();
+    if (got !== {want}) throw new Error(`availableParallelism: got ${{got}}, want {want}`);
+    if (+os.availableParallelism !== {want}) throw new Error("as a primitive");
+    "#
+  );
+  run(PermissionsContainer::allow_all(), code).expect("availableParallelism");
+}
