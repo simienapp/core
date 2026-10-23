@@ -76,8 +76,8 @@ simien_node = { version = "0.1.5", path = "./ext/node" }
 simien_node_crypto = { version = "0.1.0", path = "./ext/node_crypto" }
 simien_napi = { version = "0.1.1", path = "./ext/napi" }
 simien_fs = { version = "0.1.1", path = "./ext/fs" }
-simien_io = { version = "0.1.0", path = "./ext/io" }
-simien_process = { version = "0.1.0", path = "./ext/process" }
+simien_io = { version = "0.1.1", path = "./ext/io" }
+simien_process = { version = "0.1.1", path = "./ext/process" }
 simien_os = { version = "0.1.0", path = "./ext/os" }
 simien_dotenv = { version = "0.1.0", path = "./libs/dotenv" }
 simien_node_shim = { version = "0.1.0", path = "./libs/node_shim" }

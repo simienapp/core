@@ -130,7 +130,11 @@ async fn write_with_optional_fd(
     }
     return Ok(());
   }
-  write_half.write_all(msg).await?;
+  #[cfg(unix)]
+  let msg = &msg[write_half.write_now(msg)..];
+  if !msg.is_empty() {
+    write_half.write_all(msg).await?;
+  }
   Ok(())
 }
 
@@ -618,6 +622,31 @@ mod tests {
       super::IpcRefTracker::new_test(),
     ));
     (client, server)
+  }
+
+  /// A message is on the wire after one poll, before the reactor has turned:
+  /// a program that sends and then exits at once (`process.send(m);
+  /// process.exit()`) doesn't lose it.
+  #[cfg(unix)]
+  #[tokio::test]
+  async fn a_write_lands_on_its_first_poll() {
+    use std::future::Future;
+    use std::io::Read;
+    use std::task::Context;
+    use std::task::Poll;
+    use std::task::Waker;
+
+    let (ipc, other) = pair().await;
+    let write = ipc.write_msg_bytes(b"\"hello\"\n", None);
+    let mut write = std::pin::pin!(write);
+    let polled = write.as_mut().poll(&mut Context::from_waker(Waker::noop()));
+    assert!(matches!(polled, Poll::Ready(Ok(()))), "{polled:?}");
+
+    let mut other = other.into_std().unwrap();
+    other.set_nonblocking(false).unwrap();
+    let mut got = [0u8; 8];
+    other.read_exact(&mut got).unwrap();
+    assert_eq!(&got, b"\"hello\"\n");
   }
 
   #[tokio::test]
