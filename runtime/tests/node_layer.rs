@@ -275,3 +275,18 @@ fn vm_contexts_work_and_a_missing_inspector_is_an_error() {
     "#;
   run(PermissionsContainer::allow_all(), code.to_string()).expect("vm and inspector");
 }
+
+/// `os.availableParallelism()` is the machine's, with no `navigator` global.
+#[test]
+fn available_parallelism_is_a_count() {
+  let want = std::thread::available_parallelism().unwrap().get();
+  let code = format!(
+    r#"
+    import os from "node:os";
+    const got = os.availableParallelism();
+    if (got !== {want}) throw new Error(`availableParallelism: got ${{got}}, want {want}`);
+    if (+os.availableParallelism !== {want}) throw new Error("as a primitive");
+    "#
+  );
+  run(PermissionsContainer::allow_all(), code).expect("availableParallelism");
+}
