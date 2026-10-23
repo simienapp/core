@@ -32,6 +32,9 @@ const os = core.loadExtScript("ext:simien_os/30_os.js");
 const { Deno } = core.loadExtScript("ext:simien_node/internal/deno_ns.js");
 
 const {
+  ArrayPrototypePush,
+  ArrayPrototypeShift,
+  ArrayPrototypeSome,
   ObjectAssign,
   ObjectDefineProperties,
   ObjectDefineProperty,
@@ -39,6 +42,7 @@ const {
   ObjectGetOwnPropertyDescriptors,
   ObjectKeys,
   ObjectSetPrototypeOf,
+  PromisePrototypeThen,
   ReflectApply,
   ReflectOwnKeys,
   Symbol,
@@ -176,19 +180,70 @@ const userVisibleCore = ObjectFreeze(ObjectDefineProperties(
 ObjectAssign(internals, { core: userVisibleCore });
 const internalSymbol = Symbol("Deno.internal");
 
-// `Deno.test` is a no-op outside a test runner; node:test checks for it.
-function noopTest() {}
-noopTest.ignore = () => {};
-noopTest.only = () => {};
-noopTest.beforeAll = () => {};
-noopTest.beforeEach = () => {};
-noopTest.afterEach = () => {};
-noopTest.afterAll = () => {};
-noopTest.sanitizer = () => {};
-const noopTestEach = () => () => {};
-noopTest.each = noopTestEach;
-noopTest.only.each = noopTestEach;
-noopTest.ignore.each = noopTestEach;
+// node:test registers its tests through `Deno.test(options)` and runs
+// subtests with `context.step(options)`. Upstream only runs them under
+// `deno test`; here they run as Node runs them: one after another once the
+// program's own code has run, a failure printed and the exit code set to 1.
+const registeredTests = [];
+let testsScheduled = false;
+
+function registerTest(options) {
+  ArrayPrototypePush(registeredTests, options);
+  if (!testsScheduled) {
+    testsScheduled = true;
+    lazyTimers().setImmediate(runRegisteredTests);
+  }
+}
+
+async function runRegisteredTests() {
+  const only = ArrayPrototypeSome(registeredTests, (test) => test.only);
+  let failed = false;
+  while (registeredTests.length > 0) {
+    const test = ArrayPrototypeShift(registeredTests);
+    if (test.ignore || (only && !test.only)) continue;
+    if (!(await runTest(test.name, test.fn, ""))) failed = true;
+  }
+  testsScheduled = false;
+  if (failed) globalThis.process.exitCode = 1;
+}
+
+// Runs one test or step; whether it and all its steps passed.
+async function runTest(name, fn, indent) {
+  let stepFailed = false;
+  const context = {
+    name,
+    step(nameOrOptions, stepFn) {
+      const options = typeof nameOrOptions === "string"
+        ? { name: nameOrOptions, fn: stepFn }
+        : nameOrOptions;
+      return PromisePrototypeThen(
+        runTest(options.name, options.fn, indent + "  "),
+        (ok) => {
+          if (!ok) stepFailed = true;
+          return ok;
+        },
+      );
+    },
+  };
+  try {
+    await fn(context);
+  } catch (error) {
+    globalThis.console.log(`${indent}\u2716 ${name}`);
+    globalThis.console.error(error);
+    return false;
+  }
+  if (stepFailed) {
+    globalThis.console.log(`${indent}\u2716 ${name}`);
+    return false;
+  }
+  globalThis.console.log(`${indent}\u2714 ${name}`);
+  return true;
+}
+
+registerTest.ignore = (options) =>
+  registerTest(ObjectAssign({}, options, { ignore: true }));
+registerTest.only = (options) =>
+  registerTest(ObjectAssign({}, options, { only: true }));
 
 let pid;
 let args;
@@ -213,7 +268,7 @@ function bootstrapNode(argv0, versions) {
   ObjectDefineProperties(Deno, {
     internal: core.propReadOnly(internalSymbol),
     [internalSymbol]: core.propReadOnly(internals),
-    test: core.propReadOnly(noopTest),
+    test: core.propReadOnly(registerTest),
     bench: core.propReadOnly(() => {}),
   });
   ObjectDefineProperties(Deno, getSafeOwnPropertyDescriptors(denoNs));
