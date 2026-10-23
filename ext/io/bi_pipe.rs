@@ -283,6 +283,29 @@ impl From<tokio::net::unix::OwnedWriteHalf> for BiPipeWrite {
 
 #[cfg(unix)]
 impl BiPipeWrite {
+  /// Writes what the pipe takes right now and returns how much that was,
+  /// without waiting for the reactor, as libuv's `uv_try_write`: tokio knows
+  /// a fresh pipe is writable only after the reactor turns, so a program that
+  /// sends and then exits at once would lose the message. Any error (the
+  /// pipe is full, or closed) writes nothing; the async write that follows
+  /// reports it.
+  pub fn write_now(&self, buf: &[u8]) -> usize {
+    use std::os::fd::AsRawFd;
+
+    let fd = self.inner.as_ref().as_raw_fd();
+    loop {
+      // SAFETY: `fd` is this half's open socket, nonblocking as tokio set it,
+      // and `buf` is valid for `buf.len()` bytes.
+      let written = unsafe { libc::write(fd, buf.as_ptr().cast(), buf.len()) };
+      if let Ok(written) = usize::try_from(written) {
+        return written;
+      }
+      if std::io::Error::last_os_error().kind() != std::io::ErrorKind::Interrupted {
+        return 0;
+      }
+    }
+  }
+
   pub async fn send_with_fd(
     &self,
     buf: &[u8],
