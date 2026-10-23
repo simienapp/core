@@ -18,6 +18,8 @@ import {
   op_bootstrap_args,
   op_bootstrap_no_color,
   op_bootstrap_pid,
+  op_bootstrap_stderr_no_color,
+  op_bootstrap_stdout_no_color,
   op_bootstrap_target,
   op_main_module,
   op_node_has_child_ipc_pipe,
@@ -198,6 +200,13 @@ function bootstrapNode(argv0, versions) {
   if (core.build.target === "unknown") {
     core.setBuildInfo(op_bootstrap_target());
   }
+  // console colors a stream only when it's a terminal (and color is on), as
+  // upstream's 99_main.js sets it: output piped to another program is plain.
+  const { setNoColorFns } = core.loadExtScript("ext:simien_web/01_console.js");
+  setNoColorFns(
+    () => op_bootstrap_stdout_no_color(),
+    () => op_bootstrap_stderr_no_color(),
+  );
 
   // Built without spreading denoNs, so its lazy getters stay lazy.
   ObjectDefineProperties(Deno, {

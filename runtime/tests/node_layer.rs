@@ -14,6 +14,7 @@ use simien_core::ModuleLoader;
 use simien_core::ModuleSpecifier;
 use simien_core::ResolutionKind;
 use simien_error::JsErrorBox;
+use simien_node_runtime::BootstrapOptions;
 use simien_permissions::PermissionDeniedError;
 use simien_permissions::PermissionsContainer;
 use simien_permissions::Policy;
@@ -97,6 +98,16 @@ fn run_program(
   main: &str,
   code: String,
 ) -> Result<(), String> {
+  run_with(permissions, program, main, code, BootstrapOptions::default())
+}
+
+fn run_with(
+  permissions: PermissionsContainer,
+  program: Option<simien_node_runtime::loader::NodeProgram>,
+  main: &str,
+  code: String,
+  bootstrap: BootstrapOptions,
+) -> Result<(), String> {
   let tokio = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
   tokio.block_on(async move {
     let specifier = ModuleSpecifier::parse(main).unwrap();
@@ -105,7 +116,7 @@ fn run_program(
       program.as_ref(),
       Rc::new(NodeOnlyLoader),
       specifier,
-      Vec::new(),
+      bootstrap,
     );
     match isolate.run(Some(code)).await? {
       0 => Ok(()),
@@ -254,6 +265,30 @@ fn require_reads_only_what_the_policy_allows() {
     .expect("require()'s denial is an error in JavaScript");
 }
 
+/// A program that starts itself through a shell gets the embedder's
+/// arguments (`BootstrapOptions::exec_args`), as `spawn(process.execPath)`
+/// does, not Deno's `run -A`. `/bin/echo` as the shell shows the command it
+/// was handed.
+#[cfg(unix)]
+#[test]
+fn starting_itself_through_a_shell_uses_the_embedders_arguments() {
+  let code = r#"
+    import { execSync } from "node:child_process";
+    import process from "node:process";
+    const handed = String(
+      execSync(`"${process.execPath}" child.js one`, { shell: "/bin/echo" }),
+    ).trim();
+    const want = `-c "${process.execPath}" __node-program --project /app child.js one`;
+    if (handed !== want) throw new Error(`the shell got ${handed}, want ${want}`);
+    "#;
+  let bootstrap = BootstrapOptions {
+    exec_args: ["__node-program", "--project", "/app"].map(String::from).to_vec(),
+    ..Default::default()
+  };
+  run_with(PermissionsContainer::allow_all(), None, "file:///main.mjs", code.to_string(), bootstrap)
+    .expect("the embedder's arguments");
+}
+
 /// A runtime started without a snapshot or an inspector (Simien's) still
 /// makes `vm` contexts, and an inspector session is an error, not an abort.
 #[test]
@@ -274,6 +309,31 @@ fn vm_contexts_work_and_a_missing_inspector_is_an_error() {
     check("connect", error?.code, "ERR_INSPECTOR_NOT_AVAILABLE");
     "#;
   run(PermissionsContainer::allow_all(), code.to_string()).expect("vm and inspector");
+}
+
+/// Output piped to another program has no color codes: a parent reading a
+/// child's `console.log(pid)` gets the number. The test runs itself again with
+/// stdout piped, so it doesn't depend on where `cargo test` writes.
+#[test]
+fn console_output_into_a_pipe_has_no_colors() {
+  const CHILD: &str = "SIMIEN_TEST_CONSOLE_CHILD";
+  if std::env::var_os(CHILD).is_some() {
+    let code = "console.log(12345); console.log({ n: 1 });".to_string();
+    run(PermissionsContainer::allow_all(), code).expect("console.log");
+    return;
+  }
+  let output = std::process::Command::new(std::env::current_exe().unwrap())
+    .args(["--exact", "console_output_into_a_pipe_has_no_colors", "--nocapture", "--test-threads=1"])
+    .env(CHILD, "1")
+    .env_remove("NO_COLOR")
+    .env_remove("FORCE_COLOR")
+    .stdout(std::process::Stdio::piped())
+    .output()
+    .unwrap();
+  let stdout = String::from_utf8_lossy(&output.stdout);
+  assert!(output.status.success(), "{stdout}");
+  assert!(stdout.contains("12345\n") && stdout.contains("{ n: 1 }"), "{stdout:?}");
+  assert!(!stdout.contains('\x1b'), "color codes in a pipe: {stdout:?}");
 }
 
 /// `os.availableParallelism()` is the machine's, with no `navigator` global.

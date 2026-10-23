@@ -12,6 +12,7 @@ use std::rc::Rc;
 
 use simien_core::ModuleSpecifier;
 use simien_core::NoopModuleLoader;
+use simien_node_runtime::BootstrapOptions;
 use simien_node_runtime::loader::NodeProgram;
 use simien_permissions::PermissionsContainer;
 
@@ -38,7 +39,7 @@ fn main() {
       Some(&program),
       Rc::new(NoopModuleLoader),
       main_module,
-      args.collect(),
+      BootstrapOptions { args: args.collect(), ..Default::default() },
     );
     isolate.run(None).await
   });
