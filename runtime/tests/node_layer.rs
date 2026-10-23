@@ -374,3 +374,34 @@ fn a_cluster_worker_knows_it_is_one() {
     "#;
   run(PermissionsContainer::allow_all(), primary.to_string()).expect("the primary");
 }
+
+/// node:test's tests run once the program's code has, in order, subtests
+/// included, as in Node; a failing one makes the exit code 1. (They used to
+/// register with a `Deno.test` that did nothing, so nothing ran.)
+#[test]
+fn node_test_runs_the_tests_and_a_failure_fails_the_program() {
+  let dir = tempfile::tempdir().unwrap();
+  let log = dir.path().join("ran.txt");
+  let code = format!(
+    r#"
+    import test from "node:test";
+    import fs from "node:fs";
+    const ran = [];
+    test("a", async (t) => {{
+      ran.push("a");
+      await t.test("b", () => {{ ran.push("b"); }});
+    }});
+    test.skip("skipped", () => {{ ran.push("skipped"); }});
+    test("c", () => {{ ran.push("c"); fs.writeFileSync({log:?}, ran.join(",")); }});
+    "#,
+    log = log.display().to_string(),
+  );
+  run(PermissionsContainer::allow_all(), code).expect("passing tests");
+  assert_eq!(std::fs::read_to_string(&log).expect("the tests ran"), "a,b,c");
+
+  let failing = r#"
+    import test from "node:test";
+    test("fails", () => { throw new Error("no"); });
+    "#;
+  assert_eq!(run(PermissionsContainer::allow_all(), failing.to_string()), Err("exit code 1".to_string()));
+}
