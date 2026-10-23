@@ -16,6 +16,7 @@
 import { core, internals, primordials } from "ext:core/mod.js";
 import {
   op_bootstrap_args,
+  op_bootstrap_cluster,
   op_bootstrap_no_color,
   op_bootstrap_pid,
   op_bootstrap_stderr_no_color,
@@ -263,13 +264,14 @@ function bootstrapNode(argv0, versions) {
   });
 
   // node:process and node:module start Node from these on first use.
+  const { 0: clusterUniqueId, 1: clusterSchedPolicy } = op_bootstrap_cluster();
   internals.__nodeBootstrapArgs = {
     usesLocalNodeModulesDir: true,
     runningOnMainThread: true,
     argv0,
     nodeDebug: "",
-    nodeClusterUniqueId: undefined,
-    nodeClusterSchedPolicy: undefined,
+    nodeClusterUniqueId: clusterUniqueId ?? undefined,
+    nodeClusterSchedPolicy: clusterSchedPolicy ?? undefined,
     denoArgs: Deno.args,
     denoVersion: Deno.version,
   };
@@ -283,6 +285,11 @@ function bootstrapNode(argv0, versions) {
     lazyProcess();
     core.loadExtScript("ext:simien_node/child_process.ts");
     internals.__setupChildProcessIpcChannel();
+  }
+  // A `cluster` worker: the same, from initialize() upstream.
+  if (clusterUniqueId) {
+    core.loadExtScript("ext:simien_node/cluster.ts");
+    internals.__initCluster(clusterUniqueId, clusterSchedPolicy);
   }
   return lifecycle;
 }
