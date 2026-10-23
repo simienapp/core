@@ -96,14 +96,9 @@ function resolve(...pathSegments: string[]): string {
 
   for (let i = pathSegments.length - 1; i >= -1; i--) {
     let path: string;
-    // deno-lint-ignore no-explicit-any
-    const { Deno } = globalThis as any;
     if (i >= 0) {
       path = pathSegments[i];
     } else if (!resolvedDevice) {
-      if (typeof Deno?.cwd !== "function") {
-        throw new TypeError("Resolved a drive-letter-less path without a CWD.");
-      }
       path = Deno.cwd();
       if (
         pathSegments.length === 0 ||

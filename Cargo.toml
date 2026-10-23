@@ -72,7 +72,7 @@ repository = "https://github.com/simienapp/core"
 
 [workspace.dependencies]
 # The Node layer (APS 2: Node's APIs for code granted dangerouslyUseNode).
-simien_node = { version = "0.1.5", path = "./ext/node" }
+simien_node = { version = "0.1.6", path = "./ext/node" }
 simien_node_crypto = { version = "0.1.0", path = "./ext/node_crypto" }
 simien_napi = { version = "0.1.1", path = "./ext/napi" }
 simien_fs = { version = "0.1.1", path = "./ext/fs" }
