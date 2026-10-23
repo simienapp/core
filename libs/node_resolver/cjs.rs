@@ -336,7 +336,8 @@ pub fn may_be_cjs<TSys: FsRead + FsMetadata>(
 ) -> Result<bool, PackageJsonLoadError> {
   Ok(match path.extension().and_then(|e| e.to_str()) {
     Some("cjs") => true,
-    Some("js") => pkg_json_resolver
+    // A file with no extension is read as a `.js` one, as Node does.
+    Some("js") | None => pkg_json_resolver
       .get_closest_package_json(path)?
       .is_none_or(|pkg| pkg.typ != "module"),
     _ => false,
@@ -462,5 +463,29 @@ mod tests {
     }
     assert!(matches!(analyze(Path::new("/m.mjs"), "const a = 1;").unwrap(), Analysis::Esm(_)));
     assert!(matches!(analyze(Path::new("/m.cjs"), "exports.a = 1;").unwrap(), Analysis::Cjs(_)));
+  }
+
+  #[test]
+  fn a_file_without_an_extension_follows_its_package_as_js_does() {
+    use simien_sys_traits::FsCreateDirAll;
+    use simien_sys_traits::FsWrite;
+    use simien_sys_traits::impls::InMemorySys;
+
+    let sys = InMemorySys::default();
+    sys.fs_create_dir_all("/cjs/bin").unwrap();
+    sys.fs_create_dir_all("/esm/bin").unwrap();
+    sys.fs_write("/cjs/package.json", r#"{ "name": "c" }"#).unwrap();
+    sys.fs_write("/esm/package.json", r#"{ "name": "e", "type": "module" }"#).unwrap();
+    let resolver = simien_maybe_sync::new_rc(crate::PackageJsonResolver::new(sys, None));
+    for (path, cjs) in [
+      ("/cjs/bin/tool", true),
+      ("/cjs/bin/tool.js", true),
+      ("/esm/bin/tool", false),
+      ("/esm/bin/tool.js", false),
+      ("/esm/bin/tool.cjs", true),
+      ("/cjs/bin/tool.mjs", false),
+    ] {
+      assert_eq!(may_be_cjs(&resolver, Path::new(path)).unwrap(), cjs, "{path}");
+    }
   }
 }
