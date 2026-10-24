@@ -997,7 +997,9 @@ macro_rules! include_lazy_loaded_js_files {
     $(with_specifier $s2:literal)?
     $(= $config:tt)?
   ),* $(,)?) => {
-    $crate::__extension_include_js_files_inner!(mode=loaded, name=$name, dir=$crate::__extension_root_dir!($($dir)?), $([
+    // Embedded, like include_js_files!: Simien has no startup snapshot to
+    // carry these, so a build-machine path would not exist at runtime.
+    $crate::__extension_include_js_files_inner!(mode=included, name=$name, dir=$crate::__extension_root_dir!($($dir)?), $([
       // These entries will be parsed in __extension_include_js_files_inner
       $s1 $(with_specifier $s2)? $(= $config)?
     ]),*)
@@ -1019,15 +1021,17 @@ macro_rules! include_js_files_doctest {
   };
 }
 
-/// Source files declared on an extension are recorded by absolute path; their
-/// bytes are read from disk during snapshot creation and never embedded in the
-/// final binary. With a startup snapshot, the source is reachable via the
-/// snapshot bytes (for `esm`/`js`) or the residual lazy table emitted by the
-/// snapshot build (for `lazy_loaded_*`).
+/// Source files declared on an extension are embedded in the binary
+/// (`include_str!` at the embedder's compile time). Upstream records them as
+/// build-machine paths and relies on a startup snapshot to carry their bytes;
+/// Simien runs without one, so a path would only exist where the binary was
+/// built and a release would fail to start anywhere else ("Failed to
+/// initialize a JsRuntime: No such file or directory"). Embedded sources work
+/// with or without a snapshot.
 #[doc(hidden)]
 #[macro_export]
 macro_rules! __extension_include_js_files_detect {
-  ($($rest:tt)*) => { $crate::__extension_include_js_files_inner!(mode=loaded, $($rest)*) };
+  ($($rest:tt)*) => { $crate::__extension_include_js_files_inner!(mode=included, $($rest)*) };
 }
 
 /// This is the core of the [`include_js_files!`] and [`include_lazy_loaded_js_files`] macros. The first
@@ -1113,6 +1117,18 @@ macro_rules! __extension_root_dir {
 
 #[cfg(test)]
 mod tests {
+  /// A release runs on machines without this source tree: every declared
+  /// file must be in the binary, never a path to the build machine's copy.
+  #[test]
+  fn declared_files_are_embedded_not_build_machine_paths() {
+    let eager = include_js_files!(prefix "00_infra.js", "01_core.js",);
+    let lazy = include_lazy_loaded_js_files!(prefix "02_timers.js",);
+    for file in eager.iter().chain(lazy.iter()) {
+      assert!(file.is_runtime_loadable(), "{} would be read from disk at runtime", file.specifier);
+    }
+    assert_eq!(eager[0].load().unwrap().as_str(), include_str!("00_infra.js"));
+  }
+
   #[test]
   fn test_include_js() {
     let files = include_js_files!(prefix "00_infra.js", "01_core.js",);

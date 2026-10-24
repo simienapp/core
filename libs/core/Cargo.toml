@@ -2,7 +2,7 @@
 
 [package]
 name = "simien_core"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["the Deno authors", "the Simien authors"]
 edition.workspace = true
 license.workspace = true

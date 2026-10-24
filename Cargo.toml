@@ -131,7 +131,7 @@ simien_cache_dir = { version = "0.1.1", path = "./libs/cache_dir" }
 # Workspace binaries select the JavaScript engine at their top level. Keep the
 # backend-independent runtime defaults enabled here without pulling simien_core's
 # public V8 default into a QuickJS feature graph.
-simien_core = { version = "0.1.4", path = "./libs/core", default-features = false, features = ["reactor-tokio", "v8_use_custom_libcxx"] }
+simien_core = { version = "0.1.5", path = "./libs/core", default-features = false, features = ["reactor-tokio", "v8_use_custom_libcxx"] }
 simien_crypto_provider = { version = "0.1.1", path = "./libs/crypto" }
 simien_lockfile = { version = "0.1.1", path = "./libs/lockfile" }
 simien_maybe_sync = { version = "0.1.1", path = "./libs/maybe_sync" }
