@@ -14,15 +14,37 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTC_WRAPPER: sccache
-  SCCACHE_GHA_ENABLED: "true"
 
 jobs:
   rust:
     runs-on: ubuntu-24.04
+    # Compilation is cached in R2. public-ci holds only the key for this
+    # repo's sccache buckets (the dsc model); publishing keys are in release.
+    environment: public-ci
+    env:
+      RUSTC_WRAPPER: sccache
+      SCCACHE_BUCKET: simien-core-sccache-linux-x64
+      SCCACHE_REGION: auto
+      SCCACHE_S3_USE_SSL: "true"
+      SCCACHE_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_SCCACHE_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SCCACHE_SECRET_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+      - name: sccache is required, on R2
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$SCCACHE_ENDPOINT" ]; then
+            echo "::error::The R2 sccache keys are missing (public-ci environment). SCCACHE IS REQUIRED FOR ALL RUST COMPILATION."
+            exit 1
+          fi
+          # R2_ENDPOINT keeps its https:// for the AWS CLI; sccache wants the
+          # bare host and adds the scheme itself (SCCACHE_S3_USE_SSL).
+          export SCCACHE_ENDPOINT="${SCCACHE_ENDPOINT#https://}"
+          echo "SCCACHE_ENDPOINT=$SCCACHE_ENDPOINT" >> "$GITHUB_ENV"
+          sccache --start-server
+          sccache --show-stats | tee sccache-stats.txt
+          grep -q "$SCCACHE_BUCKET" sccache-stats.txt || { echo "::error::sccache is not using the R2 bucket $SCCACHE_BUCKET"; exit 1; }
       # rust-toolchain.toml pins the toolchain; this installs it.
       - run: rustup show active-toolchain || rustup toolchain install
       - run: cargo check --workspace --all-targets --locked
@@ -41,5 +63,6 @@ jobs:
       # A crate whose dependencies changed must not keep a version that's
       # already on crates.io: publishing skips it and the set stops building.
       - run: python3 tools/publish.py --check
+      - run: sccache --show-stats
       # No `cargo fmt --check`: the code keeps upstream's line breaks so ported
       # Deno patches still apply line for line (tools/port-upstream.sh).
